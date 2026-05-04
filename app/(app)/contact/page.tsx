@@ -26,7 +26,7 @@ import { createClient } from "@/lib/supabase/client";
 
 const DEV = {
   name: "Furkan Ozan Seyfi",
-  phone: "0506 684 29 33",
+  phone: "+90 506 684 29 33",
   email: "fozanseyfi@gmail.com",
   linkedin: "https://www.linkedin.com/in/fozanseyfi/",
   website: "https://fozanseyfi.com",
@@ -102,7 +102,8 @@ export default function ContactPage() {
             <div className="text-xs font-medium tracking-wide uppercase opacity-80">Geliştirici</div>
             <h2 className="mt-1 text-2xl font-bold">{DEV.name}</h2>
             <p className="mt-2 text-sm opacity-90">
-              EPC Karar Destek Platformu&apos;nun tasarımı ve geliştirilmesinden sorumlu elektrik mühendisi.
+              Yenilenebilir enerji sektöründe görev yapan elektrik mühendisi. Bu platformu EPC tedarik süreçlerinde
+              hızlı, şeffaf ve veri odaklı karar vermek isteyen profesyoneller için geliştirdim.
             </p>
 
             <div className="mt-6 space-y-2">
@@ -205,19 +206,25 @@ export default function ContactPage() {
         </Card>
       </div>
 
-      <Card>
-        <CardContent className="text-muted-foreground flex items-center gap-3 p-4 text-sm">
-          <User className="text-primary size-4 shrink-0" />
+      <Card className="border-blue-200 bg-blue-50/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base text-blue-900">
+            <User className="size-4" /> Sorumluluk Reddi & Veri Gizliliği
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="text-blue-900/80 space-y-2 text-sm leading-relaxed">
           <p>
-            Acil durumlar için doğrudan{" "}
-            <a href={`tel:${DEV.phone.replace(/\s/g, "")}`} className="text-foreground font-medium underline-offset-4 hover:underline">
-              {DEV.phone}
-            </a>{" "}
-            arayabilir veya{" "}
-            <a href={`mailto:${DEV.email}`} className="text-foreground font-medium underline-offset-4 hover:underline">
-              {DEV.email}
-            </a>{" "}
-            adresine yazabilirsiniz.
+            <strong>Verileriniz size aittir.</strong> Hesabınızdaki tüm firma, fiyat, karşılaştırma ve manuel skor
+            verileri Supabase altyapısında <strong>satır seviyesinde güvenlik (RLS)</strong> politikalarıyla şifrelenir
+            ve izole edilir.
+          </p>
+          <p>
+            <strong>Geliştirici dahil hiçbir üçüncü taraf</strong> verilerinizi izleyemez, görüntüleyemez veya
+            indiremez. Sisteme yalnızca siz ve davet ettiğiniz ekip üyeleriniz erişebilir.
+          </p>
+          <p className="text-xs opacity-80">
+            EPC Karar Destek bir karar destek aracıdır; nihai satın alma kararının sorumluluğu kullanıcıya aittir.
+            Algoritma sonuçları yol gösterici niteliktedir ve teknik/finansal/hukuki danışmanlık yerine geçmez.
           </p>
         </CardContent>
       </Card>

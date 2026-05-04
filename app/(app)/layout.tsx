@@ -30,6 +30,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="flex flex-1 flex-col">
           <Topbar profile={profile} unreadCount={unreadCount ?? 0} organizationName={organizationName} />
           <main className="flex-1 px-4 py-6 md:px-8">{children}</main>
+          <footer className="text-muted-foreground border-t px-4 py-3 text-center text-xs md:px-8">
+            Developed by{" "}
+            <a
+              href="mailto:fozanseyfi@gmail.com"
+              className="text-foreground font-medium hover:underline"
+            >
+              Furkan Ozan Seyfi
+            </a>
+          </footer>
         </div>
       </div>
       <Toaster richColors position="top-right" />

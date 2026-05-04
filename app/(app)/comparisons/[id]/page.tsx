@@ -27,6 +27,8 @@ import { RevisionDialog } from "@/components/comparison/revision-dialog";
 import { RevisionSelector } from "@/components/comparison/revision-selector";
 import { EditMetricsDialog } from "@/components/comparison/edit-metrics-dialog";
 import { EditManualScoresDialog } from "@/components/comparison/edit-manual-scores-dialog";
+import { RevisionCompare } from "@/components/comparison/revision-compare";
+import { StatusButton } from "@/components/comparison/status-button";
 
 export default async function ComparisonDetailPage({
   params,
@@ -185,6 +187,11 @@ export default async function ComparisonDetailPage({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            <StatusButton
+              comparisonId={id}
+              current={comparison.status as "draft" | "in_review" | "decided" | "archived"}
+              hasDecidedFirm={comparison.decided_firm_id !== null}
+            />
             {decided && <Badge className="bg-emerald-600 text-base">Karar: {decided.name}</Badge>}
             <EditMetricsDialog comparisonId={id} initialWeights={weights} />
             <EditManualScoresDialog
@@ -238,6 +245,7 @@ export default async function ComparisonDetailPage({
           <TabsTrigger value="ranking">Sıralama</TabsTrigger>
           <TabsTrigger value="breakdown">Skor Dökümü</TabsTrigger>
           <TabsTrigger value="items">Kalemler</TabsTrigger>
+          <TabsTrigger value="revisions">Revizeler</TabsTrigger>
           <TabsTrigger value="decision">Karar Özeti</TabsTrigger>
           <TabsTrigger value="help">Nasıl Çalışır</TabsTrigger>
         </TabsList>
@@ -365,6 +373,20 @@ export default async function ComparisonDetailPage({
               </table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="revisions">
+          <RevisionCompare
+            items={itemsForRevision}
+            firms={firms}
+            bids={(allBids ?? []).map((b) => ({
+              item_id: b.item_id,
+              firm_id: b.firm_id,
+              price: b.price,
+              revision: b.revision,
+            }))}
+            currency={currency}
+          />
         </TabsContent>
 
         <TabsContent value="decision" className="space-y-4">

@@ -98,9 +98,14 @@ export function calcStats(
   const firmStats: FirmStats[] = firmsBasic.map(({ firm, weightedTotal, filledCount }) => {
     const scope = N > 0 ? filledCount / N : 0;
 
+    // Sapma: kullanıcının HEDEF FİYATInDAN sapma. Hedef yoksa medyandan fallback.
     let absDev: number | null = null;
-    if (filledCount > 0 && med !== null && med > 0) {
-      absDev = Math.abs(weightedTotal - med) / med;
+    if (filledCount > 0) {
+      if (totalTarget > 0) {
+        absDev = Math.abs(weightedTotal - totalTarget) / totalTarget;
+      } else if (med !== null && med > 0) {
+        absDev = Math.abs(weightedTotal - med) / med;
+      }
     }
 
     let lowCount = 0;

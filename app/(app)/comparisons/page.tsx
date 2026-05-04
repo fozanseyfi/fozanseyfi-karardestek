@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatCompactCurrency } from "@/lib/currency";
 import type { Currency } from "@/lib/constants";
 import { ExcelImportDialog } from "@/components/comparison/excel-import-dialog";
+import { StatusBadge } from "@/components/comparison/status-button";
 
 export default async function ComparisonsListPage() {
   const supabase = await createClient();
@@ -48,7 +49,7 @@ export default async function ComparisonsListPage() {
                       {c.budget ? formatCompactCurrency(c.budget, c.currency as Currency) : "—"}
                     </span>
                   </div>
-                  <Badge variant={c.status === "decided" ? "default" : "outline"}>{statusLabel(c.status)}</Badge>
+                  <StatusBadge status={c.status as "draft" | "in_review" | "decided" | "archived"} />
                 </CardContent>
               </Card>
             </Link>
@@ -70,13 +71,3 @@ export default async function ComparisonsListPage() {
   );
 }
 
-function statusLabel(s: string) {
-  return (
-    {
-      draft: "Taslak",
-      in_review: "İncelemede",
-      decided: "Karar Verildi",
-      archived: "Arşiv",
-    }[s] ?? s
-  );
-}

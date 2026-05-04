@@ -57,10 +57,8 @@ export default async function TemplatesPage() {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {t.description && <p className="text-muted-foreground text-sm">{t.description}</p>}
-                    <Button asChild size="sm" variant="outline" className="w-full">
-                      <Link href={`/comparisons/new?template=${t.id}`}>
-                        <Plus className="mr-1 size-4" /> Bu Şablondan Başla
-                      </Link>
+                    <Button asChild size="sm" className="w-full">
+                      <Link href={`/templates/${t.id}`}>İncele &amp; Kullan</Link>
                     </Button>
                   </CardContent>
                 </Card>

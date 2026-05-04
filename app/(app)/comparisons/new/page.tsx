@@ -141,6 +141,7 @@ function NewComparisonForm() {
   // Step 3: prices + manual scores (firm.id'ye göre)
   const [prices, setPrices] = useState<Record<string, Record<string, string>>>({});
   const [manualScores, setManualScores] = useState<Record<string, Partial<Record<MetricKey, number>>>>({});
+  const [manualNotes, setManualNotes] = useState<Record<string, Partial<Record<MetricKey, string>>>>({});
 
   function addFirmRow() {
     setFirmRows((p) => [...p, { rowKey: `r${p.length}-${Date.now()}`, firm: null }]);
@@ -184,7 +185,7 @@ function NewComparisonForm() {
     [weights]
   );
 
-  async function save() {
+  async function save(asStatus: "draft" | "in_review", skipManual = false) {
     setSaving(true);
     try {
       const supabase = createClient();
@@ -196,7 +197,7 @@ function NewComparisonForm() {
         .insert({
           name: name.trim(),
           type,
-          status: "draft",
+          status: asStatus,
           owner_id: user.id,
           project_id: projectId,
           currency,
@@ -271,34 +272,38 @@ function NewComparisonForm() {
         if (e5) throw e5;
       }
 
-      // Manuel skorlar
-      const manualRowsToInsert: Array<{
-        comparison_id: string;
-        firm_id: string;
-        metric_key: string;
-        score: number;
-        notes: null;
-        updated_by: string;
-      }> = [];
-      for (const f of selectedFirms) {
-        const scoresForFirm = manualScores[f.id] ?? {};
-        for (const k of activeManualMetrics) {
-          const score = scoresForFirm[k];
-          if (score !== undefined && score !== null) {
-            manualRowsToInsert.push({
-              comparison_id: comp.id,
-              firm_id: f.id,
-              metric_key: k,
-              score,
-              notes: null,
-              updated_by: user.id,
-            });
+      // Manuel skorlar (skipManual=true ise atla)
+      if (!skipManual) {
+        const manualRowsToInsert: Array<{
+          comparison_id: string;
+          firm_id: string;
+          metric_key: string;
+          score: number;
+          notes: string | null;
+          updated_by: string;
+        }> = [];
+        for (const f of selectedFirms) {
+          const scoresForFirm = manualScores[f.id] ?? {};
+          const notesForFirm = manualNotes[f.id] ?? {};
+          for (const k of activeManualMetrics) {
+            const score = scoresForFirm[k];
+            const note = notesForFirm[k];
+            if ((score !== undefined && score !== null) || (note && note.trim())) {
+              manualRowsToInsert.push({
+                comparison_id: comp.id,
+                firm_id: f.id,
+                metric_key: k,
+                score: score ?? 0,
+                notes: note?.trim() || null,
+                updated_by: user.id,
+              });
+            }
           }
         }
-      }
-      if (manualRowsToInsert.length > 0) {
-        const { error: e6 } = await supabase.from("firm_manual_scores").insert(manualRowsToInsert);
-        if (e6) throw e6;
+        if (manualRowsToInsert.length > 0) {
+          const { error: e6 } = await supabase.from("firm_manual_scores").insert(manualRowsToInsert);
+          if (e6) throw e6;
+        }
       }
 
       toast.success("Karşılaştırma oluşturuldu.");
@@ -348,10 +353,15 @@ function NewComparisonForm() {
                 İleri <ChevronRight className="ml-1 size-4" />
               </Button>
             ) : (
-              <Button onClick={save} disabled={saving}>
-                <Save className="mr-1 size-4" />
-                {saving ? "Kaydediliyor..." : "Kaydet"}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" onClick={() => save("draft")} disabled={saving}>
+                  Taslak Kaydet
+                </Button>
+                <Button onClick={() => save("in_review")} disabled={saving}>
+                  <Save className="mr-1 size-4" />
+                  {saving ? "Kaydediliyor..." : "Tamamla & Kaydet"}
+                </Button>
+              </div>
             )}
           </div>
         </div>
@@ -670,16 +680,17 @@ function NewComparisonForm() {
               <CardHeader>
                 <CardTitle>Manuel Skorlar</CardTitle>
                 <CardDescription>
-                  Her firma için aktif manuel metrikleri 1-10 arasında puanla.
+                  Her firma için 1-10 puan + opsiyonel açıklama notu (ödeme şartı, sertifika, referanslar vb.). Şimdi
+                  atlayıp sonradan detay sayfasından da girebilirsin.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {selectedFirms.map((f) => (
                   <div key={f.id} className="space-y-3 rounded-lg border p-4">
                     <h4 className="font-semibold">{f.name}</h4>
-                    <div className="grid gap-4 md:grid-cols-2">
+                    <div className="space-y-4">
                       {activeManualMetrics.map((k) => (
-                        <div key={k} className="space-y-1">
+                        <div key={k} className="space-y-1.5">
                           <Label className="text-sm">
                             {METRICS[k].label}{" "}
                             <span className="text-muted-foreground">({weights[k]}%)</span>
@@ -692,7 +703,13 @@ function NewComparisonForm() {
                                 [f.id]: { ...(p[f.id] ?? {}), [k]: v },
                               }))
                             }
-                            compact
+                            notes={manualNotes[f.id]?.[k] ?? ""}
+                            onNotesChange={(v) =>
+                              setManualNotes((p) => ({
+                                ...p,
+                                [f.id]: { ...(p[f.id] ?? {}), [k]: v },
+                              }))
+                            }
                           />
                         </div>
                       ))}

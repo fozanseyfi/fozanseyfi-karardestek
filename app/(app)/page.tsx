@@ -89,7 +89,7 @@ export default async function DashboardPage() {
           </h1>
           <p className="mt-2 max-w-xl text-base opacity-90">
             GES &amp; RES projelerinde taşeron, malzeme ve hizmet tekliflerini akıllı skor algoritmasıyla
-            değerlendir; doğru karar bir tıkta.
+            değerlendir.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
             <Button asChild size="lg" variant="secondary" className="font-semibold">

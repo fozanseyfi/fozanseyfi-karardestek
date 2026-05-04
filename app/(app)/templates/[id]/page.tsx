@@ -22,6 +22,7 @@ import { DecisionCards } from "@/components/comparison/decision-cards";
 import { ScoreChart } from "@/components/comparison/score-chart";
 import { ScoreBreakdown } from "@/components/comparison/score-breakdown";
 import { RevisionCompare } from "@/components/comparison/revision-compare";
+import { ItemsTable } from "@/components/comparison/items-table";
 import { CloneTemplateButton } from "@/components/comparison/clone-template-button";
 import { formatPercent } from "@/lib/currency";
 
@@ -173,59 +174,35 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
             </TabsContent>
 
             <TabsContent value="items">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Kalemler ve Fiyatlar (Revize 1)</CardTitle>
-                  <CardDescription>İlk tur teklifler — yeşil hücreler kalem bazında en düşük teklifi gösterir</CardDescription>
-                </CardHeader>
-                <CardContent className="overflow-x-auto">
-                  <table className="w-full min-w-[600px] border-collapse text-sm">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="p-2 text-left font-medium">Kalem</th>
-                        <th className="p-2 text-right font-medium">Hedef</th>
-                        {sampleData.firms.map((f, idx) => (
-                          <th key={idx} className="p-2 text-right font-medium">{f.name}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sampleData.items.map((it, i) => {
-                        const prices = it.sample_prices ?? [];
-                        const valid = prices.filter((p): p is number => p !== null && p !== undefined);
-                        const min = valid.length > 0 ? Math.min(...valid) : null;
-                        return (
-                          <tr key={i} className="border-b">
-                            <td className="p-2">
-                              <div className="font-medium">{it.name}</div>
-                              <div className="text-muted-foreground text-xs">
-                                {it.category} · {it.default_qty} {it.unit ?? ""}
-                              </div>
-                            </td>
-                            <td className="p-2 text-right">
-                              {it.sample_target !== null && it.sample_target !== undefined
-                                ? `${it.sample_target}`
-                                : "—"}
-                            </td>
-                            {sampleData.firms.map((f, idx) => {
-                              const p = prices[idx];
-                              const isMin = p !== null && p !== undefined && p === min;
-                              return (
-                                <td
-                                  key={idx}
-                                  className={`p-2 text-right ${isMin ? "bg-emerald-50 font-semibold text-emerald-800" : ""}`}
-                                >
-                                  {p !== null && p !== undefined ? p.toLocaleString("tr-TR") : "—"}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </CardContent>
-              </Card>
+              {(() => {
+                const demoFirms = sampleData.firms.map((f, j) => ({ id: `demo-f-${j}`, name: f.name }));
+                const demoItems = sampleData.items.map((it, i) => ({
+                  id: `demo-i-${i}`,
+                  name: it.name,
+                  category: it.category,
+                  unit: it.unit,
+                  qty: it.default_qty,
+                  target_price: it.sample_target ?? null,
+                }));
+                const demoPrices: Record<string, Record<string, number | null>> = {};
+                for (let i = 0; i < sampleData.items.length; i++) {
+                  const itemId = `demo-i-${i}`;
+                  demoPrices[itemId] = {};
+                  const sp = sampleData.items[i].sample_prices ?? [];
+                  for (let j = 0; j < sampleData.firms.length; j++) {
+                    demoPrices[itemId][`demo-f-${j}`] = sp[j] ?? null;
+                  }
+                }
+                return (
+                  <ItemsTable
+                    items={demoItems}
+                    firms={demoFirms}
+                    prices={demoPrices}
+                    currency={demoCurrency}
+                    activeRevision={1}
+                  />
+                );
+              })()}
             </TabsContent>
 
             <TabsContent value="revisions">

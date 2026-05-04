@@ -46,7 +46,7 @@ export function Topbar({
     "?";
 
   return (
-    <header className="bg-background sticky top-0 z-40 flex h-14 items-center gap-3 border-b px-4 md:px-6">
+    <header className="bg-background/80 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40 flex h-14 items-center gap-3 border-b px-4 backdrop-blur md:px-6">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="md:hidden">
@@ -57,7 +57,7 @@ export function Topbar({
           <SheetHeader className="sr-only">
             <SheetTitle>Navigasyon</SheetTitle>
           </SheetHeader>
-          <Sidebar profile={profile} />
+          <Sidebar profile={profile} mobile />
         </SheetContent>
       </Sheet>
 
@@ -78,7 +78,9 @@ export function Topbar({
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-9 gap-2 px-2">
             <Avatar className="size-7">
-              <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+              <AvatarFallback className="from-primary to-primary/70 bg-gradient-to-br text-[11px] font-semibold text-white">
+                {initials}
+              </AvatarFallback>
             </Avatar>
             <div className="hidden text-left md:block">
               <div className="text-sm leading-tight font-medium">

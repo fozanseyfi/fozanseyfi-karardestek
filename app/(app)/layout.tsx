@@ -4,17 +4,24 @@ import { Topbar } from "@/components/layout/topbar";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getCurrentProfile } from "@/lib/supabase/get-profile";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
+
+  const supabase = await createClient();
+  const { count: unreadCount } = await supabase
+    .from("notifications")
+    .select("*", { count: "exact", head: true })
+    .is("read_at", null);
 
   return (
     <TooltipProvider>
       <div className="flex min-h-screen">
         <Sidebar profile={profile} />
         <div className="flex flex-1 flex-col">
-          <Topbar profile={profile} />
+          <Topbar profile={profile} unreadCount={unreadCount ?? 0} />
           <main className="flex-1 px-4 py-6 md:px-8">{children}</main>
         </div>
       </div>

@@ -99,6 +99,7 @@ function NewComparisonForm() {
   }, []);
 
   const [templateName, setTemplateName] = useState<string | null>(null);
+  const [extraRevisions, setExtraRevisions] = useState<Array<{ revision: number; prices: (number | null)[][] }>>([]);
 
   // Şablon yükleme — sample_data varsa firmaları otomatik DB'ye insert eder ve state'i doldurur
   useEffect(() => {
@@ -122,6 +123,7 @@ function NewComparisonForm() {
           sample_prices?: (number | null)[];
         }[];
         manual_scores?: { firm_index: number; metric_key: string; score: number; notes?: string }[];
+        revisions?: { revision: number; prices: (number | null)[][] }[];
       };
       const sample = tpl.sample_data as SampleData | null;
 
@@ -187,6 +189,11 @@ function NewComparisonForm() {
           }
           setPrices(newPrices);
 
+          // Ek revizyonlar (rev2, rev3)
+          if (sample.revisions) {
+            setExtraRevisions(sample.revisions);
+          }
+
           // Manuel skor + not
           if (sample.manual_scores) {
             const newScores: Record<string, Partial<Record<MetricKey, number>>> = {};
@@ -214,6 +221,25 @@ function NewComparisonForm() {
   const [prices, setPrices] = useState<Record<string, Record<string, string>>>({});
   const [manualScores, setManualScores] = useState<Record<string, Partial<Record<MetricKey, number>>>>({});
   const [manualNotes, setManualNotes] = useState<Record<string, Partial<Record<MetricKey, string>>>>({});
+
+  // beforeunload uyarısı — yarım kalan veriyi koru
+  useEffect(() => {
+    const isDirty =
+      name.trim().length > 0 ||
+      notes.trim().length > 0 ||
+      projectId !== null ||
+      firmRows.some((r) => r.firm !== null) ||
+      items.some((i) => i.name.trim().length > 0 || (i.target ?? 0) > 0) ||
+      Object.keys(prices).length > 0 ||
+      Object.keys(manualScores).length > 0;
+    if (!isDirty || saving) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "Karşılaştırma henüz kaydedilmedi. Sayfadan çıkarsan veriler kaybolur.";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [name, notes, projectId, firmRows, items, prices, manualScores, saving]);
 
   function addFirmRow() {
     setFirmRows((p) => [...p, { rowKey: `r${p.length}-${Date.now()}`, firm: null }]);
@@ -346,6 +372,31 @@ function NewComparisonForm() {
       if (bidRows.length > 0) {
         const { error: e5 } = await supabase.from("bid_prices").insert(bidRows);
         if (e5) throw e5;
+      }
+
+      // Ek revizyonlar (şablondan gelen rev2/rev3 simülasyonu)
+      if (extraRevisions.length > 0) {
+        const extraRows: typeof bidRows = [];
+        for (const rev of extraRevisions) {
+          for (let i = 0; i < items.length; i++) {
+            const itemId = insertedItems[i].id;
+            for (let j = 0; j < selectedFirms.length; j++) {
+              const p = rev.prices[i]?.[j];
+              extraRows.push({
+                comparison_id: comp.id,
+                item_id: itemId,
+                firm_id: selectedFirms[j].id,
+                price: p === null || p === undefined ? null : Number(p),
+                updated_by: user.id,
+                revision: rev.revision,
+              });
+            }
+          }
+        }
+        if (extraRows.length > 0) {
+          const { error: er } = await supabase.from("bid_prices").insert(extraRows);
+          if (er) throw er;
+        }
       }
 
       // Manuel skorlar (skipManual=true ise atla)

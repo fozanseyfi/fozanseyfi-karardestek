@@ -259,6 +259,15 @@ export default async function ComparisonDetailPage({
               }))}
               prices={prices}
               stats={stats}
+              manualScores={manualScoreRows}
+              weights={weights}
+              allBids={(allBids ?? []).map((b) => ({
+                item_id: b.item_id,
+                firm_id: b.firm_id,
+                price: b.price,
+                revision: b.revision,
+              }))}
+              projectName={projectName}
             />
           </div>
         </div>

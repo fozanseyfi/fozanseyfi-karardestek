@@ -21,7 +21,9 @@ import { RankingTable } from "@/components/comparison/ranking-table";
 import { DecisionCards } from "@/components/comparison/decision-cards";
 import { ScoreChart } from "@/components/comparison/score-chart";
 import { ScoreBreakdown } from "@/components/comparison/score-breakdown";
+import { RevisionCompare } from "@/components/comparison/revision-compare";
 import { CloneTemplateButton } from "@/components/comparison/clone-template-button";
+import { formatPercent } from "@/lib/currency";
 
 type SampleData = {
   firms: { name: string; contact_name?: string; contact_email?: string; contact_phone?: string; notes?: string }[];
@@ -35,6 +37,7 @@ type SampleData = {
     sample_prices?: (number | null)[];
   }[];
   manual_scores?: { firm_index: number; metric_key: string; score: number; notes?: string }[];
+  revisions?: { revision: number; prices: (number | null)[][] }[];
 };
 
 export default async function TemplateDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -127,6 +130,12 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
               <TabsTrigger value="ranking">Sıralama</TabsTrigger>
               <TabsTrigger value="breakdown">Skor Dökümü</TabsTrigger>
               <TabsTrigger value="firms">Firmalar</TabsTrigger>
+              <TabsTrigger value="items">Kalemler</TabsTrigger>
+              <TabsTrigger value="revisions" disabled={!sampleData.revisions || sampleData.revisions.length === 0}>
+                Revizeler
+              </TabsTrigger>
+              <TabsTrigger value="decision">Karar Özeti</TabsTrigger>
+              <TabsTrigger value="help">Nasıl Çalışır</TabsTrigger>
             </TabsList>
 
             <TabsContent value="dashboard" className="space-y-4">
@@ -161,6 +170,176 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
 
             <TabsContent value="breakdown">
               <ScoreBreakdown stats={demoStats} />
+            </TabsContent>
+
+            <TabsContent value="items">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Kalemler ve Fiyatlar (Revize 1)</CardTitle>
+                  <CardDescription>İlk tur teklifler — yeşil hücreler kalem bazında en düşük teklifi gösterir</CardDescription>
+                </CardHeader>
+                <CardContent className="overflow-x-auto">
+                  <table className="w-full min-w-[600px] border-collapse text-sm">
+                    <thead>
+                      <tr className="border-b">
+                        <th className="p-2 text-left font-medium">Kalem</th>
+                        <th className="p-2 text-right font-medium">Hedef</th>
+                        {sampleData.firms.map((f, idx) => (
+                          <th key={idx} className="p-2 text-right font-medium">{f.name}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {sampleData.items.map((it, i) => {
+                        const prices = it.sample_prices ?? [];
+                        const valid = prices.filter((p): p is number => p !== null && p !== undefined);
+                        const min = valid.length > 0 ? Math.min(...valid) : null;
+                        return (
+                          <tr key={i} className="border-b">
+                            <td className="p-2">
+                              <div className="font-medium">{it.name}</div>
+                              <div className="text-muted-foreground text-xs">
+                                {it.category} · {it.default_qty} {it.unit ?? ""}
+                              </div>
+                            </td>
+                            <td className="p-2 text-right">
+                              {it.sample_target !== null && it.sample_target !== undefined
+                                ? `${it.sample_target}`
+                                : "—"}
+                            </td>
+                            {sampleData.firms.map((f, idx) => {
+                              const p = prices[idx];
+                              const isMin = p !== null && p !== undefined && p === min;
+                              return (
+                                <td
+                                  key={idx}
+                                  className={`p-2 text-right ${isMin ? "bg-emerald-50 font-semibold text-emerald-800" : ""}`}
+                                >
+                                  {p !== null && p !== undefined ? p.toLocaleString("tr-TR") : "—"}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="revisions">
+              {sampleData.revisions && sampleData.revisions.length > 0 && (
+                <RevisionCompare
+                  items={sampleData.items.map((it, i) => ({
+                    id: `demo-i-${i}`,
+                    name: it.name,
+                    category: it.category,
+                    unit: it.unit,
+                    qty: it.default_qty,
+                  }))}
+                  firms={sampleData.firms.map((f, j) => ({ id: `demo-f-${j}`, name: f.name }))}
+                  bids={[
+                    // Revision 1 — sample_prices
+                    ...sampleData.items.flatMap((it, i) =>
+                      (it.sample_prices ?? []).map((p, j) => ({
+                        item_id: `demo-i-${i}`,
+                        firm_id: `demo-f-${j}`,
+                        price: p,
+                        revision: 1,
+                      }))
+                    ),
+                    // Diğer revisionlar
+                    ...sampleData.revisions.flatMap((rev) =>
+                      rev.prices.flatMap((itemPrices, i) =>
+                        itemPrices.map((p, j) => ({
+                          item_id: `demo-i-${i}`,
+                          firm_id: `demo-f-${j}`,
+                          price: p,
+                          revision: rev.revision,
+                        }))
+                      )
+                    ),
+                  ]}
+                  currency={demoCurrency}
+                />
+              )}
+            </TabsContent>
+
+            <TabsContent value="decision" className="space-y-4">
+              <DecisionCards stats={demoStats} currency={demoCurrency} />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Karar Özeti</CardTitle>
+                  <CardDescription>Bu örnek karşılaştırma için karar verdirici göstergeler</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="text-muted-foreground list-inside list-disc space-y-2 text-sm">
+                    <li>
+                      Önerilen firma:{" "}
+                      <span className="text-foreground font-medium">
+                        {demoStats.recommendedFirmId ? sampleData.firms[Number(demoStats.recommendedFirmId.split("-")[2])]?.name : "—"}
+                      </span>
+                    </li>
+                    <li>
+                      Anomali (outlier) firma sayısı:{" "}
+                      <span className="text-foreground font-medium">
+                        {demoStats.firms.filter((f) => f.isOutlier).length}
+                      </span>
+                    </li>
+                    <li>
+                      Tam kapsamlı firma sayısı:{" "}
+                      <span className="text-foreground font-medium">
+                        {demoStats.firms.filter((f) => f.scope === 1).length}
+                      </span>
+                    </li>
+                    <li>
+                      Ortalama sapma:{" "}
+                      <span className="text-foreground font-medium">
+                        {(() => {
+                          const devs = demoStats.firms.map((f) => f.absDev).filter((d): d is number => d !== null);
+                          return devs.length > 0
+                            ? formatPercent(devs.reduce((a, b) => a + b, 0) / devs.length, 1)
+                            : "—";
+                        })()}
+                      </span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="help">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Nasıl Çalışır?</CardTitle>
+                </CardHeader>
+                <CardContent className="text-muted-foreground space-y-3 text-sm leading-relaxed">
+                  <p>
+                    Bu şablon <strong>{sampleData.firms.length} firma</strong>, <strong>{sampleData.items.length} kalem</strong>{" "}
+                    ve <strong>{(sampleData.revisions?.length ?? 0) + 1} revize</strong> ile dolu bir örnek karşılaştırma
+                    sunar.
+                  </p>
+                  <p className="text-foreground">Aktif skorlama metrikleri:</p>
+                  <ul className="list-inside list-disc space-y-1">
+                    {(Object.keys(demoStats.appliedWeights) as MetricKey[])
+                      .filter((k) => (demoStats.appliedWeights[k] ?? 0) > 0)
+                      .map((k) => (
+                        <li key={k}>
+                          <strong>{METRICS[k].label} (%{demoStats.appliedWeights[k]}):</strong>{" "}
+                          {METRICS[k].description}
+                          <span className="ml-1 text-xs">
+                            [{METRICS[k].kind === "auto" ? "Otomatik" : "Manuel"}]
+                          </span>
+                        </li>
+                      ))}
+                  </ul>
+                  <p>
+                    <strong>Bu Şablonu Kullan</strong> ile kendi karşılaştırmana klonlarsın: firmalar, fiyatlar, manuel
+                    skorlar ve revizeler hep bir tıkta yüklenir.
+                  </p>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="firms">

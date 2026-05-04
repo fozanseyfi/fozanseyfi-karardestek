@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Menu, LogOut, User as UserIcon } from "lucide-react";
+import Link from "next/link";
+import { Menu, LogOut, User as UserIcon, Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -18,7 +19,13 @@ import { Sidebar } from "./sidebar";
 import type { Profile } from "@/types/domain";
 import { ROLE_LABELS } from "@/lib/permissions";
 
-export function Topbar({ profile }: { profile: Profile | null }) {
+export function Topbar({
+  profile,
+  unreadCount = 0,
+}: {
+  profile: Profile | null;
+  unreadCount?: number;
+}) {
   const [open, setOpen] = useState(false);
 
   async function logout() {
@@ -55,6 +62,17 @@ export function Topbar({ profile }: { profile: Profile | null }) {
       </Sheet>
 
       <div className="flex-1" />
+
+      <Button asChild variant="ghost" size="icon" className="relative">
+        <Link href="/notifications" aria-label="Bildirimler">
+          <Bell className="size-5" />
+          {unreadCount > 0 && (
+            <span className="absolute top-1.5 right-1.5 flex size-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </Link>
+      </Button>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

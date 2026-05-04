@@ -99,13 +99,13 @@ export function Sidebar({
       <div
         className={cn(
           "border-sidebar-border flex h-14 items-center border-b px-3",
-          isCollapsed && "justify-center"
+          isCollapsed ? "justify-center" : "justify-between"
         )}
       >
         <Link
           href="/"
           className={cn(
-            "text-sidebar-foreground flex items-center gap-2 overflow-hidden",
+            "text-sidebar-foreground flex min-w-0 items-center gap-2 overflow-hidden",
             isCollapsed && "justify-center"
           )}
         >
@@ -123,7 +123,31 @@ export function Sidebar({
             </div>
           )}
         </Link>
+        {!mobile && !isCollapsed && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggle}
+            className="text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground size-7 shrink-0"
+            aria-label="Daralt"
+          >
+            <ChevronLeft className="size-4" />
+          </Button>
+        )}
       </div>
+      {!mobile && isCollapsed && (
+        <div className="border-sidebar-border flex justify-center border-b py-1.5">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggle}
+            className="text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground size-7"
+            aria-label="Genişlet"
+          >
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+      )}
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-2 py-3">
@@ -180,30 +204,6 @@ export function Sidebar({
         ))}
       </nav>
 
-      {/* Collapse toggle */}
-      {!mobile && (
-        <div className="border-sidebar-border border-t p-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggle}
-            className={cn(
-              "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground w-full justify-center",
-              !isCollapsed && "justify-start"
-            )}
-            aria-label={isCollapsed ? "Genişlet" : "Daralt"}
-          >
-            {isCollapsed ? (
-              <ChevronRight className="size-4" />
-            ) : (
-              <>
-                <ChevronLeft className="mr-1 size-4" />
-                <span className="text-xs">Daralt</span>
-              </>
-            )}
-          </Button>
-        </div>
-      )}
     </aside>
   );
 }

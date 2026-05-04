@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, User, MessageSquare, Send, Sparkles } from "lucide-react";
+import { Mail, Phone, User, MessageSquare, Send, Sparkles, Globe, Linkedin } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,8 @@ const DEV = {
   name: "Furkan Ozan Seyfi",
   phone: "0506 684 29 33",
   email: "fozanseyfi@gmail.com",
+  linkedin: "https://www.linkedin.com/in/fozanseyfi/",
+  website: "https://fozanseyfi.com",
 };
 
 export default function ContactPage() {
@@ -87,10 +89,10 @@ export default function ContactPage() {
             <div className="text-xs font-medium tracking-wide uppercase opacity-80">Geliştirici</div>
             <h2 className="mt-1 text-2xl font-bold">{DEV.name}</h2>
             <p className="mt-2 text-sm opacity-90">
-              EPC Karar Destek Platformu&apos;nun tasarımı ve geliştirilmesinden sorumlu yazılım mühendisi.
+              EPC Karar Destek Platformu&apos;nun tasarımı ve geliştirilmesinden sorumlu elektrik mühendisi.
             </p>
 
-            <div className="mt-6 space-y-3">
+            <div className="mt-6 space-y-2">
               <a
                 href={`tel:${DEV.phone.replace(/\s/g, "")}`}
                 className="flex items-center gap-3 rounded-lg bg-white/10 p-3 transition-colors hover:bg-white/20"
@@ -109,6 +111,30 @@ export default function ContactPage() {
                 <div className="min-w-0 flex-1">
                   <div className="text-xs opacity-75">E-posta</div>
                   <div className="break-all font-medium">{DEV.email}</div>
+                </div>
+              </a>
+              <a
+                href={DEV.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-lg bg-white/10 p-3 transition-colors hover:bg-white/20"
+              >
+                <Linkedin className="size-4 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs opacity-75">LinkedIn</div>
+                  <div className="font-medium">linkedin.com/in/fozanseyfi</div>
+                </div>
+              </a>
+              <a
+                href={DEV.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 rounded-lg bg-white/10 p-3 transition-colors hover:bg-white/20"
+              >
+                <Globe className="size-4 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-xs opacity-75">Web Sitesi</div>
+                  <div className="font-medium">fozanseyfi.com</div>
                 </div>
               </a>
             </div>

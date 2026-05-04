@@ -22,6 +22,7 @@ export default async function FirmsPage() {
     .select(
       "id, name, contact_name, contact_email, contact_phone, comparison_firms (comparison_id, comparisons (id, name, project_id, status))"
     )
+    .eq("is_sample", false)
     .order("name");
 
   const rows = (firms ?? []) as unknown as FirmRow[];

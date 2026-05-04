@@ -90,7 +90,7 @@ function NewComparisonForm() {
     (async () => {
       const supabase = createClient();
       const [{ data: f }, { data: p }] = await Promise.all([
-        supabase.from("firms").select("id, name").order("name"),
+        supabase.from("firms").select("id, name").eq("is_sample", false).order("name"),
         supabase.from("projects").select("id, name").order("name"),
       ]);
       setAllFirms(f ?? []);
@@ -152,7 +152,7 @@ function NewComparisonForm() {
         setWeightsTouched(true);
       }
 
-      // Sample firma + fiyat + manuel skor varsa firmaları DB'ye yarat
+      // Sample firma + fiyat + manuel skor varsa firmaları DB'ye yarat (is_sample=true)
       if (sample?.firms && sample.firms.length > 0) {
         const { data: insertedFirms, error } = await supabase
           .from("firms")
@@ -164,6 +164,7 @@ function NewComparisonForm() {
               contact_phone: f.contact_phone ?? null,
               notes: f.notes ?? null,
               created_by: user.id,
+              is_sample: true,
             }))
           )
           .select();

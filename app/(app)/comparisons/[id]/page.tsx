@@ -31,6 +31,8 @@ import { RevisionCompare } from "@/components/comparison/revision-compare";
 import { StatusButton } from "@/components/comparison/status-button";
 import { DecisionSelector } from "@/components/comparison/decision-selector";
 import { ScoreBreakdownClient, FirmsTabClient, type FirmInfo, type ManualScoreRow } from "@/components/comparison/firms-tab";
+import { ItemsTable } from "@/components/comparison/items-table";
+import { DeleteComparisonButton } from "@/components/comparison/delete-comparison-button";
 
 export default async function ComparisonDetailPage({
   params,
@@ -269,6 +271,7 @@ export default async function ComparisonDetailPage({
               }))}
               projectName={projectName}
             />
+            <DeleteComparisonButton comparisonId={id} comparisonName={comparison.name} />
           </div>
         </div>
       </div>
@@ -392,63 +395,22 @@ export default async function ComparisonDetailPage({
           <TabIntro
             tone="slate"
             title="Kalemler — Kalem Bazında Fiyat Karşılaştırması"
-            body="Her kalem için her firmanın teklif fiyatı. Yeşil hücre o kalemde en düşük teklif. Hedef sütunu sizin belirlediğiniz birim fiyatı (bütçe hesabınızın temeli)."
+            body="Birim/Toplam toggle ile birim fiyat veya kalem toplamı (birim × miktar) görünebilir. Yeşil hücre kalem bazında en düşük teklif. En altta tüm firma toplamları."
           />
-          <Card>
-            <CardHeader>
-              <CardTitle>Kalemler ve Fiyatlar (Revize {activeRevision})</CardTitle>
-              <CardDescription>Her kalem için firmaların teklif fiyatları</CardDescription>
-            </CardHeader>
-            <CardContent className="overflow-x-auto">
-              <table className="w-full min-w-[700px] border-collapse text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="p-2 text-left font-medium">Kalem</th>
-                    <th className="p-2 text-right font-medium">Hedef</th>
-                    {firms.map((f) => (
-                      <th key={f.id} className="p-2 text-right font-medium">
-                        {f.name}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((it) => {
-                    const cellPrices = firms
-                      .map((f) => prices[it.id]?.[f.id])
-                      .filter((p): p is number => p !== null && p !== undefined);
-                    const minPrice = cellPrices.length > 0 ? Math.min(...cellPrices) : null;
-                    const itemRow = (cItems ?? []).find((x) => x.id === it.id);
-                    return (
-                      <tr key={it.id} className="border-b">
-                        <td className="p-2">
-                          <div className="font-medium">{it.name}</div>
-                          <div className="text-muted-foreground text-xs">
-                            {itemRow?.category} · {it.qty} {itemRow?.unit ?? ""}
-                          </div>
-                        </td>
-                        <td className="p-2 text-right">
-                          {it.target !== null ? formatCompactCurrency(it.target, currency) : "—"}
-                        </td>
-                        {firms.map((f) => {
-                          const p = prices[it.id]?.[f.id];
-                          const isMin = p !== null && p !== undefined && p === minPrice;
-                          return (
-                            <td
-                              key={f.id}
-                              className={`p-2 text-right ${isMin ? "bg-emerald-50 font-semibold text-emerald-800" : ""}`}
-                            >
-                              {p !== null && p !== undefined ? formatCompactCurrency(p, currency) : "—"}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </CardContent>
-          </Card>
+          <ItemsTable
+            items={itemsForRevision.map((it) => ({
+              id: it.id,
+              name: it.name,
+              category: it.category,
+              unit: it.unit,
+              qty: it.qty,
+              target_price: items.find((x) => x.id === it.id)?.target ?? null,
+            }))}
+            firms={firms}
+            prices={prices}
+            currency={currency}
+            activeRevision={activeRevision}
+          />
         </TabsContent>
 
         <TabsContent value="revisions" className="space-y-4">

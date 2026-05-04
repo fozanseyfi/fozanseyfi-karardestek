@@ -72,11 +72,16 @@ export default async function FirmDetailPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="space-y-6">
-      <Button asChild variant="ghost" size="sm" className="-ml-2">
-        <Link href="/firms">
-          <ChevronLeft className="mr-1 size-4" /> Firmalar
-        </Link>
-      </Button>
+      <div className="flex items-center justify-between gap-2">
+        <Button asChild variant="ghost" size="sm" className="-ml-2">
+          <Link href="/firms">
+            <ChevronLeft className="mr-1 size-4" /> Firmalar
+          </Link>
+        </Button>
+        <Button asChild variant="outline" size="sm">
+          <Link href={`/firms/${id}/edit`}>Düzenle</Link>
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>

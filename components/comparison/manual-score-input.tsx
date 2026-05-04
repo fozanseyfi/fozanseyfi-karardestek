@@ -1,16 +1,49 @@
 "use client";
 
-import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { hundredToTen, scoreLabel, tenToHundred } from "@/lib/metrics";
 import { cn } from "@/lib/utils";
 
 /**
- * 1-10 numerical slider with qualitative label (Mükemmel/ÇokIyi/İyi/Orta/Zayıf).
- * Backing value stored 0-100; UI works on 1-10 scale.
+ * 5 seçimli kalite skoru: Riskli (10) · Zayıf (30) · Orta (50) · İyi (75) · Çok İyi (100)
+ * Backend'de 0-100 saklanır.
  */
+const OPTIONS = [
+  { value: 10, label: "Riskli", short: "Risk", tone: "rose" as const },
+  { value: 30, label: "Zayıf", short: "Zayıf", tone: "orange" as const },
+  { value: 50, label: "Orta", short: "Orta", tone: "amber" as const },
+  { value: 75, label: "İyi", short: "İyi", tone: "blue" as const },
+  { value: 100, label: "Çok İyi", short: "Çok İyi", tone: "emerald" as const },
+];
+
+const TONE_CLASSES = {
+  rose: {
+    selected: "bg-rose-600 text-white border-rose-600",
+    hover: "hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700",
+    base: "border-rose-200 text-rose-700",
+  },
+  orange: {
+    selected: "bg-orange-500 text-white border-orange-500",
+    hover: "hover:bg-orange-50 hover:border-orange-300 hover:text-orange-700",
+    base: "border-orange-200 text-orange-700",
+  },
+  amber: {
+    selected: "bg-amber-500 text-white border-amber-500",
+    hover: "hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700",
+    base: "border-amber-200 text-amber-700",
+  },
+  blue: {
+    selected: "bg-blue-600 text-white border-blue-600",
+    hover: "hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700",
+    base: "border-blue-200 text-blue-700",
+  },
+  emerald: {
+    selected: "bg-emerald-600 text-white border-emerald-600",
+    hover: "hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700",
+    base: "border-emerald-200 text-emerald-700",
+  },
+};
+
 export function ManualScoreInput({
   value,
   onChange,
@@ -24,34 +57,29 @@ export function ManualScoreInput({
   onNotesChange?: (v: string) => void;
   compact?: boolean;
 }) {
-  const tenVal = value === null ? 0 : hundredToTen(value);
-  const labelText = tenVal > 0 ? scoreLabel(tenVal) : "—";
-  const labelTone =
-    tenVal >= 7
-      ? "bg-emerald-100 text-emerald-700"
-      : tenVal >= 5
-        ? "bg-blue-100 text-blue-700"
-        : tenVal >= 3
-          ? "bg-amber-100 text-amber-700"
-          : tenVal >= 1
-            ? "bg-rose-100 text-rose-700"
-            : "bg-muted text-muted-foreground";
+  // Closest option seç (manuel skor 0-100 değer alabilir; biz preset'lere bağla)
+  const closestValue = value === null ? null : OPTIONS.reduce((p, o) => (Math.abs(o.value - value) < Math.abs(p.value - value) ? o : p)).value;
 
   return (
-    <div className={cn("space-y-2", compact && "space-y-1")}>
-      <div className="flex items-center gap-3">
-        <Slider
-          value={[tenVal]}
-          onValueChange={(v) => onChange(tenToHundred(v[0]))}
-          min={0}
-          max={10}
-          step={1}
-          className="flex-1"
-        />
-        <span className="w-10 text-right text-sm font-semibold tabular-nums">{tenVal}/10</span>
-        <Badge className={cn("min-w-20 justify-center text-xs font-medium", labelTone)} variant="secondary">
-          {labelText}
-        </Badge>
+    <div className={cn("space-y-2", compact && "space-y-1.5")}>
+      <div className="grid grid-cols-5 gap-1.5">
+        {OPTIONS.map((opt) => {
+          const tone = TONE_CLASSES[opt.tone];
+          const selected = closestValue === opt.value;
+          return (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onChange(opt.value)}
+              className={cn(
+                "rounded-md border-2 px-2 py-2 text-xs font-medium transition-all",
+                selected ? tone.selected : `bg-background ${tone.base} ${tone.hover}`
+              )}
+            >
+              <div className={cn("font-semibold", compact ? "text-xs" : "text-sm")}>{opt.short}</div>
+            </button>
+          );
+        })}
       </div>
       {onNotesChange && !compact && (
         <Input
@@ -63,4 +91,25 @@ export function ManualScoreInput({
       )}
     </div>
   );
+}
+
+/** Skor → label mapping (görünüm için) */
+export function scoreToLabel(score: number | null | undefined): string {
+  if (score === null || score === undefined) return "—";
+  if (score >= 90) return "Çok İyi";
+  if (score >= 65) return "İyi";
+  if (score >= 40) return "Orta";
+  if (score >= 20) return "Zayıf";
+  return "Riskli";
+}
+
+export function scoreToTone(
+  score: number | null | undefined
+): "emerald" | "blue" | "amber" | "orange" | "rose" | "muted" {
+  if (score === null || score === undefined) return "muted";
+  if (score >= 90) return "emerald";
+  if (score >= 65) return "blue";
+  if (score >= 40) return "amber";
+  if (score >= 20) return "orange";
+  return "rose";
 }

@@ -20,6 +20,7 @@ import { formatCompactCurrency } from "@/lib/currency";
 import type { Currency } from "@/lib/constants";
 import { StatusChart } from "@/components/dashboard/status-chart";
 import { StatusBadge } from "@/components/comparison/status-button";
+import { GettingStartedChecklist } from "@/components/onboarding/getting-started-checklist";
 
 export default async function DashboardPage() {
   const profile = await getCurrentProfile();
@@ -110,6 +111,14 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Onboarding checklist (tüm tamamlanana kadar görünür) */}
+      <GettingStartedChecklist
+        hasProject={(projectsCount ?? 0) > 0}
+        hasFirm={(firmsCount ?? 0) > 0}
+        hasComparison={(comparisonsCount ?? 0) > 0}
+        hasDecision={(decidedCount ?? 0) > 0}
+      />
 
       {/* KPI GRID */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">

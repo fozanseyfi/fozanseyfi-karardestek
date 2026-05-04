@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getCurrentProfile } from "@/lib/supabase/get-profile";
 import { createClient } from "@/lib/supabase/server";
+import { OnboardingDialog } from "@/components/onboarding/onboarding-dialog";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
@@ -16,6 +17,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .select("*", { count: "exact", head: true })
     .is("read_at", null);
 
+  // onboarding_completed eski profile'larda olmayabilir — null/false ikisi de "tamamlanmadı" sayılır
+  const showOnboarding = !(profile as Record<string, unknown>).onboarding_completed;
+
   return (
     <TooltipProvider>
       <div className="flex min-h-screen">
@@ -26,6 +30,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </div>
       <Toaster richColors position="top-right" />
+      <OnboardingDialog initialOpen={showOnboarding} />
     </TooltipProvider>
   );
 }

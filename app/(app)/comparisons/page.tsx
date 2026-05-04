@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { formatCompactCurrency } from "@/lib/currency";
 import type { Currency } from "@/lib/constants";
+import { ExcelImportDialog } from "@/components/comparison/excel-import-dialog";
 
 export default async function ComparisonsListPage() {
   const supabase = await createClient();
@@ -21,11 +22,14 @@ export default async function ComparisonsListPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Karşılaştırmalar</h1>
           <p className="text-muted-foreground mt-1 text-sm">Tüm teklif karşılaştırmaları.</p>
         </div>
-        <Button asChild>
-          <Link href="/comparisons/new">
-            <Plus className="mr-1 size-4" /> Yeni
-          </Link>
-        </Button>
+        <div className="flex gap-2">
+          <ExcelImportDialog />
+          <Button asChild>
+            <Link href="/comparisons/new">
+              <Plus className="mr-1 size-4" /> Yeni
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {comparisons && comparisons.length > 0 ? (

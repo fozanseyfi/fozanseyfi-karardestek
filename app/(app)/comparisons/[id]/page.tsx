@@ -12,6 +12,7 @@ import type { Currency } from "@/lib/constants";
 import { RankingTable } from "@/components/comparison/ranking-table";
 import { DecisionCards } from "@/components/comparison/decision-cards";
 import { ScoreChart } from "@/components/comparison/score-chart";
+import { ExportButtons } from "@/components/comparison/export-buttons";
 
 export default async function ComparisonDetailPage(
   { params }: { params: Promise<{ id: string }> }
@@ -90,9 +91,30 @@ export default async function ComparisonDetailPage(
               )}
             </div>
           </div>
-          {decided && (
-            <Badge className="bg-emerald-600 text-base">Karar: {decided.name}</Badge>
-          )}
+          <div className="flex items-center gap-3">
+            {decided && (
+              <Badge className="bg-emerald-600 text-base">Karar: {decided.name}</Badge>
+            )}
+            <ExportButtons
+              comparison={{
+                name: comparison.name,
+                type: comparison.type,
+                currency,
+                budget: comparison.budget !== null ? Number(comparison.budget) : null,
+              }}
+              firms={firms}
+              items={(cItems ?? []).map((it) => ({
+                id: it.id,
+                name: it.name,
+                category: it.category,
+                unit: it.unit,
+                qty: Number(it.qty),
+                target_price: it.target_price,
+              }))}
+              prices={prices}
+              stats={stats}
+            />
+          </div>
         </div>
       </div>
 

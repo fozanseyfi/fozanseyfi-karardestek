@@ -20,21 +20,29 @@ async function requireAdmin() {
 }
 
 export async function inviteUser(email: string, role: UserRole, fullName: string | null) {
-  await requireAdmin();
+  const me = await requireAdmin();
   const cleanEmail = email.trim().toLowerCase();
   if (!cleanEmail) throw new Error("E-posta gerekli");
 
+  // Davet eden admin'in organization'ı
+  const supabase = await createClient();
+  const { data: myProfile } = await supabase
+    .from("profiles")
+    .select("organization_id")
+    .eq("id", me.id)
+    .single();
+  if (!myProfile) throw new Error("Profil bulunamadı");
+
   const adminSb = await createServiceClient();
-  const { data, error } = await adminSb.auth.admin.inviteUserByEmail(cleanEmail, {
+  const { error } = await adminSb.auth.admin.inviteUserByEmail(cleanEmail, {
     redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
-    data: fullName ? { full_name: fullName } : undefined,
+    data: {
+      full_name: fullName ?? undefined,
+      invited_org_id: myProfile.organization_id,
+      invited_role: role,
+    },
   });
   if (error) throw new Error(error.message);
-
-  // Trigger profile yarattı; rol farklıysa güncelle
-  if (data.user && role !== "user") {
-    await adminSb.from("profiles").update({ role }).eq("id", data.user.id);
-  }
 
   revalidatePath("/admin/users");
   return { ok: true };

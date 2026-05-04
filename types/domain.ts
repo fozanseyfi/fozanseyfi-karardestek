@@ -13,6 +13,15 @@ export type Profile = {
   role: UserRole;
   avatar_url: string | null;
   onboarding_completed: boolean;
+  organization_id: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type Organization = {
+  id: string;
+  name: string;
+  owner_id: string | null;
   created_at: string;
   updated_at: string;
 };

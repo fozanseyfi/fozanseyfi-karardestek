@@ -41,7 +41,15 @@ const NAV: NavItem[] = [
 
 const STORAGE_KEY = "sidebar-collapsed";
 
-export function Sidebar({ profile, mobile = false }: { profile: Profile | null; mobile?: boolean }) {
+export function Sidebar({
+  profile,
+  mobile = false,
+  organizationName,
+}: {
+  profile: Profile | null;
+  mobile?: boolean;
+  organizationName?: string | null;
+}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -104,9 +112,11 @@ export function Sidebar({ profile, mobile = false }: { profile: Profile | null; 
           </div>
           {!isCollapsed && (
             <div className="min-w-0">
-              <div className="truncate text-sm leading-tight font-semibold">EPC Karar</div>
+              <div className="truncate text-sm leading-tight font-semibold">
+                {organizationName || "EPC Karar"}
+              </div>
               <div className="text-sidebar-foreground/60 truncate text-[10px] leading-tight">
-                Destek Platformu
+                Karar Destek Paneli
               </div>
             </div>
           )}

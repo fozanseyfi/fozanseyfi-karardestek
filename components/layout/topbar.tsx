@@ -22,9 +22,11 @@ import { ROLE_LABELS } from "@/lib/permissions";
 export function Topbar({
   profile,
   unreadCount = 0,
+  organizationName,
 }: {
   profile: Profile | null;
   unreadCount?: number;
+  organizationName?: string | null;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -61,7 +63,14 @@ export function Topbar({
         </SheetContent>
       </Sheet>
 
-      <div className="flex-1" />
+      <div className="flex-1">
+        {organizationName && (
+          <div className="hidden text-xs md:block">
+            <span className="text-muted-foreground">Şirket:</span>{" "}
+            <span className="font-medium">{organizationName}</span>
+          </div>
+        )}
+      </div>
 
       <Button asChild variant="ghost" size="icon" className="relative">
         <Link href="/notifications" aria-label="Bildirimler">

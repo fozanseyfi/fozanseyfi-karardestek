@@ -54,7 +54,7 @@ function NewComparisonForm() {
   const params = useSearchParams();
   const templateId = params.get("template");
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
   const [saving, setSaving] = useState(false);
 
   // Mevcut firma + proje listeleri
@@ -325,59 +325,67 @@ function NewComparisonForm() {
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-12">
       {/* Sticky top action bar */}
-      <div className="bg-background sticky top-14 z-30 -mx-4 border-b px-4 py-3 backdrop-blur md:-mx-8 md:px-8">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex min-w-0 items-center gap-3">
-            <Badge variant="secondary" className="shrink-0">
-              Adım {step} / 3
-            </Badge>
-            <h1 className="truncate text-lg font-semibold tracking-tight md:text-xl">
-              {step === 1
-                ? "Bilgi & Skorlama Metrikleri"
-                : step === 2
-                  ? "Firmalar & Kalemler"
-                  : "Fiyat & Manuel Skorlar"}
-            </h1>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {step > 1 && (
-              <Button variant="outline" onClick={() => setStep((step - 1) as 1 | 2)}>
-                <ChevronLeft className="mr-1 size-4" /> Geri
-              </Button>
-            )}
-            {step < 3 ? (
-              <Button
-                disabled={(step === 1 && !validStep1) || (step === 2 && !validStep2)}
-                onClick={() => setStep((step + 1) as 2 | 3)}
-              >
-                İleri <ChevronRight className="ml-1 size-4" />
-              </Button>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={() => save("draft")} disabled={saving}>
-                  Taslak Kaydet
-                </Button>
-                <Button onClick={() => save("in_review")} disabled={saving}>
-                  <Save className="mr-1 size-4" />
-                  {saving ? "Kaydediliyor..." : "Tamamla & Kaydet"}
-                </Button>
+      {(() => {
+        const hasManualPhase = activeManualMetrics.length > 0;
+        const totalSteps = hasManualPhase ? 4 : 3;
+        const isLastStep = step === totalSteps;
+        const stepTitles: Record<number, string> = {
+          1: "Bilgi & Skorlama Metrikleri",
+          2: "Firmalar & Kalemler",
+          3: "Fiyat Matrisi",
+          4: "Manuel Skorlar (firma puanları)",
+        };
+        return (
+          <div className="bg-background sticky top-14 z-30 -mx-4 border-b px-4 py-3 backdrop-blur md:-mx-8 md:px-8">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex min-w-0 items-center gap-3">
+                <Badge variant="secondary" className="shrink-0">
+                  Adım {step} / {totalSteps}
+                </Badge>
+                <h1 className="truncate text-lg font-semibold tracking-tight md:text-xl">
+                  {stepTitles[step]}
+                </h1>
               </div>
-            )}
+              <div className="flex shrink-0 items-center gap-2">
+                {step > 1 && (
+                  <Button variant="outline" onClick={() => setStep((step - 1) as 1 | 2 | 3)}>
+                    <ChevronLeft className="mr-1 size-4" /> Geri
+                  </Button>
+                )}
+                {!isLastStep ? (
+                  <Button
+                    disabled={(step === 1 && !validStep1) || (step === 2 && !validStep2)}
+                    onClick={() => setStep((step + 1) as 2 | 3 | 4)}
+                  >
+                    İleri <ChevronRight className="ml-1 size-4" />
+                  </Button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={() => save("draft")} disabled={saving}>
+                      Taslak Kaydet
+                    </Button>
+                    <Button onClick={() => save("in_review")} disabled={saving}>
+                      <Save className="mr-1 size-4" />
+                      {saving ? "Kaydediliyor..." : "Tamamla & Kaydet"}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="mt-3 flex gap-1">
+              {Array.from({ length: totalSteps }).map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    "h-1 flex-1 rounded-full transition-colors",
+                    step >= i + 1 ? "bg-primary" : "bg-muted"
+                  )}
+                />
+              ))}
+            </div>
           </div>
-        </div>
-        {/* Progress indicator */}
-        <div className="mt-3 flex gap-1">
-          {[1, 2, 3].map((s) => (
-            <div
-              key={s}
-              className={cn(
-                "h-1 flex-1 rounded-full transition-colors",
-                step >= s ? "bg-primary" : "bg-muted"
-              )}
-            />
-          ))}
-        </div>
-      </div>
+        );
+      })()}
 
       {step === 1 && (
         <div className="grid gap-6 lg:grid-cols-2">
@@ -611,115 +619,104 @@ function NewComparisonForm() {
       )}
 
       {step === 3 && (
-        <Tabs defaultValue="prices">
-          <TabsList>
-            <TabsTrigger value="prices">Fiyat Matrisi</TabsTrigger>
-            <TabsTrigger value="manual" disabled={activeManualMetrics.length === 0}>
-              Manuel Skorlar {activeManualMetrics.length > 0 && `(${activeManualMetrics.length})`}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="prices">
-            <Card>
-              <CardHeader>
-                <CardTitle>Fiyat Matrisi</CardTitle>
-                <CardDescription>
-                  Boş hücre &quot;teklif yok&quot; sayılır. Toplam Hedef:{" "}
-                  <span className="text-foreground font-medium">
-                    {formatCompactCurrency(totalTarget, currency)}
-                  </span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="overflow-x-auto">
-                <table className="w-full min-w-[700px] border-collapse">
-                  <thead>
-                    <tr className="border-b">
-                      <th className="p-2 text-left text-sm font-medium">Kalem</th>
-                      {selectedFirms.map((f) => (
-                        <th key={f.id} className="p-2 text-right text-sm font-medium">
-                          {f.name}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {items.map((it) => (
-                      <tr key={it.tempId} className="border-b">
-                        <td className="p-2">
-                          <div className="font-medium">{it.name}</div>
-                          <div className="text-muted-foreground text-xs">
-                            {it.category} · {it.qty} {it.unit}
-                          </div>
-                        </td>
-                        {selectedFirms.map((f) => (
-                          <td key={f.id} className="p-1.5">
-                            <Input
-                              type="number"
-                              inputMode="decimal"
-                              className={cn(INPUT_BIG, "text-right")}
-                              value={prices[it.tempId]?.[f.id] ?? ""}
-                              onChange={(e) =>
-                                setPrices((p) => ({
-                                  ...p,
-                                  [it.tempId]: { ...(p[it.tempId] ?? {}), [f.id]: e.target.value },
-                                }))
-                              }
-                            />
-                          </td>
-                        ))}
-                      </tr>
+        <Card>
+          <CardHeader>
+            <CardTitle>Fiyat Matrisi</CardTitle>
+            <CardDescription>
+              Her kalem için her firmanın birim fiyatını gir. Boş hücre &quot;teklif yok&quot; sayılır. Toplam Hedef:{" "}
+              <span className="text-foreground font-medium">
+                {formatCompactCurrency(totalTarget, currency)}
+              </span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="overflow-x-auto">
+            <table className="w-full min-w-[700px] border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="p-2 text-left text-sm font-medium">Kalem</th>
+                  {selectedFirms.map((f) => (
+                    <th key={f.id} className="p-2 text-right text-sm font-medium">
+                      {f.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {items.map((it) => (
+                  <tr key={it.tempId} className="border-b">
+                    <td className="p-2">
+                      <div className="font-medium">{it.name}</div>
+                      <div className="text-muted-foreground text-xs">
+                        {it.category} · {it.qty} {it.unit}
+                      </div>
+                    </td>
+                    {selectedFirms.map((f) => (
+                      <td key={f.id} className="p-1.5">
+                        <Input
+                          type="number"
+                          inputMode="decimal"
+                          className={cn(INPUT_BIG, "text-right")}
+                          value={prices[it.tempId]?.[f.id] ?? ""}
+                          onChange={(e) =>
+                            setPrices((p) => ({
+                              ...p,
+                              [it.tempId]: { ...(p[it.tempId] ?? {}), [f.id]: e.target.value },
+                            }))
+                          }
+                        />
+                      </td>
                     ))}
-                  </tbody>
-                </table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="manual">
-            <Card>
-              <CardHeader>
-                <CardTitle>Manuel Skorlar</CardTitle>
-                <CardDescription>
-                  Her firma için 1-10 puan + opsiyonel açıklama notu (ödeme şartı, sertifika, referanslar vb.). Şimdi
-                  atlayıp sonradan detay sayfasından da girebilirsin.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                {selectedFirms.map((f) => (
-                  <div key={f.id} className="space-y-3 rounded-lg border p-4">
-                    <h4 className="font-semibold">{f.name}</h4>
-                    <div className="space-y-4">
-                      {activeManualMetrics.map((k) => (
-                        <div key={k} className="space-y-1.5">
-                          <Label className="text-sm">
-                            {METRICS[k].label}{" "}
-                            <span className="text-muted-foreground">({weights[k]}%)</span>
-                          </Label>
-                          <ManualScoreInput
-                            value={manualScores[f.id]?.[k] ?? null}
-                            onChange={(v) =>
-                              setManualScores((p) => ({
-                                ...p,
-                                [f.id]: { ...(p[f.id] ?? {}), [k]: v },
-                              }))
-                            }
-                            notes={manualNotes[f.id]?.[k] ?? ""}
-                            onNotesChange={(v) =>
-                              setManualNotes((p) => ({
-                                ...p,
-                                [f.id]: { ...(p[f.id] ?? {}), [k]: v },
-                              }))
-                            }
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  </tr>
                 ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              </tbody>
+            </table>
+          </CardContent>
+        </Card>
+      )}
+
+      {step === 4 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Manuel Skorlar — Firma Puanlama</CardTitle>
+            <CardDescription>
+              Adım 1&apos;de seçtiğin manuel metriklere göre her firmaya 1-10 puan + açıklama notu gir. Notlar sonradan
+              firma profilinde gözükür ({activeManualMetrics.length} aktif metrik × {selectedFirms.length} firma).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {selectedFirms.map((f) => (
+              <div key={f.id} className="space-y-3 rounded-lg border p-4">
+                <h4 className="text-base font-semibold">{f.name}</h4>
+                <div className="space-y-4">
+                  {activeManualMetrics.map((k) => (
+                    <div key={k} className="space-y-1.5">
+                      <Label className="text-sm">
+                        {METRICS[k].label}{" "}
+                        <span className="text-muted-foreground">({weights[k]}%)</span>
+                      </Label>
+                      <ManualScoreInput
+                        value={manualScores[f.id]?.[k] ?? null}
+                        onChange={(v) =>
+                          setManualScores((p) => ({
+                            ...p,
+                            [f.id]: { ...(p[f.id] ?? {}), [k]: v },
+                          }))
+                        }
+                        notes={manualNotes[f.id]?.[k] ?? ""}
+                        onNotesChange={(v) =>
+                          setManualNotes((p) => ({
+                            ...p,
+                            [f.id]: { ...(p[f.id] ?? {}), [k]: v },
+                          }))
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       )}
 
       {/* Summary alttan da gelsin (uzun sayfalarda) */}

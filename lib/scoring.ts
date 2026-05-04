@@ -86,11 +86,13 @@ export function calcStats(
     return { firm: f, weightedTotal, filledCount };
   });
 
-  const med = median(firmsBasic.filter((x) => x.filledCount > 0).map((x) => x.weightedTotal));
+  const validTotals = firmsBasic.filter((x) => x.filledCount > 0).map((x) => x.weightedTotal);
+  const med = median(validTotals);
+  const minTotal = validTotals.length > 0 ? Math.min(...validTotals) : null;
+  const maxTotal = validTotals.length > 0 ? Math.max(...validTotals) : null;
 
   // Outlier detection on weighted totals (IQR method)
-  const totalsForOutlier = firmsBasic.filter((x) => x.filledCount > 0).map((x) => x.weightedTotal);
-  const q = quartiles(totalsForOutlier);
+  const q = quartiles(validTotals);
   const outlierBounds = q
     ? { lo: q.q1 - 1.5 * (q.q3 - q.q1), hi: q.q3 + 1.5 * (q.q3 - q.q1) }
     : null;
@@ -121,11 +123,22 @@ export function calcStats(
       }
     }
 
+    // En Düşük Teklif: TOPLAM fiyattan değerlendirilir.
+    // En düşük toplam = 100 puan, en yüksek = 0 puan (lineer interpolation)
+    let lowestScore = 0;
+    if (filledCount > 0 && minTotal !== null && maxTotal !== null) {
+      if (maxTotal === minTotal) {
+        lowestScore = 100; // tüm firmalar aynı toplamda
+      } else {
+        lowestScore = ((maxTotal - weightedTotal) / (maxTotal - minTotal)) * 100;
+      }
+    }
+
     // Auto metrics → 0-100
     const autoScores = {
       scope: scope * 100,
       deviation: absDev !== null ? Math.max(0, (1 - absDev) * 100) : 0,
-      lowest: N > 0 ? (lowCount / N) * 100 : 0,
+      lowest: lowestScore,
     };
 
     // Manual metrics → 0-100 (already 0-100 from DB, but we may store as 1-10 input → tenToHundred)

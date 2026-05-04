@@ -37,7 +37,7 @@ export const METRICS: Record<MetricKey, MetricDef> = {
   lowest: {
     key: "lowest",
     label: "En Düşük Teklif",
-    description: "Kalem bazında en düşük teklifi verme oranı.",
+    description: "Toplam ağırlıklı teklifin diğerlerine göre düşüklüğü. En düşük toplam=100 puan, en yüksek=0.",
     kind: "auto",
   },
   technical: {

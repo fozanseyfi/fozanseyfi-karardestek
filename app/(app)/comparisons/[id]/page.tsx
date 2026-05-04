@@ -251,6 +251,11 @@ export default async function ComparisonDetailPage({
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-4">
+          <TabIntro
+            tone="blue"
+            title="Pano — Karşılaştırmanın Özeti"
+            body="Önerilen firma, en düşük toplam, hedef sapma ve genel skor dağılımı. İlk bakışta hangi firmanın öne çıktığını anlamak için bu sekmeden başla."
+          />
           <div className="grid gap-4 lg:grid-cols-2">
             <TotalKpiCard stats={stats} currency={currency} />
             <Card>
@@ -269,11 +274,21 @@ export default async function ComparisonDetailPage({
           <DecisionCards stats={stats} currency={currency} />
         </TabsContent>
 
-        <TabsContent value="ranking">
+        <TabsContent value="ranking" className="space-y-4">
+          <TabIntro
+            tone="emerald"
+            title="Sıralama — Skor Bazlı Liste"
+            body="Tüm firmalar toplam skorlarına göre sıralı. Yeşil=güçlü aday (≥70), sarı=orta (50-69), kırmızı=riskli (<50). Anomali rozetli firmalar rakiplerinden çok kopuk teklif vermiş demektir."
+          />
           <RankingTable firms={stats.firms} currency={currency} recommendedFirmId={stats.recommendedFirmId} />
         </TabsContent>
 
         <TabsContent value="breakdown" className="space-y-4">
+          <TabIntro
+            tone="violet"
+            title="Skor Dökümü — Hangi Metrikten Ne Kadar Puan?"
+            body="Her firmanın her metrikten aldığı puanın tablosu. Bir firmanın neden öne çıktığını veya neden zayıf olduğunu burada görebilirsin. Renkler katkı/maks oranını gösterir."
+          />
           <ScoreBreakdown stats={stats} />
           {!onlyAutoMetrics && (
             <Card>
@@ -318,6 +333,11 @@ export default async function ComparisonDetailPage({
         </TabsContent>
 
         <TabsContent value="items" className="space-y-4">
+          <TabIntro
+            tone="slate"
+            title="Kalemler — Kalem Bazında Fiyat Karşılaştırması"
+            body="Her kalem için her firmanın teklif fiyatı. Yeşil hücre o kalemde en düşük teklif. Hedef sütunu sizin belirlediğiniz birim fiyatı (bütçe hesabınızın temeli)."
+          />
           <Card>
             <CardHeader>
               <CardTitle>Kalemler ve Fiyatlar (Revize {activeRevision})</CardTitle>
@@ -375,7 +395,12 @@ export default async function ComparisonDetailPage({
           </Card>
         </TabsContent>
 
-        <TabsContent value="revisions">
+        <TabsContent value="revisions" className="space-y-4">
+          <TabIntro
+            tone="amber"
+            title="Revizeler — Tur Karşılaştırması"
+            body="Firmalar tekliflerini revize ettikçe (Sağ üstteki 'Revize Kaydet' butonu ile) burada turlar yan yana karşılaştırılır. Yeşil ↓ indirim, kırmızı ↑ zam."
+          />
           <RevisionCompare
             items={itemsForRevision}
             firms={firms}
@@ -390,6 +415,11 @@ export default async function ComparisonDetailPage({
         </TabsContent>
 
         <TabsContent value="decision" className="space-y-4">
+          <TabIntro
+            tone="emerald"
+            title="Karar Özeti — Yönetici Bilgisi"
+            body="Karar verirken bakacağın anahtar göstergeler: önerilen firma, medyan, anomali sayısı, ortalama sapma. PDF olarak da dışa aktarabilirsin."
+          />
           <DecisionCards stats={stats} currency={currency} />
           <Card>
             <CardHeader>
@@ -443,7 +473,12 @@ export default async function ComparisonDetailPage({
           </Card>
         </TabsContent>
 
-        <TabsContent value="help">
+        <TabsContent value="help" className="space-y-4">
+          <TabIntro
+            tone="blue"
+            title="Nasıl Çalışır — Skor Algoritması"
+            body="Bu sayfa skorların nasıl hesaplandığını açıklar. Kararlarını anlamlandırmak veya raporda referans göstermek için kullanışlı."
+          />
           <Card>
             <CardHeader>
               <CardTitle>Skor Algoritması Nasıl Çalışır?</CardTitle>
@@ -480,6 +515,30 @@ export default async function ComparisonDetailPage({
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function TabIntro({
+  tone,
+  title,
+  body,
+}: {
+  tone: "blue" | "emerald" | "violet" | "slate" | "amber";
+  title: string;
+  body: string;
+}) {
+  const cls = {
+    blue: "border-blue-200 bg-blue-50 text-blue-900",
+    emerald: "border-emerald-200 bg-emerald-50 text-emerald-900",
+    violet: "border-violet-200 bg-violet-50 text-violet-900",
+    slate: "border-slate-200 bg-slate-50 text-slate-900",
+    amber: "border-amber-200 bg-amber-50 text-amber-900",
+  }[tone];
+  return (
+    <div className={`rounded-lg border p-3 ${cls}`}>
+      <div className="text-sm font-semibold">{title}</div>
+      <p className="mt-0.5 text-sm opacity-90">{body}</p>
     </div>
   );
 }

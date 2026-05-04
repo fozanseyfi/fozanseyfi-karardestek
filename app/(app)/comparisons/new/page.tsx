@@ -98,42 +98,114 @@ function NewComparisonForm() {
     })();
   }, []);
 
-  // Şablon yükleme
+  const [templateName, setTemplateName] = useState<string | null>(null);
+
+  // Şablon yükleme — sample_data varsa firmaları otomatik DB'ye insert eder ve state'i doldurur
   useEffect(() => {
     if (!templateId) return;
     (async () => {
       const supabase = createClient();
-      const { data } = await supabase.from("templates").select("*").eq("id", templateId).single();
-      if (!data) return;
-      setType(data.type);
-      const tplItems = Array.isArray(data.items) ? data.items : [];
-      if (tplItems.length > 0) {
-        setItems(
-          tplItems.map(
-            (
-              it: {
-                name: string;
-                category: string;
-                unit: string | null;
-                default_qty: number;
-                sample_target?: number | null;
-              },
-              idx: number
-            ) => ({
-              tempId: `i${idx}-${Date.now()}`,
-              name: it.name,
-              category: ((ITEM_CATEGORIES as readonly string[]).includes(it.category)
-                ? it.category
-                : "Diğer") as ItemCategory,
-              unit: it.unit ?? "",
-              qty: it.default_qty,
-              target: it.sample_target ?? null,
-            })
-          )
-        );
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data: tpl } = await supabase.from("templates").select("*").eq("id", templateId).single();
+      if (!tpl) return;
+
+      type SampleData = {
+        firms: { name: string; contact_name?: string; contact_email?: string; contact_phone?: string; notes?: string }[];
+        metric_weights?: Record<string, number>;
+        items: {
+          name: string;
+          category: string;
+          unit: string | null;
+          default_qty: number;
+          sample_target?: number | null;
+          sample_prices?: (number | null)[];
+        }[];
+        manual_scores?: { firm_index: number; metric_key: string; score: number; notes?: string }[];
+      };
+      const sample = tpl.sample_data as SampleData | null;
+
+      setType(tpl.type);
+      setTemplateName(tpl.name);
+
+      // Items
+      const tplItems = sample?.items ?? (Array.isArray(tpl.items) ? tpl.items : []);
+      const newItems = tplItems.map(
+        (it: { name: string; category: string; unit: string | null; default_qty: number; sample_target?: number | null }, idx: number) => ({
+          tempId: `i${idx}-${Date.now()}`,
+          name: it.name,
+          category: ((ITEM_CATEGORIES as readonly string[]).includes(it.category)
+            ? it.category
+            : "Diğer") as ItemCategory,
+          unit: it.unit ?? "",
+          qty: it.default_qty,
+          target: it.sample_target ?? null,
+        })
+      );
+      setItems(newItems);
+
+      // Metrik ağırlıkları
+      if (sample?.metric_weights) {
+        setWeights(sample.metric_weights as Weights);
+        setWeightsTouched(true);
       }
-      if (data.name) setName(`${data.name} - ${new Date().toLocaleDateString("tr-TR")}`);
-      toast.success("Şablon yüklendi.");
+
+      // Sample firma + fiyat + manuel skor varsa firmaları DB'ye yarat
+      if (sample?.firms && sample.firms.length > 0) {
+        const { data: insertedFirms, error } = await supabase
+          .from("firms")
+          .insert(
+            sample.firms.map((f) => ({
+              name: f.name,
+              contact_name: f.contact_name ?? null,
+              contact_email: f.contact_email ?? null,
+              contact_phone: f.contact_phone ?? null,
+              notes: f.notes ?? null,
+              created_by: user.id,
+            }))
+          )
+          .select();
+        if (!error && insertedFirms) {
+          setAllFirms((p) => [...p, ...insertedFirms].sort((a, b) => a.name.localeCompare(b.name, "tr")));
+          setFirmRows(
+            insertedFirms.map((f, idx) => ({
+              rowKey: `r-tpl-${idx}`,
+              firm: { id: f.id, name: f.name },
+            }))
+          );
+
+          // Fiyat matrisi
+          const newPrices: Record<string, Record<string, string>> = {};
+          for (let i = 0; i < tplItems.length; i++) {
+            const tempId = newItems[i].tempId;
+            newPrices[tempId] = {};
+            const samplePrices = (tplItems[i] as { sample_prices?: (number | null)[] }).sample_prices ?? [];
+            for (let j = 0; j < insertedFirms.length; j++) {
+              const p = samplePrices[j];
+              newPrices[tempId][insertedFirms[j].id] = p !== null && p !== undefined ? String(p) : "";
+            }
+          }
+          setPrices(newPrices);
+
+          // Manuel skor + not
+          if (sample.manual_scores) {
+            const newScores: Record<string, Partial<Record<MetricKey, number>>> = {};
+            const newNotes: Record<string, Partial<Record<MetricKey, string>>> = {};
+            for (const ms of sample.manual_scores) {
+              const fid = insertedFirms[ms.firm_index]?.id;
+              if (!fid) continue;
+              if (!newScores[fid]) newScores[fid] = {};
+              if (!newNotes[fid]) newNotes[fid] = {};
+              newScores[fid][ms.metric_key as MetricKey] = ms.score;
+              if (ms.notes) newNotes[fid][ms.metric_key as MetricKey] = ms.notes;
+            }
+            setManualScores(newScores);
+            setManualNotes(newNotes);
+          }
+        }
+      }
+
+      toast.success(sample?.firms ? "Şablon ve örnek veriler yüklendi." : "Şablon yüklendi.");
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [templateId]);
@@ -171,7 +243,11 @@ function NewComparisonForm() {
   const totalWeight = (Object.values(weights) as number[]).reduce((s, v) => s + (v ?? 0), 0);
   const totalTarget = items.reduce((sum, it) => sum + (it.target ?? 0) * it.qty, 0);
 
-  const validStep1 = name.trim().length > 1 && totalWeight === 100 && Object.keys(weights).length > 0;
+  const validStep1 =
+    name.trim().length > 1 &&
+    totalWeight === 100 &&
+    Object.keys(weights).length > 0 &&
+    projectId !== null;
   const validStep2 =
     selectedFirms.length > 0 &&
     items.length > 0 &&
@@ -387,6 +463,16 @@ function NewComparisonForm() {
         );
       })()}
 
+      {templateName && (
+        <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <span className="rounded bg-amber-200 px-1.5 py-0.5 text-xs font-medium uppercase">Şablon</span>
+          <span>
+            <strong>{templateName}</strong> şablonundan başlatıldı. Aşağıdaki firma, fiyat ve skorlar otomatik yüklendi
+            — istediğin gibi düzenleyebilirsin.
+          </span>
+        </div>
+      )}
+
       {step === 1 && (
         <div className="grid gap-6 lg:grid-cols-2">
           <Card>
@@ -407,12 +493,13 @@ function NewComparisonForm() {
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-sm">Proje</Label>
+                <Label className="text-sm">Proje *</Label>
                 <ProjectCombobox
                   options={allProjects}
                   selectedId={projectId}
                   onSelect={(p) => setProjectId(p?.id ?? null)}
                   onProjectCreated={(p) => setAllProjects((prev) => [...prev, p])}
+                  allowNone={false}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">

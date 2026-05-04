@@ -29,6 +29,8 @@ import { EditMetricsDialog } from "@/components/comparison/edit-metrics-dialog";
 import { EditManualScoresDialog } from "@/components/comparison/edit-manual-scores-dialog";
 import { RevisionCompare } from "@/components/comparison/revision-compare";
 import { StatusButton } from "@/components/comparison/status-button";
+import { DecisionSelector } from "@/components/comparison/decision-selector";
+import { ScoreBreakdownClient, FirmsTabClient, type FirmInfo, type ManualScoreRow } from "@/components/comparison/firms-tab";
 
 export default async function ComparisonDetailPage({
   params,
@@ -54,7 +56,7 @@ export default async function ComparisonDetailPage({
   ] = await Promise.all([
     supabase
       .from("comparison_firms")
-      .select("id, firm_id, notes, firms (id, name)")
+      .select("id, firm_id, notes, firms (id, name, contact_name, contact_email, contact_phone, notes)")
       .eq("comparison_id", id),
     supabase.from("comparison_items").select("*").eq("comparison_id", id).order("position"),
     supabase.from("bid_prices").select("item_id, firm_id, price, revision").eq("comparison_id", id),
@@ -68,15 +70,31 @@ export default async function ComparisonDetailPage({
       .eq("comparison_id", id),
   ]);
 
+  type FirmRecord = {
+    id: string;
+    name: string;
+    contact_name: string | null;
+    contact_email: string | null;
+    contact_phone: string | null;
+    notes: string | null;
+  };
   type CFirmRow = {
     firm_id: string;
-    firms: { id: string; name: string } | { id: string; name: string }[] | null;
+    firms: FirmRecord | FirmRecord[] | null;
   };
-  const firms: FirmInput[] = (cFirms ?? []).map((cf) => {
+  const firmInfos: FirmInfo[] = (cFirms ?? []).map((cf) => {
     const row = cf as unknown as CFirmRow;
     const f = Array.isArray(row.firms) ? row.firms[0] : row.firms;
-    return { id: row.firm_id, name: f?.name ?? "—" };
+    return {
+      id: row.firm_id,
+      name: f?.name ?? "—",
+      contact_name: f?.contact_name ?? null,
+      contact_email: f?.contact_email ?? null,
+      contact_phone: f?.contact_phone ?? null,
+      notes: f?.notes ?? null,
+    };
   });
+  const firms: FirmInput[] = firmInfos.map((f) => ({ id: f.id, name: f.name }));
 
   const items: ItemInput[] = (cItems ?? []).map((it) => ({
     id: it.id,
@@ -145,6 +163,13 @@ export default async function ComparisonDetailPage({
   const manualMetricKeys = (Object.keys(weights) as MetricKey[]).filter(
     (k) => METRICS[k].kind === "manual" && (weights[k] ?? 0) > 0
   );
+
+  const manualScoreRows: ManualScoreRow[] = (manualRows ?? []).map((m) => ({
+    firm_id: m.firm_id,
+    metric_key: m.metric_key as MetricKey,
+    score: Number(m.score),
+    notes: m.notes ?? null,
+  }));
 
   const itemsForRevision = (cItems ?? []).map((it) => ({
     id: it.id,
@@ -244,6 +269,7 @@ export default async function ComparisonDetailPage({
           <TabsTrigger value="dashboard">Pano</TabsTrigger>
           <TabsTrigger value="ranking">Sıralama</TabsTrigger>
           <TabsTrigger value="breakdown">Skor Dökümü</TabsTrigger>
+          <TabsTrigger value="firms">Firmalar</TabsTrigger>
           <TabsTrigger value="items">Kalemler</TabsTrigger>
           <TabsTrigger value="revisions">Revizeler</TabsTrigger>
           <TabsTrigger value="decision">Karar Özeti</TabsTrigger>
@@ -287,9 +313,15 @@ export default async function ComparisonDetailPage({
           <TabIntro
             tone="violet"
             title="Skor Dökümü — Hangi Metrikten Ne Kadar Puan?"
-            body="Her firmanın her metrikten aldığı puanın tablosu. Bir firmanın neden öne çıktığını veya neden zayıf olduğunu burada görebilirsin. Renkler katkı/maks oranını gösterir."
+            body="Her firmanın her metrikten aldığı puanın tablosu. Sütun başlığına tıklayarak sıralayabilir, firma adına tıklayarak manuel skor notlarını (ödeme şartı, sertifika vb.) açılır pencerede görebilirsin."
           />
-          <ScoreBreakdown stats={stats} />
+          <ScoreBreakdownClient
+            stats={stats}
+            firmInfos={firmInfos}
+            manualScores={manualScoreRows}
+            weights={weights}
+            currency={currency}
+          />
           {!onlyAutoMetrics && (
             <Card>
               <CardHeader>
@@ -330,6 +362,21 @@ export default async function ComparisonDetailPage({
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="firms" className="space-y-4">
+          <TabIntro
+            tone="emerald"
+            title="Firmalar — Profil ve Manuel Skor Notları"
+            body="Bu karşılaştırmadaki tüm firmalar. Bir firmanın üzerine tıkla — açılan pencerede iletişim bilgileri, skor özeti ve manuel skor notları (ödeme şartı, finansal bilgiler, referanslar vb.) görünür."
+          />
+          <FirmsTabClient
+            stats={stats}
+            firmInfos={firmInfos}
+            manualScores={manualScoreRows}
+            weights={weights}
+            currency={currency}
+          />
         </TabsContent>
 
         <TabsContent value="items" className="space-y-4">
@@ -418,7 +465,12 @@ export default async function ComparisonDetailPage({
           <TabIntro
             tone="emerald"
             title="Karar Özeti — Yönetici Bilgisi"
-            body="Karar verirken bakacağın anahtar göstergeler: önerilen firma, medyan, anomali sayısı, ortalama sapma. PDF olarak da dışa aktarabilirsin."
+            body="Karar verirken bakacağın anahtar göstergeler. Aşağıdan firma seçip 'Kararı Onayla' ile karşılaştırmayı kapat, durum 'Karar Verildi' olur."
+          />
+          <DecisionSelector
+            comparisonId={id}
+            firms={firms}
+            currentDecidedFirmId={comparison.decided_firm_id}
           />
           <DecisionCards stats={stats} currency={currency} />
           <Card>

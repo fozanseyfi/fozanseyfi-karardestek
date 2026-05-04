@@ -52,7 +52,7 @@ export function ProjectCombobox({
               {selected ? (
                 selected.name
               ) : (
-                <span className="text-muted-foreground">Proje seç (opsiyonel)...</span>
+                <span className="text-muted-foreground">Proje seç...</span>
               )}
             </span>
             <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50" />

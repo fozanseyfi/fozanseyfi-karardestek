@@ -46,7 +46,7 @@ export function StatusButton({
 
   async function setStatus(newStatus: Status) {
     if (newStatus === "decided" && !hasDecidedFirm) {
-      toast.error("Önce 'Karar Verildi' olabilmesi için bir firma seçilmelidir (Karar Özeti sekmesinden).");
+      toast.error("Önce 'Karar Özeti' sekmesinden 'Kararı Onayla' ile bir firma seç.");
       return;
     }
     setSaving(true);

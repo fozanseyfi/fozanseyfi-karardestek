@@ -119,11 +119,12 @@ export function exportToExcel(
   const rankRows = stats.firms.map((f, idx) => ({
     Sıra: idx + 1,
     Firma: f.firmName,
-    Skor: f.score,
+    Skor: f.totalScore,
     "Kapsam %": Math.round(f.scope * 100),
     "Sapma %": f.absDev !== null ? Math.round(f.absDev * 1000) / 10 : "",
     "Ağırlıklı Toplam": Math.round(f.weightedTotal),
     "En Düşük Sayısı": f.lowCount,
+    Anomali: f.isOutlier ? "Evet" : "",
   }));
   const ws2 = XLSX.utils.json_to_sheet(rankRows);
   XLSX.utils.book_append_sheet(wb, ws2, "Sıralama");

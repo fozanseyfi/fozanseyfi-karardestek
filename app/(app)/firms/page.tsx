@@ -1,5 +1,5 @@
-import { Plus } from "lucide-react";
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
@@ -30,17 +30,17 @@ export default async function FirmsPage() {
       {firms && firms.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {firms.map((f) => (
-            <Card key={f.id}>
-              <CardContent className="p-5">
-                <h3 className="font-semibold">{f.name}</h3>
-                {f.contact_name && <p className="text-muted-foreground mt-1 text-sm">{f.contact_name}</p>}
-                {f.contact_email && (
-                  <a href={`mailto:${f.contact_email}`} className="mt-2 block text-sm text-blue-600 hover:underline">
-                    {f.contact_email}
-                  </a>
-                )}
-              </CardContent>
-            </Card>
+            <Link key={f.id} href={`/firms/${f.id}`}>
+              <Card className="hover:bg-muted/30 h-full transition-colors">
+                <CardContent className="p-5">
+                  <h3 className="font-semibold">{f.name}</h3>
+                  {f.contact_name && <p className="text-muted-foreground mt-1 text-sm">{f.contact_name}</p>}
+                  {f.contact_email && (
+                    <p className="mt-2 text-sm text-blue-600">{f.contact_email}</p>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       ) : (

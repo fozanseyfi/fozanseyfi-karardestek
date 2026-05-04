@@ -27,8 +27,9 @@ export function DecisionCards({
           icon={Award}
           title="Önerilen Firma"
           firm={recommended}
-          subtitle={`Skor ${recommended.score.toFixed(1)} · Kapsam ${formatPercent(recommended.scope, 0)}`}
+          subtitle={`Skor ${recommended.totalScore.toFixed(1)} · Kapsam ${formatPercent(recommended.scope, 0)}`}
           value={formatCompactCurrency(recommended.weightedTotal, currency)}
+          isOutlier={recommended.isOutlier}
         />
       )}
       {lowest && (
@@ -39,6 +40,7 @@ export function DecisionCards({
           firm={lowest}
           subtitle="Toplam ağırlıklı bedel en düşük olan teklif"
           value={formatCompactCurrency(lowest.weightedTotal, currency)}
+          isOutlier={lowest.isOutlier}
         />
       )}
       {highDev && highDev.absDev !== null && highDev.absDev > 0.1 && (
@@ -74,6 +76,7 @@ function DecisionCard({
   firm,
   subtitle,
   value,
+  isOutlier,
 }: {
   tone: "good" | "info" | "warn";
   icon: React.ComponentType<{ className?: string }>;
@@ -81,6 +84,7 @@ function DecisionCard({
   firm: FirmStats;
   subtitle: string;
   value: string;
+  isOutlier?: boolean;
 }) {
   const toneClasses = {
     good: "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -96,7 +100,14 @@ function DecisionCard({
           <span className="text-xs font-semibold tracking-wide uppercase">{title}</span>
         </div>
         <div>
-          <div className="text-lg font-semibold">{firm.firmName}</div>
+          <div className="flex items-center gap-2">
+            <div className="text-lg font-semibold">{firm.firmName}</div>
+            {isOutlier && (
+              <span className="rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-medium text-rose-700">
+                ANOMALİ
+              </span>
+            )}
+          </div>
           <div className="text-xs opacity-80">{subtitle}</div>
         </div>
         <div className="text-2xl font-bold">{value}</div>

@@ -7,11 +7,8 @@ import type { ComparisonStats } from "./scoring";
 Font.register({
   family: "Inter",
   fonts: [
-    { src: "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50ojJX0KQHPg.ttf" },
-    {
-      src: "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50ojJX5sQHPg.ttf",
-      fontWeight: "bold",
-    },
+    { src: "/fonts/Inter-Regular.woff" },
+    { src: "/fonts/Inter-Bold.woff", fontWeight: "bold" },
   ],
 });
 
@@ -58,7 +55,7 @@ export function DecisionPdf({ comparison, stats, itemCount, firmsCount }: PdfPay
             <Text style={styles.recHead}>ÖNERİLEN FİRMA</Text>
             <Text style={styles.recName}>{recommended.firmName}</Text>
             <Text>
-              Skor {recommended.score.toFixed(1)} · Toplam {fmt(recommended.weightedTotal)} {sym} · Kapsam{" "}
+              Skor {recommended.totalScore.toFixed(1)} · Toplam {fmt(recommended.weightedTotal)} {sym} · Kapsam{" "}
               {Math.round(recommended.scope * 100)}%
             </Text>
           </View>
@@ -76,7 +73,7 @@ export function DecisionPdf({ comparison, stats, itemCount, firmsCount }: PdfPay
           {stats.firms.map((f) => (
             <View key={f.firmId} style={styles.row}>
               <Text style={styles.cellLabel}>{f.firmName}</Text>
-              <Text style={styles.cellNum}>{f.score.toFixed(1)}</Text>
+              <Text style={styles.cellNum}>{f.totalScore.toFixed(1)}</Text>
               <Text style={styles.cellNum}>{Math.round(f.scope * 100)}%</Text>
               <Text style={styles.cellNum}>
                 {f.absDev !== null ? `${(f.absDev * 100).toFixed(1)}%` : "—"}

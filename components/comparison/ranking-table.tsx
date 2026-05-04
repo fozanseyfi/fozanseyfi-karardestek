@@ -1,5 +1,6 @@
 "use client";
 
+import { AlertTriangle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatCompactCurrency, formatPercent } from "@/lib/currency";
@@ -35,7 +36,14 @@ export function RankingTable({
             <TableRow key={f.firmId} className={cn(f.firmId === recommendedFirmId && "bg-emerald-50")}>
               <TableCell className="font-medium">{idx + 1}</TableCell>
               <TableCell>
-                <div className="font-medium">{f.firmName}</div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{f.firmName}</span>
+                  {f.isOutlier && (
+                    <Badge variant="destructive" className="gap-1 text-xs">
+                      <AlertTriangle className="size-3" /> Anomali
+                    </Badge>
+                  )}
+                </div>
                 <div className="text-muted-foreground text-xs">
                   {f.filledCount} / {f.totalItems} kalem
                 </div>
@@ -55,7 +63,7 @@ export function RankingTable({
                     f.recommendation === "incomplete" && "bg-muted text-muted-foreground"
                   )}
                 >
-                  {f.score.toFixed(1)}
+                  {f.totalScore.toFixed(1)}
                 </span>
               </TableCell>
               <TableCell>

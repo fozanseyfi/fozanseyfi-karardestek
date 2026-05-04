@@ -6,42 +6,68 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
-import { calcStats, type FirmInput, type ItemInput, type PriceMatrix } from "@/lib/scoring";
+import {
+  calcStats,
+  type FirmInput,
+  type ItemInput,
+  type ManualScores,
+  type MetricWeights,
+  type PriceMatrix,
+} from "@/lib/scoring";
+import { METRICS, type MetricKey } from "@/lib/metrics";
 import { formatCompactCurrency, formatPercent } from "@/lib/currency";
 import type { Currency } from "@/lib/constants";
 import { RankingTable } from "@/components/comparison/ranking-table";
 import { DecisionCards } from "@/components/comparison/decision-cards";
 import { ScoreChart } from "@/components/comparison/score-chart";
 import { ExportButtons } from "@/components/comparison/export-buttons";
+import { TotalKpiCard } from "@/components/comparison/total-kpi";
+import { ScoreBreakdown } from "@/components/comparison/score-breakdown";
+import { RevisionDialog } from "@/components/comparison/revision-dialog";
+import { RevisionSelector } from "@/components/comparison/revision-selector";
 
-export default async function ComparisonDetailPage(
-  { params }: { params: Promise<{ id: string }> }
-) {
+export default async function ComparisonDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ revision?: string }>;
+}) {
   const { id } = await params;
+  const sp = await searchParams;
+  const requestedRevision = sp.revision ? Number(sp.revision) : null;
   const supabase = await createClient();
 
-  const { data: comparison } = await supabase
-    .from("comparisons")
-    .select("*")
-    .eq("id", id)
-    .single();
-
+  const { data: comparison } = await supabase.from("comparisons").select("*").eq("id", id).single();
   if (!comparison) notFound();
 
-  const [{ data: cFirms }, { data: cItems }, { data: cPrices }] = await Promise.all([
+  const [
+    { data: cFirms },
+    { data: cItems },
+    { data: allBids },
+    { data: cMetrics },
+    { data: manualRows },
+  ] = await Promise.all([
     supabase
       .from("comparison_firms")
       .select("id, firm_id, notes, firms (id, name)")
       .eq("comparison_id", id),
+    supabase.from("comparison_items").select("*").eq("comparison_id", id).order("position"),
+    supabase.from("bid_prices").select("item_id, firm_id, price, revision").eq("comparison_id", id),
     supabase
-      .from("comparison_items")
-      .select("*")
-      .eq("comparison_id", id)
-      .order("position"),
-    supabase.from("bid_prices").select("item_id, firm_id, price").eq("comparison_id", id),
+      .from("comparison_metrics")
+      .select("metric_key, weight")
+      .eq("comparison_id", id),
+    supabase
+      .from("firm_manual_scores")
+      .select("firm_id, metric_key, score")
+      .eq("comparison_id", id),
   ]);
 
-  type CFirmRow = { firm_id: string; firms: { id: string; name: string } | { id: string; name: string }[] | null };
+  type CFirmRow = {
+    firm_id: string;
+    firms: { id: string; name: string } | { id: string; name: string }[] | null;
+  };
   const firms: FirmInput[] = (cFirms ?? []).map((cf) => {
     const row = cf as unknown as CFirmRow;
     const f = Array.isArray(row.firms) ? row.firms[0] : row.firms;
@@ -55,18 +81,53 @@ export default async function ComparisonDetailPage(
     qty: Number(it.qty),
   }));
 
+  // Revisionları topla
+  const revisions = Array.from(new Set((allBids ?? []).map((b) => b.revision))).sort((a, b) => a - b);
+  const latestRevision = revisions.length > 0 ? Math.max(...revisions) : 1;
+  const activeRevision =
+    requestedRevision && revisions.includes(requestedRevision) ? requestedRevision : latestRevision;
+
+  // Aktif revize için fiyat matrisi
   const prices: PriceMatrix = {};
-  for (const bp of cPrices ?? []) {
+  for (const bp of allBids ?? []) {
+    if (bp.revision !== activeRevision) continue;
     if (!prices[bp.item_id]) prices[bp.item_id] = {};
     prices[bp.item_id][bp.firm_id] = bp.price;
   }
 
-  const stats = calcStats(firms, items, prices);
-  const currency = comparison.currency as Currency;
+  // Metrik ağırlıkları
+  const weights: MetricWeights = {};
+  for (const m of cMetrics ?? []) {
+    weights[m.metric_key as MetricKey] = Number(m.weight);
+  }
+  // Eğer hiç metrik yoksa (eski karşılaştırmalar) varsayılan 40/35/25
+  if (Object.keys(weights).length === 0) {
+    weights.scope = 40;
+    weights.deviation = 35;
+    weights.lowest = 25;
+  }
 
-  const decided = comparison.decided_firm_id
-    ? firms.find((f) => f.id === comparison.decided_firm_id)
-    : null;
+  // Manuel skorlar
+  const manualScores: ManualScores = {};
+  for (const m of manualRows ?? []) {
+    if (!manualScores[m.firm_id]) manualScores[m.firm_id] = {};
+    manualScores[m.firm_id][m.metric_key as MetricKey] = Number(m.score);
+  }
+
+  const stats = calcStats(firms, items, prices, manualScores, weights);
+  const currency = comparison.currency as Currency;
+  const decided = comparison.decided_firm_id ? firms.find((f) => f.id === comparison.decided_firm_id) : null;
+
+  const itemsForRevision = (cItems ?? []).map((it) => ({
+    id: it.id,
+    name: it.name,
+    category: it.category,
+    unit: it.unit,
+    qty: Number(it.qty),
+  }));
+
+  const activeMetricKeys = (Object.keys(weights) as MetricKey[]).filter((k) => (weights[k] ?? 0) > 0);
+  const onlyAutoMetrics = activeMetricKeys.every((k) => METRICS[k].kind === "auto");
 
   return (
     <div className="space-y-6">
@@ -82,18 +143,30 @@ export default async function ComparisonDetailPage(
             <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-sm">
               <Badge variant="secondary">{comparison.type}</Badge>
               <span>·</span>
-              <span>{firms.length} firma · {items.length} kalem</span>
-              {comparison.budget && (
-                <>
-                  <span>·</span>
-                  <span>Bütçe {formatCompactCurrency(Number(comparison.budget), currency)}</span>
-                </>
-              )}
+              <span>
+                {firms.length} firma · {items.length} kalem
+              </span>
+              <span>·</span>
+              <span>Hedef Toplam: {formatCompactCurrency(stats.totalTarget, currency)}</span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            {decided && (
-              <Badge className="bg-emerald-600 text-base">Karar: {decided.name}</Badge>
+          <div className="flex flex-wrap items-center gap-2">
+            {decided && <Badge className="bg-emerald-600 text-base">Karar: {decided.name}</Badge>}
+            <RevisionSelector
+              comparisonId={id}
+              current={activeRevision}
+              available={revisions.length > 0 ? revisions : [1]}
+              latest={latestRevision}
+            />
+            {activeRevision === latestRevision && (
+              <RevisionDialog
+                comparisonId={id}
+                currentRevision={latestRevision}
+                firms={firms}
+                items={itemsForRevision}
+                prevPrices={prices}
+                currency={currency}
+              />
             )}
             <ExportButtons
               comparison={{
@@ -103,13 +176,13 @@ export default async function ComparisonDetailPage(
                 budget: comparison.budget !== null ? Number(comparison.budget) : null,
               }}
               firms={firms}
-              items={(cItems ?? []).map((it) => ({
+              items={itemsForRevision.map((it) => ({
                 id: it.id,
                 name: it.name,
                 category: it.category,
                 unit: it.unit,
-                qty: Number(it.qty),
-                target_price: it.target_price,
+                qty: it.qty,
+                target_price: items.find((x) => x.id === it.id)?.target ?? null,
               }))}
               prices={prices}
               stats={stats}
@@ -122,32 +195,83 @@ export default async function ComparisonDetailPage(
         <TabsList>
           <TabsTrigger value="dashboard">Pano</TabsTrigger>
           <TabsTrigger value="ranking">Sıralama</TabsTrigger>
+          <TabsTrigger value="breakdown">Skor Dökümü</TabsTrigger>
           <TabsTrigger value="items">Kalemler</TabsTrigger>
           <TabsTrigger value="decision">Karar Özeti</TabsTrigger>
           <TabsTrigger value="help">Nasıl Çalışır</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-4">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <TotalKpiCard stats={stats} currency={currency} />
+            <Card>
+              <CardHeader>
+                <CardTitle>Skor Dağılımı</CardTitle>
+                <CardDescription>
+                  Aktif metrikler:{" "}
+                  {activeMetricKeys.map((k) => `${METRICS[k].label} %${weights[k]}`).join(" · ")}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScoreChart firms={stats.firms} />
+              </CardContent>
+            </Card>
+          </div>
           <DecisionCards stats={stats} currency={currency} />
-          <Card>
-            <CardHeader>
-              <CardTitle>Skor Dağılımı</CardTitle>
-              <CardDescription>40% kapsam + 35% sapma + 25% en düşük teklif</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ScoreChart firms={stats.firms} />
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="ranking">
           <RankingTable firms={stats.firms} currency={currency} recommendedFirmId={stats.recommendedFirmId} />
         </TabsContent>
 
+        <TabsContent value="breakdown" className="space-y-4">
+          <ScoreBreakdown stats={stats} />
+          {!onlyAutoMetrics && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Manuel Skor Detayları</CardTitle>
+                <CardDescription>
+                  Her firmanın manuel metriklerden aldığı puan (0-100)
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="overflow-x-auto">
+                <table className="w-full min-w-[500px] text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="p-2 text-left font-medium">Firma</th>
+                      {activeMetricKeys
+                        .filter((k) => METRICS[k].kind === "manual")
+                        .map((k) => (
+                          <th key={k} className="p-2 text-right font-medium">
+                            {METRICS[k].label}
+                          </th>
+                        ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {stats.firms.map((f) => (
+                      <tr key={f.firmId} className="border-b">
+                        <td className="p-2 font-medium">{f.firmName}</td>
+                        {activeMetricKeys
+                          .filter((k) => METRICS[k].kind === "manual")
+                          .map((k) => (
+                            <td key={k} className="p-2 text-right">
+                              {f.metricScores[k] > 0 ? `${Math.round(f.metricScores[k] / 10)}/10` : "—"}
+                            </td>
+                          ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
         <TabsContent value="items" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Kalemler ve Fiyatlar</CardTitle>
+              <CardTitle>Kalemler ve Fiyatlar (Revize {activeRevision})</CardTitle>
               <CardDescription>Her kalem için firmaların teklif fiyatları</CardDescription>
             </CardHeader>
             <CardContent className="overflow-x-auto">
@@ -208,12 +332,14 @@ export default async function ComparisonDetailPage(
             <CardHeader>
               <CardTitle>Karar Özeti</CardTitle>
               <CardDescription>
-                Skor ağırlıkları: %40 kapsam + %35 hedef sapma + %25 en düşük teklif sayısı
+                Bu karşılaştırmadaki aktif metrikler:{" "}
+                {activeMetricKeys.map((k) => `${METRICS[k].label} %${weights[k]}`).join(" · ")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="text-muted-foreground list-inside list-disc space-y-2 text-sm">
-                <li>Medyan toplam: {stats.median !== null ? formatCompactCurrency(stats.median, currency) : "—"}</li>
+                <li>Hedef toplam: <span className="text-foreground font-medium">{formatCompactCurrency(stats.totalTarget, currency)}</span></li>
+                <li>Medyan firma toplamı: {stats.median !== null ? formatCompactCurrency(stats.median, currency) : "—"}</li>
                 <li>
                   Önerilen firma:{" "}
                   <span className="text-foreground font-medium">
@@ -227,7 +353,13 @@ export default async function ComparisonDetailPage(
                   </span>
                 </li>
                 <li>
-                  Tam kapsamlı (her kaleme teklif veren) firma sayısı:{" "}
+                  Anomali (outlier) firma sayısı:{" "}
+                  <span className="text-foreground font-medium">
+                    {stats.firms.filter((f) => f.isOutlier).length}
+                  </span>
+                </li>
+                <li>
+                  Tam kapsamlı firma sayısı:{" "}
                   <span className="text-foreground font-medium">
                     {stats.firms.filter((f) => f.scope === 1).length}
                   </span>
@@ -255,23 +387,31 @@ export default async function ComparisonDetailPage(
             </CardHeader>
             <CardContent className="text-muted-foreground space-y-3 text-sm leading-relaxed">
               <p>
-                Her firma 100 üzerinden bir <strong>skor</strong> alır. Skor üç bileşenden oluşur:
+                Her firma 100 üzerinden bir <strong>skor</strong> alır. Skor, karşılaştırma türüne göre seçilen
+                <strong> aktif metriklerin ağırlıklı toplamıdır</strong>.
               </p>
+              <p className="text-foreground">Bu karşılaştırmadaki aktif metrikler:</p>
               <ul className="list-inside list-disc space-y-1">
-                <li>
-                  <strong>Kapsam (40%):</strong> Firmanın kaç kaleme fiyat verdiği. Tam kapsam = 40 puan.
-                </li>
-                <li>
-                  <strong>Hedef Sapma (35%):</strong> Firmanın toplam teklifinin medyandan ne kadar saptığı.
-                  Sapma 0 = 35 puan; sapma %100 = 0 puan.
-                </li>
-                <li>
-                  <strong>En Düşük Teklif (25%):</strong> Firmanın kalem bazında en düşük teklifi verdiği oran.
-                  Tüm kalemlerde en düşük = 25 puan.
-                </li>
+                {activeMetricKeys.map((k) => (
+                  <li key={k}>
+                    <strong>{METRICS[k].label} (%{weights[k]}):</strong> {METRICS[k].description}
+                    <span className="ml-1 text-xs">
+                      [{METRICS[k].kind === "auto" ? "Otomatik" : "Manuel"}]
+                    </span>
+                  </li>
+                ))}
               </ul>
               <p>
+                <strong>Anomali (outlier) tespiti:</strong> IQR (Interquartile Range) yöntemi ile rakiplerinden çok
+                kopuk teklif verenler &quot;Anomali&quot; etiketiyle işaretlenir. Q1 - 1.5×IQR altı veya Q3 + 1.5×IQR
+                üstü değerler outlier sayılır (en az 4 firma gerekli).
+              </p>
+              <p>
                 <strong>Renk kodları:</strong> Yeşil ≥ 70 (Güçlü Aday), Sarı 50–69 (Orta), Kırmızı &lt; 50 (Riskli).
+              </p>
+              <p>
+                <strong>Revize (turlar):</strong> Firmaların revize fiyatları &quot;Revize Kaydet&quot; butonu ile yeni
+                bir tur olarak kaydedilir; geçmiş revizeler dropdown'dan görüntülenebilir.
               </p>
             </CardContent>
           </Card>

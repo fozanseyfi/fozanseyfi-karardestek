@@ -13,7 +13,7 @@ import {
 import type { FirmStats } from "@/lib/scoring";
 
 export function ScoreChart({ firms }: { firms: FirmStats[] }) {
-  const data = firms.map((f) => ({ name: f.firmName, skor: f.score, recommendation: f.recommendation }));
+  const data = firms.map((f) => ({ name: f.firmName, skor: f.totalScore, recommendation: f.recommendation }));
   const colorOf = (rec: FirmStats["recommendation"]) =>
     rec === "good"
       ? "#10b981"

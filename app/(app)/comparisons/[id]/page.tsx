@@ -25,6 +25,8 @@ import { TotalKpiCard } from "@/components/comparison/total-kpi";
 import { ScoreBreakdown } from "@/components/comparison/score-breakdown";
 import { RevisionDialog } from "@/components/comparison/revision-dialog";
 import { RevisionSelector } from "@/components/comparison/revision-selector";
+import { EditMetricsDialog } from "@/components/comparison/edit-metrics-dialog";
+import { EditManualScoresDialog } from "@/components/comparison/edit-manual-scores-dialog";
 
 export default async function ComparisonDetailPage({
   params,
@@ -60,7 +62,7 @@ export default async function ComparisonDetailPage({
       .eq("comparison_id", id),
     supabase
       .from("firm_manual_scores")
-      .select("firm_id, metric_key, score")
+      .select("firm_id, metric_key, score, notes")
       .eq("comparison_id", id),
   ]);
 
@@ -118,6 +120,30 @@ export default async function ComparisonDetailPage({
   const currency = comparison.currency as Currency;
   const decided = comparison.decided_firm_id ? firms.find((f) => f.id === comparison.decided_firm_id) : null;
 
+  // Proje bilgisi (varsa)
+  let projectName: string | null = null;
+  if (comparison.project_id) {
+    const { data: proj } = await supabase
+      .from("projects")
+      .select("name")
+      .eq("id", comparison.project_id)
+      .single();
+    projectName = proj?.name ?? null;
+  }
+
+  // Manuel skor edit için detaylı struct (notes ile)
+  const manualScoresDetailed: Record<string, Partial<Record<MetricKey, { score: number; notes: string | null }>>> = {};
+  for (const m of manualRows ?? []) {
+    if (!manualScoresDetailed[m.firm_id]) manualScoresDetailed[m.firm_id] = {};
+    manualScoresDetailed[m.firm_id][m.metric_key as MetricKey] = {
+      score: Number(m.score),
+      notes: m.notes ?? null,
+    };
+  }
+  const manualMetricKeys = (Object.keys(weights) as MetricKey[]).filter(
+    (k) => METRICS[k].kind === "manual" && (weights[k] ?? 0) > 0
+  );
+
   const itemsForRevision = (cItems ?? []).map((it) => ({
     id: it.id,
     name: it.name,
@@ -142,6 +168,14 @@ export default async function ComparisonDetailPage({
             <h1 className="text-2xl font-semibold tracking-tight">{comparison.name}</h1>
             <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-sm">
               <Badge variant="secondary">{comparison.type}</Badge>
+              {projectName && (
+                <>
+                  <span>·</span>
+                  <Link href={`/projects/${comparison.project_id}`} className="hover:underline">
+                    📁 {projectName}
+                  </Link>
+                </>
+              )}
               <span>·</span>
               <span>
                 {firms.length} firma · {items.length} kalem
@@ -152,6 +186,13 @@ export default async function ComparisonDetailPage({
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {decided && <Badge className="bg-emerald-600 text-base">Karar: {decided.name}</Badge>}
+            <EditMetricsDialog comparisonId={id} initialWeights={weights} />
+            <EditManualScoresDialog
+              comparisonId={id}
+              firms={firms}
+              metrics={manualMetricKeys}
+              initialScores={manualScoresDetailed}
+            />
             <RevisionSelector
               comparisonId={id}
               current={activeRevision}

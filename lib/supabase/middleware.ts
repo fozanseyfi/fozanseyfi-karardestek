@@ -30,6 +30,7 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isAuthPath =
     path.startsWith("/login") ||
+    path.startsWith("/signup") ||
     path.startsWith("/forgot-password") ||
     path.startsWith("/invite") ||
     path.startsWith("/auth/callback");

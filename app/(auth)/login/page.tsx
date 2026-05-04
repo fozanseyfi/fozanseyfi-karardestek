@@ -115,6 +115,12 @@ function LoginForm() {
               Şifremi unuttum
             </Link>
           </div>
+          <div className="border-t pt-4 text-center text-sm">
+            <span className="text-muted-foreground">Hesabın yok mu? </span>
+            <Link href="/signup" className="text-primary font-medium hover:underline">
+              Hemen kayıt ol
+            </Link>
+          </div>
         </form>
       </CardContent>
     </Card>

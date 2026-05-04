@@ -17,8 +17,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .select("*", { count: "exact", head: true })
     .is("read_at", null);
 
-  // onboarding_completed eski profile'larda olmayabilir — null/false ikisi de "tamamlanmadı" sayılır
-  const showOnboarding = !(profile as Record<string, unknown>).onboarding_completed;
+  const showOnboarding = !profile.onboarding_completed;
 
   return (
     <TooltipProvider>

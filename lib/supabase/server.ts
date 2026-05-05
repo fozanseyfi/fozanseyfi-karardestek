@@ -26,14 +26,15 @@ export async function createClient() {
 }
 
 export async function createServiceClient() {
-  const cookieStore = await cookies();
+  // ÖNEMLİ: User cookie'sini geçirme — geçersek Supabase user JWT'yi kullanır ve RLS uygulanır.
+  // Boş cookies => apikey olarak service_role kullanılır => tam RLS bypass.
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll();
+          return [];
         },
         setAll() {},
       },

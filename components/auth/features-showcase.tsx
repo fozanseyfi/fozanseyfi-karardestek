@@ -83,19 +83,38 @@ export function FeaturesShowcase() {
         {active === "roles" && <RolesTab />}
       </div>
 
-      {/* Veri güvenliği — kompakt */}
-      <div className="mx-auto flex max-w-3xl items-start gap-3 rounded-xl border border-emerald-200/60 bg-emerald-50/40 p-4">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
-          <Shield className="size-4" />
-        </div>
-        <div className="min-w-0">
-          <div className="text-emerald-900 text-xs font-semibold tracking-wide uppercase">
-            Veri Gizliliği
+      {/* Veri güvenliği */}
+      <div className="rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-white p-6 md:p-8">
+        <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-center">
+          <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md">
+            <Shield className="size-7" />
           </div>
-          <p className="mt-1 text-sm leading-relaxed text-slate-700">
-            Verileriniz <strong>RLS</strong> ile şifrelenir, hesaplar arası tam izole edilir; üçüncü taraf izleme
-            yoktur. <strong>Geliştirici dahil hiç kimse</strong> içeriğinizi göremez.
-          </p>
+          <div>
+            <div className="text-emerald-900 text-xs font-semibold tracking-wide uppercase">
+              Veri Gizliliği & Sorumluluk
+            </div>
+            <h3 className="mt-1 text-lg font-semibold tracking-tight">
+              Verileriniz size aittir. Geliştirici dahil hiç kimse görüntüleyemez.
+            </h3>
+            <ul className="mt-3 grid gap-1.5 text-sm text-slate-700 md:grid-cols-2">
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                <span>Satır seviyesinde güvenlik (RLS) ile şifrelenir</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                <span>Hesaplar arası tam izolasyon</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                <span>Üçüncü taraf izleme veya analitik yok</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" />
+                <span>Yalnızca sizin davet ettikleriniz erişebilir</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>

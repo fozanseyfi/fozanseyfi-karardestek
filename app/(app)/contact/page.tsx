@@ -8,7 +8,6 @@ import {
   Send,
   Sparkles,
   Globe,
-  Clock,
   ShieldCheck,
   Info,
   Bug,
@@ -116,14 +115,8 @@ export default function ContactPage() {
           </h1>
           <p className="text-muted-foreground mt-3 text-base leading-relaxed md:text-lg">
             Hata bildirimi, özellik önerisi veya genel sorularınız için aşağıdaki formdan veya doğrudan
-            iletişim kanallarından bize ulaşabilirsiniz.
+            iletişim kanallarından bana ulaşabilirsiniz.
           </p>
-          <div className="text-muted-foreground mt-4 inline-flex items-center gap-2 text-xs">
-            <Clock className="size-3.5" />
-            <span>
-              Ortalama yanıt süresi: <strong className="text-foreground">24–48 saat</strong>
-            </span>
-          </div>
         </div>
       </div>
 

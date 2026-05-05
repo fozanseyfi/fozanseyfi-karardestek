@@ -16,7 +16,7 @@ export function AuthMissionCard() {
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-sm font-semibold text-emerald-900">
-              Kolektif Bilgi Paylaşımı Amacıyla Geliştirilmiş Ücretsiz Platform
+              Bilgi Paylaşımı Amacıyla Geliştirilmiş Ücretsiz Platform
             </span>
           </div>
           <p className="text-xs leading-relaxed text-emerald-900/80 mt-1">

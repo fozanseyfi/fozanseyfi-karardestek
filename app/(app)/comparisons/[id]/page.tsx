@@ -33,6 +33,7 @@ import { DecisionSelector } from "@/components/comparison/decision-selector";
 import { ScoreBreakdownClient, FirmsTabClient, type FirmInfo, type ManualScoreRow } from "@/components/comparison/firms-tab";
 import { ItemsTable } from "@/components/comparison/items-table";
 import { DeleteComparisonButton } from "@/components/comparison/delete-comparison-button";
+import { getCurrentProfile } from "@/lib/supabase/get-profile";
 
 export default async function ComparisonDetailPage({
   params,
@@ -142,6 +143,11 @@ export default async function ComparisonDetailPage({
   const currency = comparison.currency as Currency;
   const decided = comparison.decided_firm_id ? firms.find((f) => f.id === comparison.decided_firm_id) : null;
 
+  // Yetki kontrolü — viewer edit/delete butonlarını görmesin
+  const me = await getCurrentProfile();
+  const canEdit = me?.role !== "viewer" && (me?.role === "admin" || comparison.owner_id === me?.id);
+  const canDelete = me?.role !== "viewer" && (me?.role === "admin" || comparison.owner_id === me?.id);
+
   // Proje bilgisi (varsa)
   let projectName: string | null = null;
   if (comparison.project_id) {
@@ -214,26 +220,30 @@ export default async function ComparisonDetailPage({
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <StatusButton
-              comparisonId={id}
-              current={comparison.status as "draft" | "in_review" | "decided" | "archived"}
-              hasDecidedFirm={comparison.decided_firm_id !== null}
-            />
+            {canEdit && (
+              <StatusButton
+                comparisonId={id}
+                current={comparison.status as "draft" | "in_review" | "decided" | "archived"}
+                hasDecidedFirm={comparison.decided_firm_id !== null}
+              />
+            )}
             {decided && <Badge className="bg-emerald-600 text-base">Karar: {decided.name}</Badge>}
-            <EditMetricsDialog comparisonId={id} initialWeights={weights} />
-            <EditManualScoresDialog
-              comparisonId={id}
-              firms={firms}
-              metrics={manualMetricKeys}
-              initialScores={manualScoresDetailed}
-            />
+            {canEdit && <EditMetricsDialog comparisonId={id} initialWeights={weights} />}
+            {canEdit && (
+              <EditManualScoresDialog
+                comparisonId={id}
+                firms={firms}
+                metrics={manualMetricKeys}
+                initialScores={manualScoresDetailed}
+              />
+            )}
             <RevisionSelector
               comparisonId={id}
               current={activeRevision}
               available={revisions.length > 0 ? revisions : [1]}
               latest={latestRevision}
             />
-            {activeRevision === latestRevision && (
+            {canEdit && activeRevision === latestRevision && (
               <RevisionDialog
                 comparisonId={id}
                 currentRevision={latestRevision}
@@ -271,7 +281,7 @@ export default async function ComparisonDetailPage({
               }))}
               projectName={projectName}
             />
-            <DeleteComparisonButton comparisonId={id} comparisonName={comparison.name} />
+            {canDelete && <DeleteComparisonButton comparisonId={id} comparisonName={comparison.name} />}
           </div>
         </div>
       </div>
@@ -438,11 +448,13 @@ export default async function ComparisonDetailPage({
             title="Karar Özeti — Yönetici Bilgisi"
             body="Karar verirken bakacağın anahtar göstergeler. Aşağıdan firma seçip 'Kararı Onayla' ile karşılaştırmayı kapat, durum 'Karar Verildi' olur."
           />
-          <DecisionSelector
-            comparisonId={id}
-            firms={firms}
-            currentDecidedFirmId={comparison.decided_firm_id}
-          />
+          {canEdit && (
+            <DecisionSelector
+              comparisonId={id}
+              firms={firms}
+              currentDecidedFirmId={comparison.decided_firm_id}
+            />
+          )}
           <DecisionCards stats={stats} currency={currency} />
           <Card>
             <CardHeader>

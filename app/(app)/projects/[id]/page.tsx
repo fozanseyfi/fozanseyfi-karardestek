@@ -6,9 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/supabase/get-profile";
+import { canCreateComparison } from "@/lib/permissions";
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const profile = await getCurrentProfile();
+  const canCreate = canCreateComparison(profile);
   const supabase = await createClient();
   const { data: project } = await supabase.from("projects").select("*").eq("id", id).single();
   if (!project) notFound();
@@ -34,11 +38,13 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             <p className="text-muted-foreground mt-1 text-sm">{project.description}</p>
           )}
         </div>
-        <Button asChild>
-          <Link href={`/comparisons/new`}>
-            <Plus className="mr-1 size-4" /> Bu Projeye Karşılaştırma Ekle
-          </Link>
-        </Button>
+        {canCreate && (
+          <Button asChild>
+            <Link href={`/comparisons/new`}>
+              <Plus className="mr-1 size-4" /> Bu Projeye Karşılaştırma Ekle
+            </Link>
+          </Button>
+        )}
       </div>
 
       <Card>

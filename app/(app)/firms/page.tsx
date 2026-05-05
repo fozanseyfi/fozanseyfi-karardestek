@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/supabase/get-profile";
+import { canCreateComparison } from "@/lib/permissions";
 
 type FirmRow = {
   id: string;
@@ -16,6 +18,8 @@ type FirmRow = {
 };
 
 export default async function FirmsPage() {
+  const profile = await getCurrentProfile();
+  const canCreate = canCreateComparison(profile);
   const supabase = await createClient();
   const { data: firms } = await supabase
     .from("firms")
@@ -48,11 +52,13 @@ export default async function FirmsPage() {
             Merkezi firma havuzu. Bir firma birden fazla karşılaştırma ve projede kullanılabilir.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/firms/new">
-            <Plus className="mr-1 size-4" /> Yeni Firma
-          </Link>
-        </Button>
+        {canCreate && (
+          <Button asChild>
+            <Link href="/firms/new">
+              <Plus className="mr-1 size-4" /> Yeni Firma
+            </Link>
+          </Button>
+        )}
       </div>
 
       {rows.length > 0 ? (

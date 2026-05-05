@@ -8,8 +8,12 @@ import { formatCompactCurrency } from "@/lib/currency";
 import type { Currency } from "@/lib/constants";
 import { ExcelImportDialog } from "@/components/comparison/excel-import-dialog";
 import { StatusBadge } from "@/components/comparison/status-button";
+import { getCurrentProfile } from "@/lib/supabase/get-profile";
+import { canCreateComparison } from "@/lib/permissions";
 
 export default async function ComparisonsListPage() {
+  const profile = await getCurrentProfile();
+  const canCreate = canCreateComparison(profile);
   const supabase = await createClient();
   const { data: comparisons } = await supabase
     .from("comparisons")
@@ -23,14 +27,16 @@ export default async function ComparisonsListPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Karşılaştırmalar</h1>
           <p className="text-muted-foreground mt-1 text-sm">Tüm teklif karşılaştırmaları.</p>
         </div>
-        <div className="flex gap-2">
-          <ExcelImportDialog />
-          <Button asChild>
-            <Link href="/comparisons/new">
-              <Plus className="mr-1 size-4" /> Yeni
-            </Link>
-          </Button>
-        </div>
+        {canCreate && (
+          <div className="flex gap-2">
+            <ExcelImportDialog />
+            <Button asChild>
+              <Link href="/comparisons/new">
+                <Plus className="mr-1 size-4" /> Yeni
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
 
       {comparisons && comparisons.length > 0 ? (

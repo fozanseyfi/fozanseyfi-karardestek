@@ -93,16 +93,22 @@ export default async function DashboardPage() {
             değerlendir.
           </p>
           <div className="mt-5 flex flex-wrap gap-2">
-            <Button asChild size="lg" variant="secondary" className="font-semibold">
-              <Link href="/comparisons/new">
-                <Plus className="mr-1 size-4" /> Yeni Karşılaştırma
-              </Link>
-            </Button>
+            {profile?.role !== "viewer" && (
+              <Button asChild size="lg" variant="secondary" className="font-semibold">
+                <Link href="/comparisons/new">
+                  <Plus className="mr-1 size-4" /> Yeni Karşılaştırma
+                </Link>
+              </Button>
+            )}
             <Button
               asChild
               size="lg"
-              variant="outline"
-              className="border-white/30 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white"
+              variant={profile?.role === "viewer" ? "secondary" : "outline"}
+              className={
+                profile?.role === "viewer"
+                  ? "font-semibold"
+                  : "border-white/30 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white"
+              }
             >
               <Link href="/templates">
                 <Sparkles className="mr-1 size-4" /> Şablonları Gör
@@ -158,14 +164,27 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Hızlı İşlemler</CardTitle>
-            <CardDescription>En sık kullanılan aksiyonlar</CardDescription>
+            <CardTitle>{profile?.role === "viewer" ? "Hızlı Erişim" : "Hızlı İşlemler"}</CardTitle>
+            <CardDescription>
+              {profile?.role === "viewer" ? "Sık baktığın sayfalar" : "En sık kullanılan aksiyonlar"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <QuickAction icon={Plus} label="Yeni Karşılaştırma" href="/comparisons/new" tone="blue" />
-            <QuickAction icon={Sparkles} label="Şablondan Başla" href="/templates" tone="amber" />
-            <QuickAction icon={Building2} label="Yeni Firma" href="/firms/new" tone="emerald" />
-            <QuickAction icon={FolderKanban} label="Yeni Proje" href="/projects/new" tone="violet" />
+            {profile?.role !== "viewer" ? (
+              <>
+                <QuickAction icon={Plus} label="Yeni Karşılaştırma" href="/comparisons/new" tone="blue" />
+                <QuickAction icon={Sparkles} label="Şablondan Başla" href="/templates" tone="amber" />
+                <QuickAction icon={Building2} label="Yeni Firma" href="/firms/new" tone="emerald" />
+                <QuickAction icon={FolderKanban} label="Yeni Proje" href="/projects/new" tone="violet" />
+              </>
+            ) : (
+              <>
+                <QuickAction icon={GitCompareArrows} label="Karşılaştırmalar" href="/comparisons" tone="blue" />
+                <QuickAction icon={Sparkles} label="Şablonlar" href="/templates" tone="amber" />
+                <QuickAction icon={Building2} label="Firmalar" href="/firms" tone="emerald" />
+                <QuickAction icon={FolderKanban} label="Projeler" href="/projects" tone="violet" />
+              </>
+            )}
           </CardContent>
         </Card>
       </div>

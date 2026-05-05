@@ -9,9 +9,13 @@ import { createClient } from "@/lib/supabase/server";
 import { formatCompactCurrency } from "@/lib/currency";
 import { METRICS, scoreLabel, hundredToTen, type MetricKey } from "@/lib/metrics";
 import type { Currency } from "@/lib/constants";
+import { getCurrentProfile } from "@/lib/supabase/get-profile";
+import { canCreateComparison } from "@/lib/permissions";
 
 export default async function FirmDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const profile = await getCurrentProfile();
+  const canEdit = canCreateComparison(profile);
   const supabase = await createClient();
   const { data: firm } = await supabase.from("firms").select("*").eq("id", id).single();
   if (!firm) notFound();
@@ -78,9 +82,11 @@ export default async function FirmDetailPage({ params }: { params: Promise<{ id:
             <ChevronLeft className="mr-1 size-4" /> Firmalar
           </Link>
         </Button>
-        <Button asChild variant="outline" size="sm">
-          <Link href={`/firms/${id}/edit`}>Düzenle</Link>
-        </Button>
+        {canEdit && (
+          <Button asChild variant="outline" size="sm">
+            <Link href={`/firms/${id}/edit`}>Düzenle</Link>
+          </Button>
+        )}
       </div>
 
       <Card>

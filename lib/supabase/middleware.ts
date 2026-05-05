@@ -32,6 +32,7 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/login") ||
     path.startsWith("/signup") ||
     path.startsWith("/forgot-password") ||
+    path.startsWith("/reset-password") ||
     path.startsWith("/invite") ||
     path.startsWith("/auth/callback");
   const isPublicAsset =
@@ -54,7 +55,8 @@ export async function updateSession(request: NextRequest) {
     user &&
     isAuthPath &&
     !path.startsWith("/auth/callback") &&
-    !path.startsWith("/invite")
+    !path.startsWith("/invite") &&
+    !path.startsWith("/reset-password")
   ) {
     const url = request.nextUrl.clone();
     url.pathname = "/";

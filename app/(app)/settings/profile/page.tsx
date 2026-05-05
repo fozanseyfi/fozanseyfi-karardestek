@@ -39,6 +39,7 @@ export default async function ProfileSettingsPage() {
         initialFullName={profile?.full_name ?? ""}
         initialOrgName={org?.name ?? ""}
         isAdmin={isAdmin(profile)}
+        email={profile?.email ?? ""}
       />
     </div>
   );

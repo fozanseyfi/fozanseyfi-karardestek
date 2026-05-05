@@ -2,11 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Building2, User, Sparkles, AlertTriangle } from "lucide-react";
+import { Save, Building2, User, Sparkles, AlertTriangle, Lock, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/client";
 import {
   Dialog,
   DialogContent,
@@ -25,16 +26,61 @@ export function ProfileForm({
   initialFullName,
   initialOrgName,
   isAdmin,
+  email,
 }: {
   initialFullName: string;
   initialOrgName: string;
   isAdmin: boolean;
+  email: string;
 }) {
   const router = useRouter();
   const [fullName, setFullName] = useState(initialFullName);
   const [orgName, setOrgName] = useState(initialOrgName);
   const [pending, startTransition] = useTransition();
   const [convertOpen, setConvertOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newPassword2, setNewPassword2] = useState("");
+  const [pwdSaving, setPwdSaving] = useState(false);
+
+  async function changePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPassword.length < 8) {
+      toast.error("Yeni şifre en az 8 karakter olmalı.");
+      return;
+    }
+    if (newPassword !== newPassword2) {
+      toast.error("Yeni şifreler eşleşmiyor.");
+      return;
+    }
+    if (currentPassword === newPassword) {
+      toast.error("Yeni şifre eskisinden farklı olmalı.");
+      return;
+    }
+    setPwdSaving(true);
+    try {
+      const supabase = createClient();
+      // Mevcut şifreyi doğrula (re-authenticate)
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email,
+        password: currentPassword,
+      });
+      if (signInErr) {
+        toast.error("Mevcut şifre yanlış.");
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      toast.success("Şifreniz güncellendi.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setNewPassword2("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Şifre güncellenemedi.");
+    } finally {
+      setPwdSaving(false);
+    }
+  }
 
   function doConvert() {
     startTransition(async () => {
@@ -130,6 +176,76 @@ export function ProfileForm({
             <Button type="submit" disabled={pending || !isAdmin}>
               <Save className="mr-1 size-4" />
               {pending ? "Kaydediliyor..." : "Kaydet"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <KeyRound className="size-4" /> Şifre Değiştir
+          </CardTitle>
+          <CardDescription>
+            Mevcut şifrenizi onaylayarak yeni bir şifre belirleyin. Şifrenizi unuttuysanız çıkış yapıp{" "}
+            <strong>&quot;Şifremi unuttum&quot;</strong> bağlantısını kullanın.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={changePassword} className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="current-pwd">Mevcut Şifre</Label>
+              <div className="relative">
+                <Lock className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+                <Input
+                  id="current-pwd"
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="h-11 pl-10"
+                />
+              </div>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="new-pwd">Yeni Şifre</Label>
+                <div className="relative">
+                  <Lock className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+                  <Input
+                    id="new-pwd"
+                    type="password"
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="En az 8 karakter"
+                    className="h-11 pl-10"
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="new-pwd2">Yeni Şifre (tekrar)</Label>
+                <div className="relative">
+                  <Lock className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+                  <Input
+                    id="new-pwd2"
+                    type="password"
+                    required
+                    minLength={8}
+                    autoComplete="new-password"
+                    value={newPassword2}
+                    onChange={(e) => setNewPassword2(e.target.value)}
+                    className="h-11 pl-10"
+                  />
+                </div>
+              </div>
+            </div>
+            <Button type="submit" disabled={pwdSaving}>
+              <Save className="mr-1 size-4" />
+              {pwdSaving ? "Güncelleniyor..." : "Şifreyi Güncelle"}
             </Button>
           </form>
         </CardContent>

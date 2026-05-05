@@ -33,7 +33,7 @@ export default function ForgotPasswordPage() {
     const supabase = createClient();
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${baseUrl}/auth/callback?next=/settings/password`,
+      redirectTo: `${baseUrl}/auth/callback?next=/reset-password`,
     });
     setLoading(false);
     if (error) toast.error(error.message);

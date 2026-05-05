@@ -1,4 +1,4 @@
-import { Globe, Mail } from "lucide-react";
+import { Globe, Mail, Sparkles, ShieldCheck, Heart } from "lucide-react";
 
 function LinkedinIcon({ className }: { className?: string }) {
   return (
@@ -9,50 +9,113 @@ function LinkedinIcon({ className }: { className?: string }) {
 }
 
 export function SiteFooter() {
+  const year = new Date().getFullYear();
+
   return (
-    <footer className="mt-auto border-t bg-background">
-      <div className="text-muted-foreground mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-4 py-6 text-xs md:flex-row md:px-6">
-        <div className="text-center md:text-left">
-          <div>
-            <strong className="text-foreground">EPC Karar Destek Platformu</strong> · Tasarım & Geliştirme:{" "}
-            <a
-              href="https://www.linkedin.com/in/fozanseyfi/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground font-medium hover:underline"
-            >
-              Furkan Ozan Seyfi
-            </a>{" "}
-            <span className="text-muted-foreground">— Elektrik Mühendisi</span>
+    <footer className="mt-auto border-t bg-gradient-to-b from-slate-50 to-white">
+      <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-12">
+        <div className="grid gap-8 md:grid-cols-3">
+          {/* Sütun 1: Brand */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="from-primary to-primary/80 flex size-9 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm">
+                <Sparkles className="text-primary-foreground size-4" />
+              </div>
+              <div className="leading-tight">
+                <div className="text-sm font-semibold tracking-tight">EPC Karar Destek</div>
+                <div className="text-muted-foreground text-[10px]">Karar Destek Platformu</div>
+              </div>
+            </div>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              GES &amp; RES projelerinde taşeron, malzeme ve hizmet tekliflerini akıllı skor algoritmasıyla
+              değerlendiren, ekip tabanlı karar destek platformu.
+            </p>
+            <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/70 bg-emerald-50 px-2.5 py-0.5 text-[10px] font-medium text-emerald-800">
+              <ShieldCheck className="size-3" />
+              Bağımsız · Ücretsiz · Reklamsız
+            </div>
+          </div>
+
+          {/* Sütun 2: Geliştirici */}
+          <div className="space-y-3">
+            <div className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+              Tasarım & Geliştirme
+            </div>
+            <div>
+              <a
+                href="https://www.linkedin.com/in/fozanseyfi/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-foreground hover:text-primary text-sm font-semibold transition-colors"
+              >
+                Furkan Ozan Seyfi
+              </a>
+              <div className="text-muted-foreground text-xs">Elektrik Mühendisi</div>
+            </div>
+            <p className="text-muted-foreground text-xs leading-relaxed">
+              Sahadaki ihtiyaçları ve yönetimsel zorlukları bizzat deneyimlemiş bir mühendis olarak,
+              hiçbir ticari beklenti gütmeksizin sektör paydaşlarına sunulmuştur.
+            </p>
+          </div>
+
+          {/* Sütun 3: İletişim */}
+          <div className="space-y-3">
+            <div className="text-[10px] font-semibold tracking-wider text-slate-500 uppercase">
+              İletişim & Bağlantılar
+            </div>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <a
+                  href="https://www.linkedin.com/in/fozanseyfi/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 transition-colors"
+                >
+                  <span className="bg-muted/50 group-hover:bg-blue-50 flex size-7 items-center justify-center rounded-md">
+                    <LinkedinIcon className="size-3.5" />
+                  </span>
+                  LinkedIn
+                </a>
+              </li>
+              <li>
+                <a
+                  href="https://fozanseyfi.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 transition-colors"
+                >
+                  <span className="bg-muted/50 flex size-7 items-center justify-center rounded-md">
+                    <Globe className="size-3.5" />
+                  </span>
+                  fozanseyfi.com
+                </a>
+              </li>
+              <li>
+                <a
+                  href="mailto:fozanseyfi@gmail.com"
+                  className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 transition-colors"
+                >
+                  <span className="bg-muted/50 flex size-7 items-center justify-center rounded-md">
+                    <Mail className="size-3.5" />
+                  </span>
+                  fozanseyfi@gmail.com
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <a
-            href="https://www.linkedin.com/in/fozanseyfi/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-foreground inline-flex items-center gap-1 hover:underline"
-          >
-            <LinkedinIcon className="size-3" /> LinkedIn
-          </a>
-          <span className="text-muted-foreground/50">·</span>
-          <a
-            href="https://fozanseyfi.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-foreground inline-flex items-center gap-1 hover:underline"
-          >
-            <Globe className="size-3" /> fozanseyfi.com
-          </a>
-          <span className="text-muted-foreground/50">·</span>
-          <a
-            href="mailto:fozanseyfi@gmail.com"
-            className="hover:text-foreground inline-flex items-center gap-1 hover:underline"
-          >
-            <Mail className="size-3" /> fozanseyfi@gmail.com
-          </a>
+
+        {/* Alt bar */}
+        <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t pt-6 text-[11px] md:flex-row">
+          <div className="text-muted-foreground text-center md:text-left">
+            © {year} <strong className="text-foreground">EPC Karar Destek Platformu</strong> · Tüm hakları saklıdır
+          </div>
+          <div className="text-muted-foreground inline-flex items-center gap-1">
+            <Heart className="size-3 text-rose-500" /> ile sektör için geliştirildi
+          </div>
         </div>
       </div>
     </footer>
   );
 }
+

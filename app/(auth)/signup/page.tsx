@@ -9,8 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { AuthHeader, AuthMarketing } from "@/components/auth/auth-landing";
+import { AuthHeader } from "@/components/auth/auth-landing";
 import { AuthMissionCard } from "@/components/auth/auth-mission-card";
+import { FeaturesShowcase } from "@/components/auth/features-showcase";
+import { RoleExplainer } from "@/components/auth/role-explainer";
 import { SiteFooter } from "@/components/layout/site-footer";
 
 export default function SignupPage() {
@@ -47,7 +49,8 @@ export default function SignupPage() {
         </div>
       </section>
 
-      <AuthMarketing />
+      <FeaturesShowcase />
+      <RoleExplainer />
       <SiteFooter />
     </div>
   );

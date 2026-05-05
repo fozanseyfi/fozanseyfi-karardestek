@@ -10,28 +10,44 @@ export default async function AdminUsersPage() {
   if (!isAdmin(me)) redirect("/");
 
   const supabase = await createClient();
-  // Admin'in org'undaki tüm üyeler (organization_members üzerinden)
-  // Kullanıcının aktif org'u burası olmasa bile listede görünür.
-  const { data: members } = await supabase
-    .from("organization_members")
-    .select("user_id, role, profiles!inner(id, email, full_name, created_at)")
-    .eq("organization_id", me!.organization_id);
-
-  type RawMember = {
-    user_id: string;
-    role: UserRole;
-    profiles: { id: string; email: string; full_name: string | null; created_at: string };
-  };
   type Row = { id: string; email: string; full_name: string | null; role: UserRole; created_at: string };
-  const list: Row[] = ((members ?? []) as unknown as RawMember[])
-    .map((m) => ({
-      id: m.profiles.id,
-      email: m.profiles.email,
-      full_name: m.profiles.full_name,
-      role: m.role,
-      created_at: m.profiles.created_at,
-    }))
-    .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  let list: Row[] = [];
+
+  try {
+    // 1) Admin'in org'undaki tüm üyelikler
+    const { data: members, error: mErr } = await supabase
+      .from("organization_members")
+      .select("user_id, role")
+      .eq("organization_id", me!.organization_id);
+    if (mErr) {
+      console.error("[admin/users] memberships query error:", mErr);
+    } else if (members && members.length > 0) {
+      const ids = members.map((m) => m.user_id as string);
+      const roleByUser = new Map<string, UserRole>(
+        members.map((m) => [m.user_id as string, m.role as UserRole])
+      );
+      // 2) Bu üyelerin profil bilgileri (ortak org paylaştıkları için RLS izin verir)
+      const { data: profiles, error: pErr } = await supabase
+        .from("profiles")
+        .select("id, email, full_name, created_at")
+        .in("id", ids);
+      if (pErr) {
+        console.error("[admin/users] profiles query error:", pErr);
+      } else {
+        list = (profiles ?? [])
+          .map((p) => ({
+            id: p.id as string,
+            email: p.email as string,
+            full_name: (p.full_name as string | null) ?? null,
+            role: roleByUser.get(p.id as string) ?? ("user" as UserRole),
+            created_at: p.created_at as string,
+          }))
+          .sort((a, b) => a.created_at.localeCompare(b.created_at));
+      }
+    }
+  } catch (err) {
+    console.error("[admin/users] uncaught:", err);
+  }
 
   return (
     <div className="space-y-6">

@@ -122,77 +122,93 @@ export async function updateUserRole(userId: string, role: UserRole) {
 }
 
 export async function deleteUser(userId: string) {
-  const me = await requireAdmin();
-  if (userId === me.id) {
-    throw new Error("Kendini silemezsin.");
-  }
+  try {
+    const me = await requireAdmin();
+    if (userId === me.id) {
+      throw new Error("Kendini silemezsin.");
+    }
 
-  const supabase = await createClient();
-  const { data: myProfile } = await supabase
-    .from("profiles")
-    .select("organization_id")
-    .eq("id", me.id)
-    .single();
-  if (!myProfile) throw new Error("Profil bulunamadı");
-  const orgId = myProfile.organization_id as string;
+    const supabase = await createClient();
+    const { data: myProfile } = await supabase
+      .from("profiles")
+      .select("organization_id")
+      .eq("id", me.id)
+      .single();
+    if (!myProfile) throw new Error("Profil bulunamadı");
+    const orgId = myProfile.organization_id as string;
 
-  const adminSb = await createServiceClient();
+    const adminSb = await createServiceClient();
 
-  // Kullanıcıyı bu org'dan çıkar (auth user'ı silmez — başka panellerde olabilir)
-  const { error: omErr } = await adminSb
-    .from("organization_members")
-    .delete()
-    .eq("user_id", userId)
-    .eq("organization_id", orgId);
-  if (omErr) throw new Error(omErr.message);
-
-  // Kullanıcının aktif org'u bu org idi ve başka org'a üyeyse → diğer org'a switch et
-  // Hiç org'u kalmadıysa: profile.organization_id null bırakamıyoruz (NOT NULL).
-  // Bu durumda kendi paneli oluştur.
-  const { data: targetProfile } = await adminSb
-    .from("profiles")
-    .select("organization_id, full_name, email")
-    .eq("id", userId)
-    .single();
-
-  if (targetProfile?.organization_id === orgId) {
-    const { data: otherMembership } = await adminSb
+    // 1. Kullanıcıyı bu org'dan çıkar (auth user'ı silmez — başka panellerde olabilir)
+    const { error: omErr, count: deletedCount } = await adminSb
       .from("organization_members")
-      .select("organization_id, role")
+      .delete({ count: "exact" })
       .eq("user_id", userId)
-      .limit(1)
-      .maybeSingle();
+      .eq("organization_id", orgId);
+    if (omErr) {
+      console.error("[deleteUser] om delete failed:", omErr);
+      throw new Error(`Üyelik silinemedi: ${omErr.message}`);
+    }
+    if (deletedCount === 0) {
+      console.warn("[deleteUser] no rows matched for delete", { userId, orgId });
+    }
 
-    if (otherMembership) {
-      await adminSb
-        .from("profiles")
-        .update({
-          organization_id: otherMembership.organization_id,
-          role: otherMembership.role,
-        })
-        .eq("id", userId);
-    } else {
-      // Hiç org kalmadı — kullanıcıya kendi paneli aç
-      const displayName =
-        (targetProfile.full_name && targetProfile.full_name.trim()) ||
-        targetProfile.email.split("@")[0];
-      const { data: newOrg } = await adminSb
-        .from("organizations")
-        .insert({ name: `${displayName} Paneli`, owner_id: userId })
-        .select()
-        .single();
-      if (newOrg) {
-        await adminSb
-          .from("organization_members")
-          .insert({ user_id: userId, organization_id: newOrg.id, role: "admin" });
+    // 2. Kullanıcının aktif org'u bu org idi mi?
+    const { data: targetProfile, error: tpErr } = await adminSb
+      .from("profiles")
+      .select("organization_id, full_name, email")
+      .eq("id", userId)
+      .single();
+    if (tpErr) {
+      console.error("[deleteUser] target profile read failed:", tpErr);
+    }
+
+    if (targetProfile?.organization_id === orgId) {
+      // Diğer üyeliklerden birini bul
+      const { data: others } = await adminSb
+        .from("organization_members")
+        .select("organization_id, role")
+        .eq("user_id", userId)
+        .limit(1);
+      const otherMembership = others?.[0];
+
+      if (otherMembership) {
         await adminSb
           .from("profiles")
-          .update({ organization_id: newOrg.id, role: "admin" })
+          .update({
+            organization_id: otherMembership.organization_id,
+            role: otherMembership.role,
+          })
           .eq("id", userId);
+      } else {
+        // Hiç org kalmadı → kendi paneli aç
+        const displayName =
+          (targetProfile.full_name && targetProfile.full_name.trim()) ||
+          targetProfile.email.split("@")[0];
+        const { data: newOrg, error: orgErr } = await adminSb
+          .from("organizations")
+          .insert({ name: `${displayName} Paneli`, owner_id: userId })
+          .select()
+          .single();
+        if (orgErr) {
+          console.error("[deleteUser] new org for orphan user failed:", orgErr);
+        } else if (newOrg) {
+          await adminSb
+            .from("organization_members")
+            .insert({ user_id: userId, organization_id: newOrg.id, role: "admin" });
+          await adminSb
+            .from("profiles")
+            .update({ organization_id: newOrg.id, role: "admin" })
+            .eq("id", userId);
+        }
       }
     }
-  }
 
-  revalidatePath("/admin/users");
-  return { ok: true };
+    revalidatePath("/admin/users");
+    revalidatePath("/", "layout");
+    return { ok: true };
+  } catch (err) {
+    console.error("[deleteUser] uncaught:", err);
+    throw err;
+  }
 }

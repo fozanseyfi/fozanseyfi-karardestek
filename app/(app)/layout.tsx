@@ -13,33 +13,59 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!profile) redirect("/login");
 
   const supabase = await createClient();
-  const [{ count: unreadCount }, { data: org }, { data: membersRaw }] = await Promise.all([
-    supabase
+
+  // Her sorguyu izole et: birinin patlaması SSR'ı çökertmesin.
+  let unreadCount = 0;
+  let organizationName: string | null = null;
+  let memberships: { id: string; name: string; role: string }[] = [];
+
+  try {
+    const { count } = await supabase
       .from("notifications")
       .select("*", { count: "exact", head: true })
-      .is("read_at", null),
-    supabase.from("organizations").select("name").eq("id", profile.organization_id).single(),
-    supabase
+      .is("read_at", null);
+    unreadCount = count ?? 0;
+  } catch (err) {
+    console.error("[layout] notifications count failed:", err);
+  }
+
+  try {
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("name")
+      .eq("id", profile.organization_id)
+      .maybeSingle();
+    organizationName = org?.name ?? null;
+  } catch (err) {
+    console.error("[layout] active org name failed:", err);
+  }
+
+  try {
+    type RawMembership = {
+      organization_id: string;
+      role: string;
+      organizations: { id: string; name: string } | null;
+    };
+    const { data: membersRaw, error: mErr } = await supabase
       .from("organization_members")
       .select("organization_id, role, organizations(id, name)")
-      .eq("user_id", profile.id),
-  ]);
-
-  type RawMembership = {
-    organization_id: string;
-    role: string;
-    organizations: { id: string; name: string } | null;
-  };
-  const memberships = ((membersRaw ?? []) as unknown as RawMembership[])
-    .filter((m) => m.organizations !== null)
-    .map((m) => ({
-      id: m.organizations!.id,
-      name: m.organizations!.name,
-      role: m.role,
-    }));
+      .eq("user_id", profile.id);
+    if (mErr) {
+      console.error("[layout] memberships query error:", mErr);
+    } else {
+      memberships = ((membersRaw ?? []) as unknown as RawMembership[])
+        .filter((m) => m.organizations !== null)
+        .map((m) => ({
+          id: m.organizations!.id,
+          name: m.organizations!.name,
+          role: m.role,
+        }));
+    }
+  } catch (err) {
+    console.error("[layout] memberships catch:", err);
+  }
 
   const showOnboarding = !profile.onboarding_completed;
-  const organizationName = org?.name ?? null;
 
   return (
     <TooltipProvider>

@@ -9,8 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import Link from "next/link";
-import { AuthHeader, AuthMarketing, AuthFooter } from "@/components/auth/auth-landing";
+import { AuthHeader, AuthMarketing } from "@/components/auth/auth-landing";
 import { AuthMissionCard } from "@/components/auth/auth-mission-card";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 export default function LoginPage() {
   return (
@@ -48,7 +49,7 @@ export default function LoginPage() {
       </section>
 
       <AuthMarketing />
-      <AuthFooter />
+      <SiteFooter />
     </div>
   );
 }

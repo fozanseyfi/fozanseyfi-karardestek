@@ -16,12 +16,11 @@ export function AuthMissionCard() {
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-sm font-semibold text-emerald-900">
-              Tamamen ücretsiz, ticari değil
+              Sektöre gönüllü bir mühendis katkısı
             </span>
           </div>
           <p className="text-xs leading-relaxed text-emerald-900/80 mt-0.5">
-            Sektöre fayda sağlamak adına bireysel olarak geliştirilen, hiçbir ödeme veya abonelik talep etmeyen bir
-            platform.
+            Sahanın içinden gelen bir ihtiyaçtan doğdu; ticari beklenti yok, abonelik veya ödeme talep edilmez.
           </p>
         </div>
       </div>
@@ -35,11 +34,11 @@ export function AuthMissionCard() {
       >
         {open ? (
           <>
-            Detayı gizle <ChevronUp className="size-3" />
+            Notu kapat <ChevronUp className="size-3" />
           </>
         ) : (
           <>
-            Hikayesini oku <ChevronDown className="size-3" />
+            Geliştiricinin notu <ChevronDown className="size-3" />
           </>
         )}
       </button>

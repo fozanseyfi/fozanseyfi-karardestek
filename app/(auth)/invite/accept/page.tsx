@@ -10,7 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { AuthHeader, AuthFooter } from "@/components/auth/auth-landing";
+import { AuthHeader } from "@/components/auth/auth-landing";
+import { SiteFooter } from "@/components/layout/site-footer";
 
 type SessionState = "checking" | "ok" | "missing";
 
@@ -184,7 +185,7 @@ export default function InviteAcceptPage() {
         </div>
       </section>
 
-      <AuthFooter />
+      <SiteFooter />
     </div>
   );
 }

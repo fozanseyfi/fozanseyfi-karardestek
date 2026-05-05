@@ -53,7 +53,7 @@ export default function InviteAcceptPage() {
       const supabase = createClient();
       const { error } = await supabase.auth.updateUser({
         password,
-        data: { full_name: name.trim() },
+        data: { full_name: name.trim(), invite_completed: true },
       });
       if (error) throw error;
       toast.success("Hesabınız aktifleştirildi.");

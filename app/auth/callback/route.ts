@@ -35,9 +35,18 @@ export async function GET(request: Request) {
     }
   }
 
-  // Davet akışında, oturum kuruldu ama şifre belirlenmedi —
-  // type=invite ise zorla /invite/accept'e yönlendir (next belirtilmemiş olsa da güvenli olsun)
-  const finalRedirect = type === "invite" && redirect === "/" ? "/invite/accept" : redirect;
+  // Davet akışında, oturum kuruldu ama henüz şifre belirlenmedi —
+  // user metadata'da invited_org_id varsa ve invite_completed işaretlenmediyse şifre sayfasına yönlendir
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const meta = (user?.user_metadata ?? null) as Record<string, unknown> | null;
+  const isPendingInvite = !!meta && meta.invited_org_id != null && meta.invite_completed !== true;
+
+  let finalRedirect = redirect;
+  if (isPendingInvite || (type === "invite" && redirect === "/")) {
+    finalRedirect = "/invite/accept";
+  }
 
   return NextResponse.redirect(new URL(finalRedirect, url.origin));
 }

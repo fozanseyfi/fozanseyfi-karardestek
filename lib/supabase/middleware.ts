@@ -47,7 +47,15 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isAuthPath && !path.startsWith("/auth/callback")) {
+  // Login olan kullanıcıyı /login, /signup, /forgot-password gibi sayfalardan ana sayfaya atar.
+  // Davet akışında kullanıcı zaten /auth/callback ile login olduğu için /invite/accept'e gerek var —
+  // bu yüzden /invite paths bu redirect'ten muaf tutulur.
+  if (
+    user &&
+    isAuthPath &&
+    !path.startsWith("/auth/callback") &&
+    !path.startsWith("/invite")
+  ) {
     const url = request.nextUrl.clone();
     url.pathname = "/";
     return NextResponse.redirect(url);

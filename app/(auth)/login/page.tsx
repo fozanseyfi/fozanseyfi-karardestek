@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,12 +10,42 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import Link from "next/link";
+import { AuthSidePanel } from "@/components/auth/auth-side-panel";
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<LoginSkeleton />}>
-      <LoginForm />
-    </Suspense>
+    <div className="flex min-h-screen">
+      <AuthSidePanel />
+      <div className="flex flex-1 items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md">
+          {/* Mobile için kompakt logo (lg ekranda zaten side panel var) */}
+          <div className="mb-6 flex items-center gap-2 lg:hidden">
+            <div className="from-primary to-primary/70 flex size-9 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm">
+              <Sparkles className="text-primary-foreground size-4" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold">EPC Karar Destek</div>
+              <div className="text-muted-foreground text-[10px]">Karar Destek Platformu</div>
+            </div>
+          </div>
+
+          <Suspense fallback={<LoginSkeleton />}>
+            <LoginForm />
+          </Suspense>
+
+          {/* Mobile için altta kısa bilgi */}
+          <div className="text-muted-foreground mt-6 text-center text-xs lg:hidden">
+            <p>
+              Geliştirici:{" "}
+              <a href="https://www.linkedin.com/in/fozanseyfi/" className="hover:underline">
+                Furkan Ozan Seyfi
+              </a>{" "}
+              · <a href="https://fozanseyfi.com" className="hover:underline">fozanseyfi.com</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -52,10 +83,10 @@ function LoginForm() {
   }
 
   return (
-    <Card>
+    <Card className="border-border/60 shadow-lg">
       <CardHeader>
-        <CardTitle>Giriş Yap</CardTitle>
-        <CardDescription>E-posta ve şifrenizle giriş yapın.</CardDescription>
+        <CardTitle className="text-2xl">Hoş Geldiniz</CardTitle>
+        <CardDescription>Hesabınıza giriş yapın</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
@@ -73,7 +104,15 @@ function LoginForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="password">Şifre</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password">Şifre</Label>
+              <Link
+                href="/forgot-password"
+                className="text-muted-foreground hover:text-foreground text-xs underline-offset-4 hover:underline"
+              >
+                Şifremi unuttum
+              </Link>
+            </div>
             <Input
               id="password"
               type="password"
@@ -85,18 +124,13 @@ function LoginForm() {
               className="h-11"
             />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="h-11 w-full" disabled={loading}>
             {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
           </Button>
-          <div className="text-muted-foreground text-center text-sm">
-            <Link href="/forgot-password" className="hover:text-foreground underline-offset-4 hover:underline">
-              Şifremi unuttum
-            </Link>
-          </div>
           <div className="border-t pt-4 text-center text-sm">
-            <span className="text-muted-foreground">Hesabın yok mu? </span>
+            <span className="text-muted-foreground">Hesabınız yok mu? </span>
             <Link href="/signup" className="text-primary font-medium hover:underline">
-              Hemen kayıt ol
+              Hemen kayıt olun
             </Link>
           </div>
         </form>

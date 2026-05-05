@@ -30,35 +30,43 @@ export default function InviteAcceptPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Hesabınızı Tamamlayın</CardTitle>
-        <CardDescription>
-          Davet bağlantısından girdiniz. Adınızı ve yeni şifrenizi belirleyerek hesabınızı aktifleştirin.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Ad Soyad</Label>
-            <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password">Şifre</Label>
-            <Input
-              id="password"
-              type="password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Kaydediliyor..." : "Hesabı Aktifleştir"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <div className="bg-muted/30 flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">EPC Karar Destek</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Karar Destek Platformu</p>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Hesabınızı Tamamlayın</CardTitle>
+            <CardDescription>
+              Davet bağlantısından girdiniz. Adınızı ve yeni şifrenizi belirleyerek hesabınızı aktifleştirin.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Ad Soyad</Label>
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Şifre</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Kaydediliyor..." : "Hesabı Aktifleştir"}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

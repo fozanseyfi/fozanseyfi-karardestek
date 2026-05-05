@@ -9,6 +9,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import Link from "next/link";
 
+function PageWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="bg-muted/30 flex min-h-screen items-center justify-center px-4 py-12">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">EPC Karar Destek</h1>
+          <p className="text-muted-foreground mt-1 text-sm">Karar Destek Platformu</p>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -27,9 +41,10 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Şifremi Unuttum</CardTitle>
+    <PageWrapper>
+      <Card>
+        <CardHeader>
+          <CardTitle>Şifremi Unuttum</CardTitle>
         <CardDescription>E-posta adresinize sıfırlama bağlantısı gönderilecek.</CardDescription>
       </CardHeader>
       <CardContent>
@@ -55,6 +70,7 @@ export default function ForgotPasswordPage() {
           </div>
         </form>
       </CardContent>
-    </Card>
+      </Card>
+    </PageWrapper>
   );
 }

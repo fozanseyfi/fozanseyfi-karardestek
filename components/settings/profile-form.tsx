@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Save, Building2, User, Sparkles, AlertTriangle, Lock, KeyRound } from "lucide-react";
+import { Save, Building2, User, Sparkles, Lock, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -259,9 +259,8 @@ export function ProfileForm({
               <Sparkles className="size-4" /> Kendi Panelimi Aç
             </CardTitle>
             <CardDescription className="text-amber-900/80">
-              Kendi şirketinizi açarak <strong>kendi panelinizin yöneticisi</strong> olabilirsiniz. Davet edildiğiniz
-              panelden ayrılırsınız ve sıfırdan kendi karşılaştırmalarınızı, projelerinizi, firmalarınızı
-              oluşturursunuz.
+              Kendi şirketinizi açarak <strong>kendi panelinizin yöneticisi</strong> olabilirsiniz. Mevcut paneldeki
+              üyeliğiniz korunur — topbar üzerinden istediğiniz zaman paneller arasında geçiş yapabilirsiniz.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -276,18 +275,18 @@ export function ProfileForm({
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="text-amber-600 size-5" /> Kendi Panelinizi Açmak Üzeresiniz
+              <Sparkles className="text-emerald-600 size-5" /> Kendi Panelinizi Açmak Üzeresiniz
             </DialogTitle>
             <DialogDescription>
-              Bu işlem <strong>geri alınamaz</strong> (manuel olarak admin tarafından geri davet edilmediğiniz sürece).
+              Sıfırdan boş bir panel oluşturulacak ve siz onun <strong>yöneticisi</strong> olacaksınız.
             </DialogDescription>
           </DialogHeader>
           <ul className="text-sm space-y-2">
             <li>✅ Yeni boş bir panel açılır, siz <strong>yöneticisi</strong> olursunuz</li>
             <li>✅ Sıfırdan karşılaştırma, proje, firma yaratabilirsiniz</li>
             <li>✅ Kendi ekibinizi davet edebilirsiniz</li>
-            <li>❌ Mevcut paneldeki erişiminiz kesilir (görüntüleme dahil)</li>
-            <li>❌ Önceki panelden hiçbir veri kopyalanmaz</li>
+            <li>✅ <strong>Mevcut paneldeki üyeliğiniz korunur</strong> — topbar&apos;daki panel seçici ile aralarında geçiş yapabilirsiniz</li>
+            <li>ℹ️ Önceki panelden veri kopyalanmaz; her panel bağımsızdır</li>
           </ul>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setConvertOpen(false)} disabled={pending}>

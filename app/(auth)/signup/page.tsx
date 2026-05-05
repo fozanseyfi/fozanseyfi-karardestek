@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { AuthHeader, AuthMarketing, AuthFooter } from "@/components/auth/auth-landing";
+import { AuthMissionCard } from "@/components/auth/auth-mission-card";
 
 export default function SignupPage() {
   return (
@@ -25,11 +26,7 @@ export default function SignupPage() {
             Hesap Oluştur
           </h1>
           <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
-            E-posta ve şifrenle kayıt ol; doğrulama maili gelecek. Zaten hesabın var mı?{" "}
-            <Link href="/login" className="text-primary font-medium hover:underline">
-              Giriş yap
-            </Link>
-            .
+            E-posta ve şifrenle kayıt ol; doğrulama maili gelecek.
           </p>
         </div>
 
@@ -37,6 +34,15 @@ export default function SignupPage() {
           <Suspense fallback={null}>
             <SignupForm />
           </Suspense>
+
+          <p className="text-muted-foreground mt-4 text-center text-sm">
+            Zaten hesabın var mı?{" "}
+            <Link href="/login" className="text-primary font-medium hover:underline">
+              Giriş yap
+            </Link>
+          </p>
+
+          <AuthMissionCard />
         </div>
       </section>
 

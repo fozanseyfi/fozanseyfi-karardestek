@@ -35,7 +35,7 @@ export async function inviteUser(email: string, role: UserRole, fullName: string
 
   const adminSb = await createServiceClient();
   const { error } = await adminSb.auth.admin.inviteUserByEmail(cleanEmail, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/invite/accept`,
     data: {
       full_name: fullName ?? undefined,
       invited_org_id: myProfile.organization_id,

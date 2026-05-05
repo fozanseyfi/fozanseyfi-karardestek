@@ -26,6 +26,7 @@ import { ItemsTable } from "@/components/comparison/items-table";
 import { getCurrentProfile } from "@/lib/supabase/get-profile";
 import { canCreateComparison } from "@/lib/permissions";
 import { CloneTemplateButton } from "@/components/comparison/clone-template-button";
+import { EditTemplateMetricsDialog } from "@/components/template/edit-template-metrics-dialog";
 import { formatPercent } from "@/lib/currency";
 
 type SampleData = {
@@ -115,9 +116,17 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
               <CardTitle>{tpl.name}</CardTitle>
               {tpl.description && <CardDescription className="mt-1">{tpl.description}</CardDescription>}
             </div>
-            {canCreateComparison(currentProfile) && (
-              <CloneTemplateButton templateId={tpl.id} hasSample={!!hasSample} />
-            )}
+            <div className="flex flex-wrap items-center gap-2">
+              {currentProfile?.role === "admin" && hasSample && sampleData && (
+                <EditTemplateMetricsDialog
+                  templateId={tpl.id}
+                  initialWeights={sampleData.metric_weights as Record<string, number>}
+                />
+              )}
+              {canCreateComparison(currentProfile) && (
+                <CloneTemplateButton templateId={tpl.id} hasSample={!!hasSample} />
+              )}
+            </div>
           </div>
         </CardHeader>
       </Card>

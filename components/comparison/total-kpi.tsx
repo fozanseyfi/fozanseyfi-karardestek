@@ -11,6 +11,16 @@ export function TotalKpiCard({ stats, currency }: { stats: ComparisonStats; curr
   const { totalTarget, firms } = stats;
   const ranked = firms.filter((f) => f.filledCount > 0);
 
+  const offerCount = ranked.length;
+  const offerAvg =
+    offerCount > 0 ? ranked.reduce((s, f) => s + f.weightedTotal, 0) / offerCount : null;
+  const avgDev =
+    offerAvg !== null && totalTarget > 0 ? (offerAvg - totalTarget) / totalTarget : null;
+  const avgTone =
+    avgDev === null ? "neutral" : avgDev <= -0.05 ? "good" : avgDev >= 0.1 ? "bad" : "neutral";
+  const AvgIcon =
+    avgDev === null ? Minus : avgDev > 0 ? ArrowUp : avgDev < 0 ? ArrowDown : Minus;
+
   return (
     <Card>
       <CardContent className="p-5">
@@ -27,6 +37,37 @@ export function TotalKpiCard({ stats, currency }: { stats: ComparisonStats; curr
             </div>
             <div className="text-muted-foreground text-xs">{stats.itemCount} kalem</div>
           </div>
+
+          {offerAvg !== null && (
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2.5">
+              <div className="min-w-0">
+                <div className="text-muted-foreground text-[11px]">
+                  Gelen Tekliflerin Ortalaması ({offerCount} teklif)
+                </div>
+                <div className="text-base font-semibold tabular-nums">
+                  {formatCompactCurrency(offerAvg, currency)}
+                </div>
+              </div>
+              {avgDev !== null && (
+                <span
+                  className={cn(
+                    "flex shrink-0 items-center gap-0.5 rounded px-2 py-1 text-xs font-medium",
+                    avgTone === "good" && "bg-emerald-100 text-emerald-700",
+                    avgTone === "bad" && "bg-rose-100 text-rose-700",
+                    avgTone === "neutral" && "bg-white text-slate-600 ring-1 ring-slate-200"
+                  )}
+                  title={`Hedeften ${avgDev >= 0 ? "yüksek" : "düşük"}`}
+                >
+                  <AvgIcon className="size-3" />
+                  {avgDev >= 0 ? "+" : "−"}
+                  {formatPercent(Math.abs(avgDev), 1)}
+                  <span className="text-muted-foreground/80 ml-1 text-[10px] font-normal">
+                    {avgDev >= 0 ? "hedeften yüksek" : "hedeften düşük"}
+                  </span>
+                </span>
+              )}
+            </div>
+          )}
 
           {ranked.length === 0 ? (
             <p className="text-muted-foreground text-sm">Henüz teklif girilmedi.</p>

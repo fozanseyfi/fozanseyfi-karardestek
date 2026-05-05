@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner";
 import Link from "next/link";
 import { AuthHeader, AuthMarketing, AuthFooter } from "@/components/auth/auth-landing";
+import { AuthMissionCard } from "@/components/auth/auth-mission-card";
 
 export default function LoginPage() {
   return (
@@ -26,11 +27,7 @@ export default function LoginPage() {
             Hoş Geldiniz
           </h1>
           <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
-            Hesabınıza giriş yapın veya{" "}
-            <Link href="/signup" className="text-primary font-medium hover:underline">
-              hemen kayıt olun
-            </Link>
-            .
+            Hesabınıza giriş yapın.
           </p>
         </div>
 
@@ -38,6 +35,15 @@ export default function LoginPage() {
           <Suspense fallback={<LoginSkeleton />}>
             <LoginForm />
           </Suspense>
+
+          <p className="text-muted-foreground mt-4 text-center text-sm">
+            Hesabın yok mu?{" "}
+            <Link href="/signup" className="text-primary font-medium hover:underline">
+              Hemen kayıt ol
+            </Link>
+          </p>
+
+          <AuthMissionCard />
         </div>
       </section>
 

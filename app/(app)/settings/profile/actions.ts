@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 export async function updateOrganizationName(name: string) {
   const supabase = await createClient();
@@ -46,4 +46,42 @@ export async function updateProfileName(fullName: string) {
 
   revalidatePath("/settings/profile", "layout");
   revalidatePath("/", "layout");
+}
+
+export async function convertToOwnOrganization() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Oturum yok");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, email, role")
+    .eq("id", user.id)
+    .single();
+  if (!profile) throw new Error("Profil bulunamadı");
+  if (profile.role === "admin") {
+    throw new Error("Zaten yönetici rolündesiniz; ayrı bir panele geçmeye gerek yok.");
+  }
+
+  const displayName =
+    (profile.full_name && profile.full_name.trim()) || profile.email.split("@")[0];
+
+  const adminSb = await createServiceClient();
+  const { data: newOrg, error: e1 } = await adminSb
+    .from("organizations")
+    .insert({ name: `${displayName} Paneli`, owner_id: user.id })
+    .select()
+    .single();
+  if (e1) throw new Error(e1.message);
+
+  const { error: e2 } = await adminSb
+    .from("profiles")
+    .update({ organization_id: newOrg.id, role: "admin" })
+    .eq("id", user.id);
+  if (e2) throw new Error(e2.message);
+
+  revalidatePath("/", "layout");
+  return { ok: true, newOrgName: newOrg.name as string };
 }

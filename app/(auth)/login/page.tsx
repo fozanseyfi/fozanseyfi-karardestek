@@ -12,7 +12,6 @@ import Link from "next/link";
 import { AuthHeader } from "@/components/auth/auth-landing";
 import { AuthMissionCard } from "@/components/auth/auth-mission-card";
 import { FeaturesShowcase } from "@/components/auth/features-showcase";
-import { RoleExplainer } from "@/components/auth/role-explainer";
 import { SiteFooter } from "@/components/layout/site-footer";
 
 export default function LoginPage() {
@@ -51,7 +50,6 @@ export default function LoginPage() {
       </section>
 
       <FeaturesShowcase />
-      <RoleExplainer />
       <SiteFooter />
     </div>
   );

@@ -60,10 +60,10 @@ function Frame1Initial() {
         </span>
       </div>
       <div className="flex-1 space-y-1">
-        <PriceRow firm="Sesa Mühendislik" price="240 TL/adet" winner />
-        <PriceRow firm="Soldera Solar" price="265 TL/adet" />
-        <PriceRow firm="Bekir Ökmen" price="245 TL/adet" />
-        <PriceRow firm="Efesun Yapı" price="280 TL/adet" />
+        <PriceRow firm="Alfa Mühendislik" price="240 TL/adet" winner />
+        <PriceRow firm="Gamma Solar" price="265 TL/adet" />
+        <PriceRow firm="Beta İnşaat" price="245 TL/adet" />
+        <PriceRow firm="Delta Yapı" price="280 TL/adet" />
       </div>
       <div className="text-muted-foreground rounded bg-blue-50 px-2 py-1 text-[10px]">
         Mekanik kazık çakımı · 1000 adet
@@ -123,13 +123,13 @@ function Frame2Revised() {
         </span>
       </div>
       <div className="flex-1 space-y-1">
-        <PriceRow firm="Sesa Mühendislik" price="232 TL/adet" delta={{ pct: 3.3, up: false }} />
-        <PriceRow firm="Soldera Solar" price="240 TL/adet" delta={{ pct: 9.4, up: false }} />
-        <PriceRow firm="Bekir Ökmen" price="225 TL/adet" delta={{ pct: 8.2, up: false }} newWinner />
-        <PriceRow firm="Efesun Yapı" price="285 TL/adet" delta={{ pct: 1.8, up: true }} />
+        <PriceRow firm="Alfa Mühendislik" price="232 TL/adet" delta={{ pct: 3.3, up: false }} />
+        <PriceRow firm="Gamma Solar" price="240 TL/adet" delta={{ pct: 9.4, up: false }} />
+        <PriceRow firm="Beta İnşaat" price="225 TL/adet" delta={{ pct: 8.2, up: false }} newWinner />
+        <PriceRow firm="Delta Yapı" price="285 TL/adet" delta={{ pct: 1.8, up: true }} />
       </div>
       <div className="rounded bg-amber-50 px-2 py-1 text-[10px] text-amber-900">
-        ⚡ Bekir Ökmen %8.2 indirimle <strong>kazanan değişti</strong>
+        ⚡ Beta İnşaat %8.2 indirimle <strong>kazanan değişti</strong>
       </div>
     </div>
   );
@@ -146,24 +146,24 @@ function Frame3Compare() {
           title="R1"
           subtitle="İlk Teklif"
           rows={[
-            { firm: "Sesa", price: "240" },
-            { firm: "Bekir", price: "245" },
-            { firm: "Soldera", price: "265" },
-            { firm: "Efesun", price: "280" },
+            { firm: "Alfa", price: "240" },
+            { firm: "Beta", price: "245" },
+            { firm: "Gamma", price: "265" },
+            { firm: "Delta", price: "280" },
           ]}
-          winner="Sesa"
+          winner="Alfa"
         />
         <RevColumn
           title="R2"
           subtitle="Revize"
           highlight
           rows={[
-            { firm: "Bekir", price: "225", delta: -8.2, color: "emerald" },
-            { firm: "Sesa", price: "232", delta: -3.3, color: "emerald" },
-            { firm: "Soldera", price: "240", delta: -9.4, color: "emerald" },
-            { firm: "Efesun", price: "285", delta: 1.8, color: "rose" },
+            { firm: "Beta", price: "225", delta: -8.2, color: "emerald" },
+            { firm: "Alfa", price: "232", delta: -3.3, color: "emerald" },
+            { firm: "Gamma", price: "240", delta: -9.4, color: "emerald" },
+            { firm: "Delta", price: "285", delta: 1.8, color: "rose" },
           ]}
-          winner="Bekir"
+          winner="Beta"
         />
       </div>
     </div>

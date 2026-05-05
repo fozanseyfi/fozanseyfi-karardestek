@@ -145,7 +145,7 @@ function Frame1AdminUsers() {
         </div>
       </div>
       <div className="flex-1 rounded-md border bg-white">
-        <Row name="Furkan Ozan" email="ozan@kontrolmatik.com" role="Yönetici" tone="emerald" you />
+        <Row name="Mert Demir" email="ozan@example.com" role="Yönetici" tone="emerald" you />
       </div>
     </div>
   );
@@ -162,7 +162,7 @@ function Frame2InviteDialog() {
         </div>
         <div className="space-y-2">
           <div className="rounded border bg-slate-50 px-2 py-1.5 text-[10px] text-slate-600">
-            ahmet@kontrolmatik.com
+            canan@example.com
           </div>
           <div className="text-[9px] font-semibold uppercase tracking-wider text-slate-500">Rol</div>
           <div className="grid grid-cols-3 gap-1">
@@ -193,10 +193,10 @@ function Frame3UserAdded() {
         </span>
       </div>
       <div className="flex-1 space-y-1 rounded-md border bg-white">
-        <Row name="Furkan Ozan" email="ozan@kontrolmatik.com" role="Yönetici" tone="emerald" you />
+        <Row name="Mert Demir" email="ozan@example.com" role="Yönetici" tone="emerald" you />
         <Row
-          name="Ahmet Yılmaz"
-          email="ahmet@kontrolmatik.com"
+          name="Canan Aydın"
+          email="canan@example.com"
           role="Kullanıcı"
           tone="blue"
           highlight
@@ -215,7 +215,7 @@ function Frame4OpenAccess() {
         <span className="text-xs font-semibold">Kullanıcılar</span>
       </div>
       <div className="flex-1 space-y-1 rounded-md border bg-white">
-        <Row name="Furkan Ozan" email="ozan@kontrolmatik.com" role="Yönetici" tone="emerald" you />
+        <Row name="Mert Demir" email="ozan@example.com" role="Yönetici" tone="emerald" you />
         <RowWithGearHighlight />
       </div>
     </div>
@@ -229,10 +229,10 @@ function Frame5AccessModes() {
       <div className="w-[340px] rounded-lg border bg-white p-3 shadow-xl">
         <div className="mb-2 flex items-center gap-1.5">
           <Settings2 className="size-3.5 text-slate-700" />
-          <span className="text-xs font-semibold">Ahmet Yılmaz — Erişim Yönetimi</span>
+          <span className="text-xs font-semibold">Canan Aydın — Erişim Yönetimi</span>
         </div>
-        <ResourceRow name="GES Mekanik Montaj — Saha A" mode="full" />
-        <ResourceRow name="RES Foundation — Trakya" mode="readonly" />
+        <ResourceRow name="Saha A — Mekanik Montaj" mode="full" />
+        <ResourceRow name="Saha B — Foundation İşleri" mode="readonly" />
         <ResourceRow name="Trafo Tedarik Q1" mode="hidden" />
       </div>
     </div>
@@ -247,12 +247,12 @@ function Frame6UserView() {
         <GitCompareArrows className="size-3.5 text-slate-700" />
         <span className="text-xs font-semibold">Karşılaştırmalar</span>
         <span className="ml-1 rounded bg-blue-50 px-1.5 py-0.5 text-[9px] font-medium text-blue-700">
-          Ahmet&apos;in Görünümü
+          Canan&apos;ın Görünümü
         </span>
       </div>
       <div className="flex-1 space-y-1.5">
-        <ComparisonRow name="GES Mekanik Montaj — Saha A" canEdit />
-        <ComparisonRow name="RES Foundation — Trakya" canEdit={false} />
+        <ComparisonRow name="Saha A — Mekanik Montaj" canEdit />
+        <ComparisonRow name="Saha B — Foundation İşleri" canEdit={false} />
       </div>
     </div>
   );
@@ -309,8 +309,8 @@ function RowWithGearHighlight() {
         A
       </div>
       <div className="min-w-0 flex-1">
-        <div className="truncate font-medium">Ahmet Yılmaz</div>
-        <div className="truncate text-[9px] text-slate-500">ahmet@kontrolmatik.com</div>
+        <div className="truncate font-medium">Canan Aydın</div>
+        <div className="truncate text-[9px] text-slate-500">canan@example.com</div>
       </div>
       <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-medium text-blue-700">
         Kullanıcı

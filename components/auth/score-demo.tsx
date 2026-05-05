@@ -93,7 +93,7 @@ function Frame2ScoreCalc() {
   return (
     <div className="flex h-full flex-col gap-1.5 p-3">
       <div className="flex items-center gap-1.5">
-        <span className="text-xs font-semibold">Skor Hesaplama — Sesa Mühendislik</span>
+        <span className="text-xs font-semibold">Skor Hesaplama — Alfa Mühendislik</span>
       </div>
       <div className="flex-1 space-y-1">
         <ScoreLine label="Hedef Sapma" type="auto" pct={92} weight={25} />
@@ -135,10 +135,10 @@ function Frame3Ranking() {
         <span className="text-xs font-semibold">Sıralama</span>
       </div>
       <div className="flex-1 space-y-1.5">
-        <RankRow rank={1} name="Sesa Mühendislik" score={87.4} highlight badge="ÖNERİLEN" />
-        <RankRow rank={2} name="Bekir Ökmen Müh." score={81.9} />
-        <RankRow rank={3} name="Soldera Solar" score={74.2} />
-        <RankRow rank={4} name="Efesun Yapı" score={58.6} outlier />
+        <RankRow rank={1} name="Alfa Mühendislik" score={87.4} highlight badge="ÖNERİLEN" />
+        <RankRow rank={2} name="Beta İnşaat" score={81.9} />
+        <RankRow rank={3} name="Gamma Solar" score={74.2} />
+        <RankRow rank={4} name="Delta Yapı" score={58.6} outlier />
       </div>
     </div>
   );

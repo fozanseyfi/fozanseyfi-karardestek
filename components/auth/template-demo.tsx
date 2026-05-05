@@ -164,9 +164,9 @@ function Frame3Editing() {
         <span className="text-xs font-semibold">Firmalar — Senin Tekliflerinle Düzenle</span>
       </div>
       <div className="flex-1 space-y-1.5">
-        <FirmEditRow original="Vestas Türkiye" custom="Trakya Rüzgar" />
-        <FirmEditRow original="GE Renewable" custom="Anadolu İnşaat" />
-        <FirmEditRow original="Elin İnşaat" custom="Elin İnşaat" unchanged />
+        <FirmEditRow original="Örnek Firma A" custom="Alfa Mühendislik" />
+        <FirmEditRow original="Örnek Firma B" custom="Beta İnşaat" />
+        <FirmEditRow original="Örnek Firma C" custom="Gamma Yapı" unchanged />
       </div>
       <div className="rounded-md bg-blue-50 px-2 py-1.5 text-[9px] text-blue-900">
         ✓ Metrik ağırlıkları (foundation için optimize edilmiş 6 metrik) korunuyor

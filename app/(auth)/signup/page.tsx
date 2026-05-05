@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { AuthHeader } from "@/components/auth/auth-landing";
 import { AuthMissionCard } from "@/components/auth/auth-mission-card";
 import { FeaturesShowcase } from "@/components/auth/features-showcase";
-import { RoleExplainer } from "@/components/auth/role-explainer";
 import { SiteFooter } from "@/components/layout/site-footer";
 
 export default function SignupPage() {
@@ -50,7 +49,6 @@ export default function SignupPage() {
       </section>
 
       <FeaturesShowcase />
-      <RoleExplainer />
       <SiteFooter />
     </div>
   );

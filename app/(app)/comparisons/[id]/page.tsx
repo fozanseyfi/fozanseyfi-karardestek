@@ -143,10 +143,35 @@ export default async function ComparisonDetailPage({
   const currency = comparison.currency as Currency;
   const decided = comparison.decided_firm_id ? firms.find((f) => f.id === comparison.decided_firm_id) : null;
 
-  // Yetki kontrolü — viewer edit/delete butonlarını görmesin
+  // Yetki kontrolü
   const me = await getCurrentProfile();
-  const canEdit = me?.role !== "viewer" && (me?.role === "admin" || comparison.owner_id === me?.id);
-  const canDelete = me?.role !== "viewer" && (me?.role === "admin" || comparison.owner_id === me?.id);
+
+  // Bu karşılaştırma bu kullanıcı için kilitli mi? (admin'in koyduğu salt-okunur kısıtlama)
+  let isLockedForMe = false;
+  if (me && me.role !== "admin") {
+    const { data: lockRow } = await supabase
+      .from("user_locked_resources")
+      .select("user_id")
+      .eq("user_id", me.id)
+      .eq("resource_type", "comparison")
+      .eq("resource_id", id)
+      .maybeSingle();
+    isLockedForMe = !!lockRow;
+  }
+
+  // canEdit:
+  //  - admin: her zaman
+  //  - user: kilitli değilse evet (org-wide edit yetkisi)
+  //  - viewer: hiçbir zaman
+  //  - sahibi: kilitli değilse evet
+  const canEdit =
+    me?.role === "admin" ||
+    (me?.role === "user" && !isLockedForMe) ||
+    (comparison.owner_id === me?.id && !isLockedForMe);
+
+  // canDelete: admin VEYA sahip (lock varsa sahibi de silemez)
+  const canDelete =
+    me?.role === "admin" || (comparison.owner_id === me?.id && !isLockedForMe);
 
   // Proje bilgisi (varsa)
   let projectName: string | null = null;

@@ -69,6 +69,8 @@ export async function convertToOwnOrganization() {
     (profile.full_name && profile.full_name.trim()) || profile.email.split("@")[0];
 
   const adminSb = await createServiceClient();
+
+  // 1. Yeni org oluştur
   const { data: newOrg, error: e1 } = await adminSb
     .from("organizations")
     .insert({ name: `${displayName} Paneli`, owner_id: user.id })
@@ -76,12 +78,69 @@ export async function convertToOwnOrganization() {
     .single();
   if (e1) throw new Error(e1.message);
 
+  // 2. Yeni org'a admin olarak ekle (eski membership korunur — kullanıcı her iki panele de erişebilir)
   const { error: e2 } = await adminSb
+    .from("organization_members")
+    .insert({ user_id: user.id, organization_id: newOrg.id, role: "admin" });
+  if (e2) throw new Error(e2.message);
+
+  // 3. Aktif org'u yeniyle değiştir
+  const { error: e3 } = await adminSb
     .from("profiles")
     .update({ organization_id: newOrg.id, role: "admin" })
     .eq("id", user.id);
-  if (e2) throw new Error(e2.message);
+  if (e3) throw new Error(e3.message);
 
   revalidatePath("/", "layout");
   return { ok: true, newOrgName: newOrg.name as string };
+}
+
+export async function switchActiveOrganization(orgId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Oturum yok");
+
+  const { error } = await supabase.rpc("switch_active_organization", {
+    target_org_id: orgId,
+  });
+  if (error) throw new Error(error.message);
+
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+export async function listMyMemberships() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from("organization_members")
+    .select("organization_id, role, organizations(id, name)")
+    .eq("user_id", user.id);
+  if (error) {
+    console.error("[listMyMemberships]", error);
+    return [];
+  }
+  type Row = {
+    organization_id: string;
+    role: string;
+    organizations: { id: string; name: string } | null;
+  };
+  return (data ?? [])
+    .map((r) => {
+      const row = r as unknown as Row;
+      return row.organizations
+        ? {
+            id: row.organizations.id,
+            name: row.organizations.name,
+            role: row.role,
+          }
+        : null;
+    })
+    .filter((m): m is { id: string; name: string; role: string } => m !== null);
 }

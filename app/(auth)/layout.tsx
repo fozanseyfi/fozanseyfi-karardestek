@@ -1,5 +1,10 @@
+import { Toaster } from "@/components/ui/sonner";
+
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  // Children ya kendi tam-ekran düzenini sunar (login, signup) ya da
-  // ortalı bir kart içerir. Layout sadece arka planı sağlar.
-  return <div className="bg-background min-h-screen">{children}</div>;
+  return (
+    <div className="bg-background min-h-screen">
+      {children}
+      <Toaster richColors position="top-right" />
+    </div>
+  );
 }

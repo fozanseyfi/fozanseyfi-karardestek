@@ -2,7 +2,6 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,41 +9,40 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import Link from "next/link";
-import { AuthSidePanel } from "@/components/auth/auth-side-panel";
+import { AuthHeader, AuthMarketing, AuthFooter } from "@/components/auth/auth-landing";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen">
-      <AuthSidePanel />
-      <div className="flex flex-1 items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md">
-          {/* Mobile için kompakt logo (lg ekranda zaten side panel var) */}
-          <div className="mb-6 flex items-center gap-2 lg:hidden">
-            <div className="from-primary to-primary/70 flex size-9 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm">
-              <Sparkles className="text-primary-foreground size-4" />
-            </div>
-            <div>
-              <div className="text-sm font-semibold">EPC Karar Destek</div>
-              <div className="text-muted-foreground text-[10px]">Karar Destek Platformu</div>
-            </div>
-          </div>
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 via-white to-white">
+      <AuthHeader />
 
+      {/* HERO + LOGIN FORM */}
+      <section className="mx-auto w-full max-w-6xl px-4 pt-12 pb-6 md:px-6 md:pt-20">
+        <div className="mx-auto max-w-md text-center">
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-blue-200/60 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+            GES &amp; RES Tedarik Kararı
+          </div>
+          <h1 className="text-3xl leading-tight font-semibold tracking-tight md:text-4xl">
+            Hoş Geldiniz
+          </h1>
+          <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
+            Hesabınıza giriş yapın veya{" "}
+            <Link href="/signup" className="text-primary font-medium hover:underline">
+              hemen kayıt olun
+            </Link>
+            .
+          </p>
+        </div>
+
+        <div className="mx-auto mt-8 w-full max-w-md">
           <Suspense fallback={<LoginSkeleton />}>
             <LoginForm />
           </Suspense>
-
-          {/* Mobile için altta kısa bilgi */}
-          <div className="text-muted-foreground mt-6 text-center text-xs lg:hidden">
-            <p>
-              Geliştirici:{" "}
-              <a href="https://www.linkedin.com/in/fozanseyfi/" className="hover:underline">
-                Furkan Ozan Seyfi
-              </a>{" "}
-              · <a href="https://fozanseyfi.com" className="hover:underline">fozanseyfi.com</a>
-            </p>
-          </div>
         </div>
-      </div>
+      </section>
+
+      <AuthMarketing />
+      <AuthFooter />
     </div>
   );
 }
@@ -84,11 +82,7 @@ function LoginForm() {
 
   return (
     <Card className="border-border/60 shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-2xl">Hoş Geldiniz</CardTitle>
-        <CardDescription>Hesabınıza giriş yapın</CardDescription>
-      </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="email">E-posta</Label>
@@ -127,12 +121,6 @@ function LoginForm() {
           <Button type="submit" className="h-11 w-full" disabled={loading}>
             {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
           </Button>
-          <div className="border-t pt-4 text-center text-sm">
-            <span className="text-muted-foreground">Hesabınız yok mu? </span>
-            <Link href="/signup" className="text-primary font-medium hover:underline">
-              Hemen kayıt olun
-            </Link>
-          </div>
         </form>
       </CardContent>
     </Card>

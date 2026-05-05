@@ -62,6 +62,49 @@ export async function getHiddenResourcesForUser(userId: string) {
   return (data ?? []) as { resource_type: ResourceType; resource_id: string }[];
 }
 
+export async function setResourceLocked(
+  userId: string,
+  resourceType: ResourceType,
+  resourceId: string,
+  locked: boolean
+) {
+  const { supabase, user } = await requireAdmin();
+
+  if (locked) {
+    const { error } = await supabase
+      .from("user_locked_resources")
+      .upsert(
+        {
+          user_id: userId,
+          resource_type: resourceType,
+          resource_id: resourceId,
+          locked_by: user.id,
+        },
+        { onConflict: "user_id,resource_type,resource_id" }
+      );
+    if (error) throw new Error(error.message);
+  } else {
+    const { error } = await supabase
+      .from("user_locked_resources")
+      .delete()
+      .eq("user_id", userId)
+      .eq("resource_type", resourceType)
+      .eq("resource_id", resourceId);
+    if (error) throw new Error(error.message);
+  }
+  revalidatePath("/admin/users");
+}
+
+export async function getLockedResourcesForUser(userId: string) {
+  const { supabase } = await requireAdmin();
+  const { data, error } = await supabase
+    .from("user_locked_resources")
+    .select("resource_type, resource_id")
+    .eq("user_id", userId);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as { resource_type: ResourceType; resource_id: string }[];
+}
+
 export type AvailableResources = {
   comparisons: { id: string; name: string }[];
   projects: { id: string; name: string }[];

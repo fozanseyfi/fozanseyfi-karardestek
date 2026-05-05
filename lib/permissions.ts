@@ -23,18 +23,21 @@ export function canManageUsers(profile: Profile | null | undefined): boolean {
 
 export function canEditComparison(
   profile: Profile | null | undefined,
-  comparisonOwnerId: string
+  _comparisonOwnerId: string
 ): boolean {
   if (!profile) return false;
-  if (profile.role === "admin") return true;
-  return profile.id === comparisonOwnerId;
+  // admin ve user (org içindeki tüm karşılaştırmalar dahil) düzenleyebilir; viewer düzenleyemez
+  return profile.role === "admin" || profile.role === "user";
 }
 
 export function canDeleteComparison(
   profile: Profile | null | undefined,
   comparisonOwnerId: string
 ): boolean {
-  return canEditComparison(profile, comparisonOwnerId);
+  if (!profile) return false;
+  // delete: sadece sahip veya admin (yıkıcı işlem, daha sıkı)
+  if (profile.role === "admin") return true;
+  return profile.id === comparisonOwnerId;
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {

@@ -16,11 +16,13 @@ export function AuthMissionCard() {
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-sm font-semibold text-emerald-900">
-              Sektöre gönüllü bir mühendis katkısı
+              Kolektif Bilgi Paylaşımı Amacıyla Geliştirilmiş Ücretsiz Platform
             </span>
           </div>
-          <p className="text-xs leading-relaxed text-emerald-900/80 mt-0.5">
-            Sahanın içinden gelen bir ihtiyaçtan doğdu; ticari beklenti yok, abonelik veya ödeme talep edilmez.
+          <p className="text-xs leading-relaxed text-emerald-900/80 mt-1">
+            Tamamen <strong>bağımsız bir inisiyatifle</strong> hayata geçirilmiş olup; herhangi bir{" "}
+            <strong>ticari model</strong>, <strong>gizli maliyet</strong> veya <strong>abonelik şartı</strong>{" "}
+            barındırmaz.
           </p>
         </div>
       </div>

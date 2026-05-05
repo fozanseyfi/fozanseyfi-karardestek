@@ -35,8 +35,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { sendContactMessage } from "@/app/(app)/contact/actions";
 
 const DEV = {
   name: "Furkan Ozan Seyfi",
@@ -77,31 +77,13 @@ export default function ContactPage() {
     }
     setSending(true);
     try {
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Oturum yok");
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("full_name, email")
-        .eq("id", user.id)
-        .single();
-
-      const topicLabel = TOPICS.find((t) => t.key === topic)?.label ?? "";
-      const finalSubject = `[${topicLabel}] ${subject.trim()}`;
-
-      const { error } = await supabase.from("feedbacks").insert({
-        user_id: user.id,
-        user_email: profile?.email ?? user.email ?? null,
-        user_name: profile?.full_name ?? null,
-        subject: finalSubject,
+      const topicLabel = TOPICS.find((t) => t.key === topic)?.label ?? "Geri Bildirim";
+      await sendContactMessage({
+        topic: topicLabel,
+        subject: subject.trim(),
         message: message.trim(),
       });
-      if (error) throw error;
-
-      toast.success("Mesajınız iletildi. En kısa sürede dönüş yapılacak.");
+      toast.success(`Mesajınız ${DEV.email} adresine iletildi. En kısa sürede dönüş yapılacak.`);
       setSubject("");
       setMessage("");
     } catch (err) {

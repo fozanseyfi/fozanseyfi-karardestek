@@ -26,49 +26,63 @@ export default async function DashboardPage() {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
 
-  const [
-    { count: comparisonsCount },
-    { count: projectsCount },
-    { count: firmsCount },
-    { count: decidedCount },
-    { data: recent },
-    { data: byStatus },
-    { data: latestDecided },
-  ] = await Promise.all([
-    supabase.from("comparisons").select("*", { count: "exact", head: true }),
-    supabase.from("projects").select("*", { count: "exact", head: true }),
-    supabase.from("firms").select("*", { count: "exact", head: true }).eq("is_sample", false),
-    supabase
-      .from("comparisons")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "decided"),
-    supabase
-      .from("comparisons")
-      .select("id, name, type, status, currency, created_at, project_id")
-      .order("created_at", { ascending: false })
-      .limit(6),
-    supabase.from("comparisons").select("status"),
-    supabase
-      .from("comparisons")
-      .select("id, name, decided_firm_id, decision_date")
-      .eq("status", "decided")
-      .order("decision_date", { ascending: false })
-      .limit(3),
-  ]);
+  // Defensive: her sorguyu izole et, biri patlasa bile diğerleri çıksın
+  let comparisonsCount = 0;
+  let projectsCount = 0;
+  let firmsCount = 0;
+  let decidedCount = 0;
+  let recent: Array<{ id: string; name: string; type: string; status: string; currency: string; created_at: string; project_id: string | null }> = [];
+  let byStatus: Array<{ status: string }> = [];
+  let latestDecided: Array<{ id: string; name: string; decided_firm_id: string | null; decision_date: string | null }> = [];
+  const firmNames = new Map<string, string>();
 
-  // Status dağılımı
+  try {
+    const results = await Promise.all([
+      supabase.from("comparisons").select("*", { count: "exact", head: true }),
+      supabase.from("projects").select("*", { count: "exact", head: true }),
+      supabase.from("firms").select("*", { count: "exact", head: true }).eq("is_sample", false),
+      supabase
+        .from("comparisons")
+        .select("*", { count: "exact", head: true })
+        .eq("status", "decided"),
+      supabase
+        .from("comparisons")
+        .select("id, name, type, status, currency, created_at, project_id")
+        .order("created_at", { ascending: false })
+        .limit(6),
+      supabase.from("comparisons").select("status"),
+      supabase
+        .from("comparisons")
+        .select("id, name, decided_firm_id, decision_date")
+        .eq("status", "decided")
+        .order("decision_date", { ascending: false })
+        .limit(3),
+    ]);
+    comparisonsCount = results[0].count ?? 0;
+    projectsCount = results[1].count ?? 0;
+    firmsCount = results[2].count ?? 0;
+    decidedCount = results[3].count ?? 0;
+    recent = (results[4].data as typeof recent) ?? [];
+    byStatus = (results[5].data as typeof byStatus) ?? [];
+    latestDecided = (results[6].data as typeof latestDecided) ?? [];
+  } catch (err) {
+    console.error("[dashboard] queries failed:", err);
+  }
+
   const statusCounts: Record<string, number> = { draft: 0, in_review: 0, decided: 0, archived: 0 };
-  for (const c of byStatus ?? []) {
+  for (const c of byStatus) {
     statusCounts[c.status] = (statusCounts[c.status] ?? 0) + 1;
   }
   const statusData = Object.entries(statusCounts).map(([status, count]) => ({ status, count }));
 
-  // Karar verilen firma adlarını al
-  const decidedFirmIds = (latestDecided ?? []).map((d) => d.decided_firm_id).filter((x): x is string => !!x);
-  const firmNames = new Map<string, string>();
-  if (decidedFirmIds.length > 0) {
-    const { data: fs } = await supabase.from("firms").select("id, name").in("id", decidedFirmIds);
-    for (const f of fs ?? []) firmNames.set(f.id, f.name);
+  try {
+    const decidedFirmIds = latestDecided.map((d) => d.decided_firm_id).filter((x): x is string => !!x);
+    if (decidedFirmIds.length > 0) {
+      const { data: fs } = await supabase.from("firms").select("id, name").in("id", decidedFirmIds);
+      for (const f of fs ?? []) firmNames.set(f.id as string, f.name as string);
+    }
+  } catch (err) {
+    console.error("[dashboard] firm names fetch failed:", err);
   }
 
   const firstName = profile?.full_name?.split(" ")[0] ?? profile?.email?.split("@")[0] ?? "";

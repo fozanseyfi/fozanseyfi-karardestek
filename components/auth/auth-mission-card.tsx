@@ -9,22 +9,23 @@ export function AuthMissionCard() {
   return (
     <div className="mt-4 overflow-hidden rounded-xl border border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-emerald-50/40 shadow-sm">
       {/* KISA VERSİYON */}
-      <div className="flex items-start gap-3 px-4 py-3.5">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-emerald-600 text-white shadow-sm">
-          <HeartHandshake className="size-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-sm font-semibold text-emerald-900">
-              Bilgi Paylaşımı Amacıyla Geliştirilmiş Ücretsiz Platform
-            </span>
+      <div className="px-4 py-3.5">
+        <div className="mb-2 flex items-center gap-2">
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-md bg-emerald-600 text-white shadow-sm">
+            <HeartHandshake className="size-4" />
           </div>
-          <p className="text-xs leading-relaxed text-emerald-900/80 mt-1">
-            Tamamen <strong>bağımsız bir inisiyatifle</strong> hayata geçirilmiş olup; herhangi bir{" "}
-            <strong>ticari model</strong>, <strong>gizli maliyet</strong> veya <strong>abonelik şartı</strong>{" "}
-            barındırmaz.
-          </p>
+          <span className="text-[10px] font-semibold tracking-wider text-emerald-700 uppercase">
+            Bağımsız İnisiyatif
+          </span>
         </div>
+        <h3 className="block whitespace-nowrap text-[13px] font-semibold tracking-tighter text-emerald-900">
+          Bilgi Paylaşımı Amacıyla Geliştirilmiş Ücretsiz Platform
+        </h3>
+        <p className="mt-1.5 text-xs leading-relaxed text-emerald-900/80">
+          Tamamen <strong>bağımsız bir inisiyatifle</strong> hayata geçirilmiş olup; herhangi bir{" "}
+          <strong>ticari model</strong>, <strong>gizli maliyet</strong> veya <strong>abonelik şartı</strong>{" "}
+          barındırmaz.
+        </p>
       </div>
 
       {/* UZUN VERSİYONA AÇMA / KAPATMA */}

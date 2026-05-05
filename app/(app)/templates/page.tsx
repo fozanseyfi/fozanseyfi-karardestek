@@ -58,7 +58,7 @@ export default async function TemplatesPage() {
                   <CardContent className="space-y-3">
                     {t.description && <p className="text-muted-foreground text-sm">{t.description}</p>}
                     <Button asChild size="sm" className="w-full">
-                      <Link href={`/templates/${t.id}`}>İncele &amp; Kullan</Link>
+                      <Link href={`/templates/${t.id}`}>İncele</Link>
                     </Button>
                   </CardContent>
                 </Card>

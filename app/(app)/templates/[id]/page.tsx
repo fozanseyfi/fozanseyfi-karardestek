@@ -23,6 +23,8 @@ import { ScoreChart } from "@/components/comparison/score-chart";
 import { ScoreBreakdown } from "@/components/comparison/score-breakdown";
 import { RevisionCompare } from "@/components/comparison/revision-compare";
 import { ItemsTable } from "@/components/comparison/items-table";
+import { getCurrentProfile } from "@/lib/supabase/get-profile";
+import { canCreateComparison } from "@/lib/permissions";
 import { CloneTemplateButton } from "@/components/comparison/clone-template-button";
 import { formatPercent } from "@/lib/currency";
 
@@ -43,6 +45,7 @@ type SampleData = {
 
 export default async function TemplateDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const currentProfile = await getCurrentProfile();
   const supabase = await createClient();
   const { data: tpl } = await supabase.from("templates").select("*").eq("id", id).single();
   if (!tpl) notFound();
@@ -112,7 +115,9 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
               <CardTitle>{tpl.name}</CardTitle>
               {tpl.description && <CardDescription className="mt-1">{tpl.description}</CardDescription>}
             </div>
-            <CloneTemplateButton templateId={tpl.id} hasSample={!!hasSample} />
+            {canCreateComparison(currentProfile) && (
+              <CloneTemplateButton templateId={tpl.id} hasSample={!!hasSample} />
+            )}
           </div>
         </CardHeader>
       </Card>

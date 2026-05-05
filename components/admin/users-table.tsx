@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { ROLE_LABELS } from "@/lib/permissions";
 import type { UserRole } from "@/lib/constants";
 import { inviteUser, updateUserRole, deleteUser } from "@/app/(app)/admin/users/actions";
+import { VisibilityDialog } from "@/components/admin/visibility-dialog";
 
 type UserRow = {
   id: string;
@@ -167,17 +168,26 @@ export function UsersTable({ users, currentUserId }: { users: UserRow[]; current
                       {new Date(u.created_at).toLocaleDateString("tr-TR")}
                     </TableCell>
                     <TableCell>
-                      {!isMe && (
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => onDelete(u.id, u.email)}
-                          disabled={pending}
-                          className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
-                        >
-                          <Trash2 className="size-4" />
-                        </Button>
-                      )}
+                      <div className="flex items-center justify-end gap-1">
+                        {!isMe && (
+                          <VisibilityDialog
+                            userId={u.id}
+                            userName={u.full_name || u.email}
+                            userRole={u.role}
+                          />
+                        )}
+                        {!isMe && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onDelete(u.id, u.email)}
+                            disabled={pending}
+                            className="text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        )}
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

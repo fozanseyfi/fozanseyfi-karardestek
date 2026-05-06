@@ -262,7 +262,7 @@ function ResourceList({
             className={cn(
               "flex items-center justify-between gap-3 py-2",
               s === "hidden" && "bg-rose-50/30",
-              s === "readonly" && "bg-amber-50/30"
+              s === "readonly" && "bg-yellow-50/30"
             )}
           >
             <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -275,7 +275,7 @@ function ResourceList({
                 </Badge>
               )}
               {s === "readonly" && (
-                <Badge variant="outline" className="text-amber-700 text-[10px]">
+                <Badge variant="outline" className="text-yellow-700 text-[10px]">
                   SALT OKUNUR
                 </Badge>
               )}
@@ -335,7 +335,7 @@ function StateBtn({
 }) {
   const toneClasses = {
     emerald: "bg-emerald-600 text-white",
-    amber: "bg-amber-500 text-white",
+    amber: "bg-yellow-500 text-white",
     rose: "bg-rose-600 text-white",
   };
   return (

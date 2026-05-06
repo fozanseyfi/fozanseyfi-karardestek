@@ -108,7 +108,7 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
                 </Badge>
                 <Badge variant="outline">{tpl.type}</Badge>
                 {hasSample && (
-                  <Badge className="bg-amber-100 text-amber-800">
+                  <Badge className="bg-yellow-100 text-yellow-800">
                     <Sparkles className="mr-1 size-3" /> Tam Örnek
                   </Badge>
                 )}
@@ -133,7 +133,7 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
 
       {hasSample && demoStats ? (
         <>
-          <div className="text-muted-foreground rounded-lg border bg-amber-50 p-3 text-sm text-amber-900">
+          <div className="text-muted-foreground rounded-lg border bg-yellow-50 p-3 text-sm text-yellow-900">
             <strong>📌 Örnek Karşılaştırma:</strong> Aşağıdaki firmalar, fiyatlar ve skorlar bu şablonun ne tür kararlar
             verdireceğini göstermek için hazırlanmıştır. Üstteki <em>&quot;Bu Şablonu Kullan&quot;</em> butonu ile
             bu örneği kendi karşılaştırmana klonlayabilir, sonra firmaları/fiyatları kendi tekliflerinle değiştirebilirsin.

@@ -58,7 +58,7 @@ export function RankingTable({
                   className={cn(
                     "rounded px-2 py-0.5 text-sm font-semibold",
                     f.recommendation === "good" && "bg-emerald-100 text-emerald-800",
-                    f.recommendation === "warning" && "bg-amber-100 text-amber-800",
+                    f.recommendation === "warning" && "bg-yellow-100 text-yellow-800",
                     f.recommendation === "danger" && "bg-rose-100 text-rose-800",
                     f.recommendation === "incomplete" && "bg-muted text-muted-foreground"
                   )}
@@ -79,7 +79,7 @@ export function RankingTable({
 
 function RecommendationBadge({ value }: { value: FirmStats["recommendation"] }) {
   if (value === "good") return <Badge className="bg-emerald-600">Güçlü Aday</Badge>;
-  if (value === "warning") return <Badge className="bg-amber-600">Orta</Badge>;
+  if (value === "warning") return <Badge className="bg-yellow-600">Orta</Badge>;
   if (value === "danger") return <Badge variant="destructive">Riskli</Badge>;
   return <Badge variant="outline">Eksik</Badge>;
 }

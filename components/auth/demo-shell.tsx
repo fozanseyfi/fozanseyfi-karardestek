@@ -61,7 +61,7 @@ export function DemoShell({
       {/* Browser chrome */}
       <div className="flex items-center gap-1.5 border-b bg-slate-50 px-3 py-2">
         <div className="size-2.5 rounded-full bg-rose-400" />
-        <div className="size-2.5 rounded-full bg-amber-400" />
+        <div className="size-2.5 rounded-full bg-yellow-400" />
         <div className="size-2.5 rounded-full bg-emerald-400" />
         <div className="ml-3 flex-1 truncate rounded bg-white px-2 py-0.5 text-[10px] text-slate-500">
           karardestek.fozanseyfi.com

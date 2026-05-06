@@ -80,7 +80,7 @@ function PriceRow({
         </span>
       )}
       {(winner || newWinner) && (
-        <Trophy className={cn("size-3", newWinner ? "animate-pulse text-amber-500" : "text-amber-500")} />
+        <Trophy className={cn("size-3", newWinner ? "animate-pulse text-yellow-500" : "text-yellow-500")} />
       )}
     </div>
   );
@@ -102,7 +102,7 @@ function Frame2Revised() {
         <PriceRow firm="Beta İnşaat" price="225 TL/adet" delta={{ pct: 8.2, up: false }} newWinner />
         <PriceRow firm="Delta Yapı" price="285 TL/adet" delta={{ pct: 1.8, up: true }} />
       </div>
-      <div className="rounded bg-amber-50 px-2 py-1 text-[10px] text-amber-900">
+      <div className="rounded bg-yellow-50 px-2 py-1 text-[10px] text-yellow-900">
         ⚡ Beta İnşaat %8.2 indirimle <strong>kazanan değişti</strong>
       </div>
     </div>

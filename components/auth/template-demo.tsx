@@ -53,7 +53,7 @@ function TemplateCard({
   firms: number;
   highlight?: boolean;
 }) {
-  const cat = category === "GES" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700";
+  const cat = category === "GES" ? "bg-yellow-100 text-yellow-700" : "bg-emerald-100 text-emerald-700";
   return (
     <div
       className={cn(
@@ -63,7 +63,7 @@ function TemplateCard({
     >
       <div className="flex items-center gap-1">
         <span className={cn("rounded px-1 py-0.5 text-[8px] font-bold", cat)}>{category}</span>
-        <Sparkles className="ml-auto size-3 text-amber-500" />
+        <Sparkles className="ml-auto size-3 text-yellow-500" />
       </div>
       <div className="text-[10px] font-semibold leading-tight">{name}</div>
       <div className="text-[9px] text-slate-500">

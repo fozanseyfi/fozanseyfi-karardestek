@@ -211,7 +211,7 @@ function Legend({
 }) {
   const toneBg = {
     emerald: "bg-emerald-100 text-emerald-700",
-    amber: "bg-amber-100 text-amber-700",
+    amber: "bg-yellow-100 text-yellow-700",
     rose: "bg-rose-100 text-rose-700",
   }[tone];
   return (

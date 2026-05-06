@@ -100,7 +100,7 @@ export function ScoreBreakdown({
                     ratio >= 0.7
                       ? "bg-emerald-50 text-emerald-700"
                       : ratio >= 0.4
-                        ? "bg-amber-50 text-amber-700"
+                        ? "bg-yellow-50 text-yellow-700"
                         : ratio > 0
                           ? "bg-rose-50 text-rose-700"
                           : "text-muted-foreground";

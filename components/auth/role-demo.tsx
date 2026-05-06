@@ -244,7 +244,7 @@ function RolePill({ label, tone, active }: { label: string; tone: "emerald" | "b
 function ResourceRow({ name, mode }: { name: string; mode: "full" | "readonly" | "hidden" }) {
   const containerTone = {
     full: "",
-    readonly: "bg-amber-50/40",
+    readonly: "bg-yellow-50/40",
     hidden: "bg-rose-50/40",
   }[mode];
 
@@ -271,7 +271,7 @@ function ModeBtn({
 }) {
   const activeTone = {
     emerald: "bg-emerald-600 text-white",
-    amber: "bg-amber-500 text-white",
+    amber: "bg-yellow-500 text-white",
     rose: "bg-rose-600 text-white",
   }[tone];
   return (
@@ -293,7 +293,7 @@ function ComparisonRow({ name, canEdit }: { name: string; canEdit: boolean }) {
         <GitCompareArrows className="size-3 shrink-0 text-blue-600" />
         <span className="truncate font-medium">{name}</span>
         {!canEdit && (
-          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[9px] font-medium text-amber-700">
+          <span className="rounded bg-yellow-100 px-1.5 py-0.5 text-[9px] font-medium text-yellow-700">
             <Lock className="-mt-px mr-0.5 inline size-2" /> Salt Okunur
           </span>
         )}

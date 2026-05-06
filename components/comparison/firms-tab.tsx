@@ -139,7 +139,7 @@ export function FirmsTabClient({
                           className={cn(
                             "text-lg font-bold tabular-nums",
                             fs.recommendation === "good" && "text-emerald-700",
-                            fs.recommendation === "warning" && "text-amber-700",
+                            fs.recommendation === "warning" && "text-yellow-700",
                             fs.recommendation === "danger" && "text-rose-700"
                           )}
                         >

@@ -28,9 +28,9 @@ const TONE_CLASSES = {
     base: "border-orange-200 text-orange-700",
   },
   amber: {
-    selected: "bg-amber-500 text-white border-amber-500",
-    hover: "hover:bg-amber-50 hover:border-amber-300 hover:text-amber-700",
-    base: "border-amber-200 text-amber-700",
+    selected: "bg-yellow-500 text-white border-yellow-500",
+    hover: "hover:bg-yellow-50 hover:border-yellow-300 hover:text-yellow-700",
+    base: "border-yellow-200 text-yellow-700",
   },
   blue: {
     selected: "bg-blue-600 text-white border-blue-600",

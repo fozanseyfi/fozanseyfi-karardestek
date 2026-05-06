@@ -516,8 +516,8 @@ function NewComparisonForm() {
       })()}
 
       {templateName && (
-        <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-          <span className="rounded bg-amber-200 px-1.5 py-0.5 text-xs font-medium uppercase">Şablon</span>
+        <div className="flex items-center gap-2 rounded-lg border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-900">
+          <span className="rounded bg-yellow-200 px-1.5 py-0.5 text-xs font-medium uppercase">Şablon</span>
           <span>
             <strong>{templateName}</strong> şablonundan başlatıldı. Aşağıdaki firma, fiyat ve skorlar otomatik yüklendi
             — istediğin gibi düzenleyebilirsin.

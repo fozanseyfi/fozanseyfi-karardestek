@@ -36,6 +36,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { sendContactMessage } from "@/app/(app)/contact/actions";
+import { PlatformsRow } from "@/components/auth/platforms-row";
 
 const DEV = {
   name: "Furkan Ozan Seyfi",
@@ -58,7 +59,7 @@ const TOPICS: { key: Topic; label: string; icon: React.ComponentType<{ className
 const TOPIC_TONES = {
   blue: "border-blue-300 bg-blue-50 text-blue-700",
   rose: "border-rose-300 bg-rose-50 text-rose-700",
-  amber: "border-amber-300 bg-amber-50 text-amber-700",
+  amber: "border-yellow-300 bg-yellow-50 text-yellow-700",
   violet: "border-violet-300 bg-violet-50 text-violet-700",
 } as const;
 
@@ -101,6 +102,7 @@ export default function ContactPage() {
   }
 
   return (
+    <>
     <div className="mx-auto max-w-5xl space-y-8">
       {/* HERO */}
       <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-slate-50 via-white to-blue-50/40 p-8 md:p-10">
@@ -271,14 +273,14 @@ export default function ContactPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-amber-200/60 bg-amber-50/30">
+        <Card className="border-yellow-200/60 bg-yellow-50/30">
           <CardContent className="p-5">
             <div className="flex items-start gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-sm">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-yellow-500 text-white shadow-sm">
                 <Info className="size-5" />
               </div>
               <div>
-                <div className="text-amber-900 text-[10px] font-semibold tracking-wider uppercase">
+                <div className="text-yellow-900 text-[10px] font-semibold tracking-wider uppercase">
                   Sorumluluk Reddi
                 </div>
                 <h4 className="mt-0.5 text-sm font-semibold">Karar destek aracı</h4>
@@ -292,6 +294,12 @@ export default function ContactPage() {
         </Card>
       </div>
     </div>
+
+    {/* OTHER PLATFORMS — full bleed across main */}
+    <div className="-mx-4 mt-8 md:-mx-8">
+      <PlatformsRow />
+    </div>
+    </>
   );
 }
 

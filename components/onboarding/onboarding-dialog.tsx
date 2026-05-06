@@ -119,7 +119,7 @@ const STEPS: Step[] = [
 const TONE_CLASSES: Record<Step["tone"], string> = {
   blue: "from-blue-500 to-blue-600",
   emerald: "from-emerald-500 to-emerald-600",
-  amber: "from-amber-500 to-amber-600",
+  amber: "from-yellow-500 to-yellow-600",
   violet: "from-violet-500 to-violet-600",
   rose: "from-rose-500 to-rose-600",
 };

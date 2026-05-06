@@ -593,7 +593,7 @@ function TabIntro({
     emerald: "border-emerald-200 bg-emerald-50 text-emerald-900",
     violet: "border-violet-200 bg-violet-50 text-violet-900",
     slate: "border-slate-200 bg-slate-50 text-slate-900",
-    amber: "border-amber-200 bg-amber-50 text-amber-900",
+    amber: "border-yellow-200 bg-yellow-50 text-yellow-900",
   }[tone];
   return (
     <div className={`rounded-lg border p-3 ${cls}`}>

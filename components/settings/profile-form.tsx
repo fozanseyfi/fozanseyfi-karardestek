@@ -253,12 +253,12 @@ export function ProfileForm({
 
       {/* Kendi panelimi aç — sadece admin olmayanlara göster */}
       {!isAdmin && (
-        <Card className="border-amber-200 bg-amber-50/50">
+        <Card className="border-yellow-200 bg-yellow-50/50">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-amber-900">
+            <CardTitle className="flex items-center gap-2 text-yellow-900">
               <Sparkles className="size-4" /> Kendi Panelimi Aç
             </CardTitle>
-            <CardDescription className="text-amber-900/80">
+            <CardDescription className="text-yellow-900/80">
               Kendi şirketinizi açarak <strong>kendi panelinizin yöneticisi</strong> olabilirsiniz. Mevcut paneldeki
               üyeliğiniz korunur — topbar üzerinden istediğiniz zaman paneller arasında geçiş yapabilirsiniz.
             </CardDescription>

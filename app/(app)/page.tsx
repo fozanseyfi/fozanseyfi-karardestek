@@ -296,7 +296,7 @@ const TONES = {
   blue: { bg: "bg-blue-50", text: "text-blue-700", iconBg: "bg-blue-600", iconText: "text-white" },
   emerald: { bg: "bg-emerald-50", text: "text-emerald-700", iconBg: "bg-emerald-600", iconText: "text-white" },
   violet: { bg: "bg-violet-50", text: "text-violet-700", iconBg: "bg-violet-600", iconText: "text-white" },
-  amber: { bg: "bg-amber-50", text: "text-amber-700", iconBg: "bg-amber-500", iconText: "text-white" },
+  amber: { bg: "bg-yellow-50", text: "text-yellow-700", iconBg: "bg-yellow-500", iconText: "text-white" },
 };
 
 function KpiTile({

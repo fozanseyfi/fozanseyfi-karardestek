@@ -164,6 +164,10 @@ function PlatformCard({ platform }: { platform: Platform }) {
     </div>
   );
 
+  if (platform.current) {
+    return <div className="cursor-default">{inner}</div>;
+  }
+
   if (disabled) {
     return <div className="cursor-not-allowed">{inner}</div>;
   }

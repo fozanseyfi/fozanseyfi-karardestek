@@ -105,7 +105,7 @@ function Frame3Ranking() {
   return (
     <div className="flex h-full flex-col gap-2 p-3">
       <div className="flex items-center gap-1.5">
-        <Trophy className="size-3.5 text-amber-600" />
+        <Trophy className="size-3.5 text-yellow-600" />
         <span className="text-xs font-semibold">Sıralama</span>
       </div>
       <div className="flex-1 space-y-1.5">
@@ -143,7 +143,7 @@ function RankRow({
       <span
         className={cn(
           "flex size-5 shrink-0 items-center justify-center rounded-full text-[9px] font-bold",
-          rank === 1 ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"
+          rank === 1 ? "bg-yellow-100 text-yellow-700" : "bg-slate-100 text-slate-600"
         )}
       >
         {rank}

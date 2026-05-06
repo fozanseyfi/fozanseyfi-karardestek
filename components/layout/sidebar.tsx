@@ -13,7 +13,7 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
+  Trophy,
   MessageCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -109,16 +109,16 @@ export function Sidebar({
             isCollapsed && "justify-center"
           )}
         >
-          <div className="from-primary to-primary/70 flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm">
-            <Sparkles className="text-primary-foreground size-4" />
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-700 shadow-sm">
+            <Trophy className="size-4 text-white" />
           </div>
           {!isCollapsed && (
             <div className="min-w-0">
               <div className="truncate text-sm leading-tight font-semibold">
-                {organizationName || "EPC Karar"}
+                {organizationName || "KararDestek"}
               </div>
-              <div className="text-sidebar-foreground/60 truncate text-[10px] leading-tight">
-                Karar Destek Paneli
+              <div className="truncate text-[10px] leading-tight font-medium tracking-[0.12em] text-yellow-700">
+                SATIN ALMA KARAR DESTEK
               </div>
             </div>
           )}

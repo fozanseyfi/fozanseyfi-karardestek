@@ -12,7 +12,6 @@ import {
   Check,
   X,
   Shield,
-  Info,
 } from "lucide-react";
 import { ScoreDemo } from "@/components/auth/score-demo";
 import { TemplateDemo } from "@/components/auth/template-demo";
@@ -115,25 +114,6 @@ export function FeaturesShowcase() {
                 <span>Yalnızca sizin davet ettikleriniz erişebilir</span>
               </li>
             </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Yasal sorumluluk uyarısı */}
-      <div className="rounded-xl border border-amber-200/70 bg-amber-50/50 p-5 md:p-6">
-        <div className="flex items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-sm">
-            <Info className="size-4" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-amber-900 text-xs font-semibold tracking-wide uppercase">
-              Sorumluluk Reddi
-            </div>
-            <p className="mt-1 text-sm leading-relaxed text-slate-700">
-              <strong className="text-amber-900">EPC Karar Destek</strong>, bir <strong>karar destek aracıdır</strong>;
-              nihai satın alma kararının sorumluluğu kullanıcıya aittir. Algoritma sonuçları yol gösterici niteliktedir
-              ve <strong>teknik, finansal veya hukuki danışmanlık yerine geçmez</strong>.
-            </p>
           </div>
         </div>
       </div>

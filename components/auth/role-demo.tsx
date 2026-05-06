@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   UserPlus,
   Users,
@@ -13,122 +12,28 @@ import {
   GitCompareArrows,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DemoShell } from "@/components/auth/demo-shell";
 
-type Frame = {
-  id: number;
-  caption: string;
-  body: React.ReactNode;
-};
-
-const FRAME_DURATION_MS = 3500;
+const CAPTIONS = [
+  "Yönetici, Kullanıcılar sekmesinden ekibini davet eder",
+  "Yeni davet: e-posta + rol seçimi (Kullanıcı / Görüntüleyici / Yönetici)",
+  "Davet edilen kişi listede görünür — rol her zaman değiştirilebilir",
+  "⚙️ ikonuyla kullanıcının kaynak erişimi yönetilir",
+  "Her karşılaştırma için 3 mod: Tam Erişim · Salt Okunur · Gizli",
+  "Kullanıcı, salt-okunur işaretlenen karşılaştırmayı görür ama düzenleyemez",
+];
 
 export function RoleDemo() {
-  const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    if (paused) return;
-    const t = setInterval(() => {
-      setActive((prev) => (prev + 1) % FRAMES.length);
-    }, FRAME_DURATION_MS);
-    return () => clearInterval(t);
-  }, [paused]);
-
-  const frame = FRAMES[active];
-
-  return (
-    <div
-      className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      {/* Mock browser bar */}
-      <div className="flex items-center gap-1.5 border-b bg-slate-50 px-3 py-2">
-        <div className="size-2.5 rounded-full bg-rose-400" />
-        <div className="size-2.5 rounded-full bg-amber-400" />
-        <div className="size-2.5 rounded-full bg-emerald-400" />
-        <div className="ml-3 flex-1 truncate rounded bg-white px-2 py-0.5 text-[10px] text-slate-500">
-          karardestek.fozanseyfi.com
-        </div>
-      </div>
-
-      {/* Frame content */}
-      <div className="relative h-[260px] bg-slate-50">
-        {FRAMES.map((f, idx) => (
-          <div
-            key={f.id}
-            className={cn(
-              "absolute inset-0 transition-opacity duration-500",
-              idx === active ? "opacity-100" : "pointer-events-none opacity-0"
-            )}
-            aria-hidden={idx !== active}
-          >
-            {f.body}
-          </div>
-        ))}
-      </div>
-
-      {/* Caption + progress */}
-      <div className="border-t bg-white px-4 py-3">
-        <div className="flex items-center gap-2 text-sm">
-          <span className="text-muted-foreground text-[10px] font-bold tabular-nums">
-            {String(active + 1).padStart(2, "0")} / {String(FRAMES.length).padStart(2, "0")}
-          </span>
-          <span className="text-foreground font-medium">{frame.caption}</span>
-        </div>
-        <div className="mt-2 flex gap-1">
-          {FRAMES.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => setActive(idx)}
-              className={cn(
-                "h-1 flex-1 rounded-full transition-colors",
-                idx === active ? "bg-blue-600" : idx < active ? "bg-blue-200" : "bg-slate-200"
-              )}
-              aria-label={`Adım ${idx + 1}`}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  const frames = [
+    <Frame1AdminUsers key="1" />,
+    <Frame2InviteDialog key="2" />,
+    <Frame3UserAdded key="3" />,
+    <Frame4OpenAccess key="4" />,
+    <Frame5AccessModes key="5" />,
+    <Frame6UserView key="6" />,
+  ];
+  return <DemoShell frames={frames} captions={CAPTIONS} />;
 }
-
-// ============= FRAMES =============
-
-const FRAMES: Frame[] = [
-  {
-    id: 1,
-    caption: "Yönetici, Kullanıcılar sekmesinden ekibini davet eder",
-    body: <Frame1AdminUsers />,
-  },
-  {
-    id: 2,
-    caption: "Yeni davet: e-posta + rol seçimi (Kullanıcı / Görüntüleyici / Yönetici)",
-    body: <Frame2InviteDialog />,
-  },
-  {
-    id: 3,
-    caption: "Davet edilen kişi listede görünür — rol her zaman değiştirilebilir",
-    body: <Frame3UserAdded />,
-  },
-  {
-    id: 4,
-    caption: "⚙️ ikonuyla kullanıcının kaynak erişimi yönetilir",
-    body: <Frame4OpenAccess />,
-  },
-  {
-    id: 5,
-    caption: "Her karşılaştırma için 3 mod: Tam Erişim · Salt Okunur · Gizli",
-    body: <Frame5AccessModes />,
-  },
-  {
-    id: 6,
-    caption: "Kullanıcı, salt-okunur işaretlenen karşılaştırmayı görür ama düzenleyemez",
-    body: <Frame6UserView />,
-  },
-];
 
 // --- Frame 1: Admin Users page ---
 function Frame1AdminUsers() {

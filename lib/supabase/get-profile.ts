@@ -21,6 +21,17 @@ export async function getCurrentProfile(): Promise<Profile | null> {
     }
     return (data as Profile | null) ?? null;
   } catch (err) {
+    // Next.js dynamic server signal'larını re-throw et — yoksa build sırasında route static gibi davranır
+    if (
+      err &&
+      typeof err === "object" &&
+      "digest" in err &&
+      typeof (err as { digest?: unknown }).digest === "string" &&
+      ((err as { digest: string }).digest.startsWith("DYNAMIC_SERVER_USAGE") ||
+        (err as { digest: string }).digest.startsWith("NEXT_REDIRECT"))
+    ) {
+      throw err;
+    }
     console.error("[getCurrentProfile] uncaught:", err);
     return null;
   }

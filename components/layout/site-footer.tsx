@@ -13,10 +13,10 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-auto border-t bg-white">
-      <div className="text-muted-foreground mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs md:flex-row md:px-6">
+      <div className="text-muted-foreground mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs md:flex-row md:px-8">
         <div className="flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-center md:justify-start md:text-left">
           <span>© {year}</span>
-          <span className="text-foreground font-medium">EPC Karar Destek</span>
+          <span className="text-foreground font-medium">KararDestek</span>
           <span className="opacity-50">·</span>
           <span>Tasarım & Geliştirme:</span>
           <a

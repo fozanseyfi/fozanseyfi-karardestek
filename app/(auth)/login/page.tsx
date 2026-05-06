@@ -2,54 +2,102 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Eye, EyeOff, Sparkles, Shield, Check } from "lucide-react";
+import Link from "next/link";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import Link from "next/link";
 import { AuthHeader } from "@/components/auth/auth-landing";
 import { AuthMissionCard } from "@/components/auth/auth-mission-card";
+import { HeroPreviewCard } from "@/components/auth/hero-preview-card";
 import { FeaturesShowcase } from "@/components/auth/features-showcase";
+import { PlatformsRow } from "@/components/auth/platforms-row";
 import { SiteFooter } from "@/components/layout/site-footer";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 via-white to-white">
+    <div className="flex min-h-screen flex-col bg-white">
       <AuthHeader />
 
-      {/* HERO + LOGIN FORM */}
-      <section className="mx-auto w-full max-w-6xl px-4 pt-12 pb-6 md:px-6 md:pt-20">
-        <div className="mx-auto max-w-md text-center">
-          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-blue-200/60 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-            GES &amp; RES Tedarik Kararı
+      {/* HERO: 2-column login + preview */}
+      <section className="mx-auto w-full max-w-7xl px-4 pt-8 pb-12 md:px-8 md:pt-12">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:gap-12">
+          {/* LEFT — login form & welcome */}
+          <div className="flex flex-col">
+            <div className="mb-5 inline-flex w-fit items-center gap-1.5 rounded-full border border-yellow-200/70 bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-800">
+              <Sparkles className="size-3" />
+              BAĞIMSIZ BİR İNİSİYATİF
+            </div>
+            <h1 className="text-3xl font-semibold leading-tight tracking-tight text-slate-900 md:text-4xl">
+              Hoş Geldiniz
+            </h1>
+            <p className="mt-2 max-w-md text-sm text-slate-600">
+              Hesabınıza giriş yapın ve karşılaştırma yönetimine kaldığınız yerden devam edin.
+            </p>
+
+            <div className="mt-6">
+              <Suspense fallback={<LoginSkeleton />}>
+                <LoginForm />
+              </Suspense>
+            </div>
+
+            <p className="mt-4 text-center text-sm text-slate-600">
+              Hesabın yok mu?{" "}
+              <Link href="/signup" className="font-semibold text-yellow-700 hover:underline">
+                Hemen kayıt ol
+              </Link>
+            </p>
+
+            <AuthMissionCard />
           </div>
-          <h1 className="text-3xl leading-tight font-semibold tracking-tight md:text-4xl">
-            Hoş Geldiniz
-          </h1>
-          <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
-            Hesabınıza giriş yapın.
-          </p>
-        </div>
 
-        <div className="mx-auto mt-8 w-full max-w-md">
-          <Suspense fallback={<LoginSkeleton />}>
-            <LoginForm />
-          </Suspense>
-
-          <p className="text-muted-foreground mt-4 text-center text-sm">
-            Hesabın yok mu?{" "}
-            <Link href="/signup" className="text-primary font-medium hover:underline">
-              Hemen kayıt ol
-            </Link>
-          </p>
-
-          <AuthMissionCard />
+          {/* RIGHT — eye-catching preview hero */}
+          <div className="lg:pl-2">
+            <HeroPreviewCard />
+          </div>
         </div>
       </section>
 
-      <FeaturesShowcase />
+      {/* HOW IT WORKS — full width, centered */}
+      <FeaturesShowcase showPrivacy={false} maxWidthClass="max-w-7xl" />
+
+      {/* PRIVACY (amber, full width) */}
+      <section className="mx-auto w-full max-w-7xl px-4 pb-12 md:px-8">
+        <div className="rounded-2xl border border-yellow-200/70 bg-gradient-to-br from-yellow-50 via-white to-white p-6 md:p-8">
+          <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-center">
+            <div className="flex size-14 items-center justify-center rounded-2xl bg-yellow-500 text-white shadow-md">
+              <Shield className="size-7" />
+            </div>
+            <div>
+              <div className="text-xs font-semibold tracking-[0.14em] text-yellow-900 uppercase">
+                Veri Gizliliği
+              </div>
+              <h3 className="mt-1 text-lg font-semibold tracking-tight">
+                Verileriniz size aittir. Geliştirici dahil hiç kimse görüntüleyemez.
+              </h3>
+              <ul className="mt-3 grid gap-1.5 text-sm text-slate-700 md:grid-cols-2">
+                {[
+                  "Satır seviyesinde güvenlik (RLS) ile şifrelenir",
+                  "Hesaplar arası tam izolasyon",
+                  "Üçüncü taraf izleme veya analitik yok",
+                  "Yalnızca sizin davet ettikleriniz erişebilir",
+                ].map((p) => (
+                  <li key={p} className="flex items-start gap-2">
+                    <Check className="mt-0.5 size-4 shrink-0 text-yellow-600" />
+                    <span>{p}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* OTHER PLATFORMS */}
+      <PlatformsRow />
+
       <SiteFooter />
     </div>
   );
@@ -57,12 +105,9 @@ export default function LoginPage() {
 
 function LoginSkeleton() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Giriş Yap</CardTitle>
-        <CardDescription>Yükleniyor...</CardDescription>
-      </CardHeader>
-    </Card>
+    <div className="rounded-2xl border border-yellow-100 bg-white p-6 shadow-sm">
+      <div className="text-sm text-muted-foreground">Yükleniyor...</div>
+    </div>
   );
 }
 
@@ -71,6 +116,7 @@ function LoginForm() {
   const redirect = params.get("redirect") ?? "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
@@ -89,48 +135,63 @@ function LoginForm() {
   }
 
   return (
-    <Card className="border-border/60 shadow-lg">
-      <CardContent className="p-6">
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">E-posta</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="ad@firma.com"
-              className="h-11"
-            />
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor="password">Şifre</Label>
-              <Link
-                href="/forgot-password"
-                className="text-muted-foreground hover:text-foreground text-xs underline-offset-4 hover:underline"
-              >
-                Şifremi unuttum
-              </Link>
-            </div>
-            <Input
-              id="password"
-              type="password"
-              required
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="h-11"
-            />
-          </div>
-          <Button type="submit" className="h-11 w-full" disabled={loading}>
-            {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+    <form onSubmit={onSubmit} className="space-y-4">
+      <div className="space-y-1.5">
+        <Label htmlFor="email" className="text-xs font-semibold text-slate-700">
+          E-posta
+        </Label>
+        <Input
+          id="email"
+          type="email"
+          required
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="ornek@firma.com"
+          className="h-11 border-slate-200 bg-white focus-visible:border-yellow-400 focus-visible:ring-yellow-200"
+        />
+      </div>
+      <div className="space-y-1.5">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password" className="text-xs font-semibold text-slate-700">
+            Şifre
+          </Label>
+          <Link
+            href="/forgot-password"
+            className="text-xs font-medium text-yellow-700 hover:underline"
+          >
+            Şifremi unuttum
+          </Link>
+        </div>
+        <div className="relative">
+          <Input
+            id="password"
+            type={showPw ? "text" : "password"}
+            required
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="h-11 border-slate-200 bg-white pr-10 focus-visible:border-yellow-400 focus-visible:ring-yellow-200"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPw((v) => !v)}
+            tabIndex={-1}
+            aria-label={showPw ? "Şifreyi gizle" : "Şifreyi göster"}
+            className="absolute right-2.5 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 hover:bg-yellow-50 hover:text-yellow-700"
+          >
+            {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
+        </div>
+      </div>
+      <Button
+        type="submit"
+        disabled={loading}
+        className="h-11 w-full bg-yellow-500 font-semibold text-white shadow-sm hover:bg-yellow-600"
+      >
+        {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
+      </Button>
+    </form>
   );
 }

@@ -33,20 +33,26 @@ const TABS: {
   { key: "roles", label: "Roller & İzinler", icon: Users, tone: "emerald" },
 ];
 
-export function FeaturesShowcase() {
+export function FeaturesShowcase({
+  showPrivacy = true,
+  maxWidthClass = "max-w-6xl",
+}: {
+  showPrivacy?: boolean;
+  maxWidthClass?: string;
+} = {}) {
   const [active, setActive] = useState<TabKey>("score");
 
   return (
-    <section className="mx-auto w-full max-w-6xl space-y-8 px-4 py-12 md:px-6">
+    <section className={cn("mx-auto w-full space-y-8 px-4 py-12 md:px-6", maxWidthClass)}>
       {/* Heading */}
       <div className="mx-auto max-w-2xl text-center">
-        <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+        <div className="inline-flex items-center gap-1.5 rounded-full border border-yellow-200/70 bg-yellow-50 px-3 py-1 text-[11px] font-semibold tracking-[0.18em] text-yellow-700 uppercase">
           Nasıl Çalışır
         </div>
-        <h2 className="mt-1 text-2xl font-semibold tracking-tight md:text-3xl">
-          Tedarik kararlarını <span className="text-primary">veri odaklı</span> verin
+        <h2 className="mt-3 text-2xl font-semibold tracking-tight md:text-4xl">
+          Tedarik kararlarını <span className="text-yellow-600">veri odaklı</span> verin
         </h2>
-        <p className="text-muted-foreground mt-2 text-sm md:text-base">
+        <p className="text-muted-foreground mt-3 text-sm md:text-base">
           Aşağıdaki sekmelere tıklayarak özelliklerin canlı demolarını görebilirsiniz.
         </p>
       </div>
@@ -64,8 +70,8 @@ export function FeaturesShowcase() {
               className={cn(
                 "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all",
                 isActive
-                  ? "border-primary bg-primary text-primary-foreground shadow-sm"
-                  : "bg-background hover:bg-muted text-muted-foreground hover:text-foreground border-slate-200"
+                  ? "border-yellow-500 bg-yellow-500 text-white shadow-sm"
+                  : "bg-white text-slate-600 hover:border-yellow-300 hover:bg-yellow-50 hover:text-yellow-700 border-slate-200"
               )}
             >
               <Icon className="size-4" />
@@ -75,8 +81,8 @@ export function FeaturesShowcase() {
         })}
       </div>
 
-      {/* Tab content */}
-      <div className="rounded-2xl border bg-gradient-to-b from-white to-slate-50/50 p-5 shadow-sm md:p-7">
+      {/* Tab content — fixed min-height keeps panel stable while switching tabs */}
+      <div className="min-h-[600px] rounded-2xl border bg-gradient-to-b from-white to-slate-50/50 p-5 shadow-sm md:min-h-[560px] md:p-7">
         {active === "score" && <ScoreTab />}
         {active === "templates" && <TemplatesTab />}
         {active === "revisions" && <RevisionsTab />}
@@ -84,6 +90,7 @@ export function FeaturesShowcase() {
       </div>
 
       {/* Veri güvenliği */}
+      {showPrivacy && (
       <div className="rounded-2xl border border-emerald-200/60 bg-gradient-to-br from-emerald-50 via-white to-white p-6 md:p-8">
         <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-center">
           <div className="flex size-14 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-md">
@@ -117,6 +124,7 @@ export function FeaturesShowcase() {
           </div>
         </div>
       </div>
+      )}
     </section>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Sparkles,
   Shield,
@@ -9,6 +10,7 @@ import {
   Mail,
   Globe,
   Check,
+  Trophy,
 } from "lucide-react";
 
 function LinkedinIcon({ className }: { className?: string }) {
@@ -40,48 +42,60 @@ const FEATURES = [
   },
 ];
 
-export function AuthHeader() {
+export function AuthHeader({ showSignupCta = true }: { showSignupCta?: boolean } = {}) {
   return (
-    <header className="bg-background/80 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30 border-b backdrop-blur">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-6">
+    <header className="bg-white/85 supports-[backdrop-filter]:bg-white/65 sticky top-0 z-30 border-b border-yellow-100/70 backdrop-blur">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 md:px-8">
         <a href="/" className="flex items-center gap-2.5">
-          <div className="from-primary to-primary/80 flex size-8 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm">
-            <Sparkles className="text-primary-foreground size-4" />
+          <div className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-600 shadow-sm">
+            <Trophy className="size-4 text-white" />
           </div>
           <div className="leading-tight">
-            <div className="text-sm font-semibold tracking-tight">EPC Karar Destek</div>
-            <div className="text-muted-foreground text-[10px]">Karar Destek Platformu</div>
+            <div className="text-sm font-semibold tracking-tight">KararDestek</div>
+            <div className="text-[10px] font-medium tracking-[0.14em] text-yellow-700/80">
+              SATIN ALMA KARAR DESTEK
+            </div>
           </div>
         </a>
-        <div className="hidden items-center gap-1 sm:flex">
-          <a
-            href="https://www.linkedin.com/in/fozanseyfi/"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="LinkedIn"
-            title="LinkedIn"
-            className="text-muted-foreground hover:bg-muted hover:text-foreground flex size-9 items-center justify-center rounded-md transition-colors"
-          >
-            <LinkedinIcon className="size-4" />
-          </a>
-          <a
-            href="https://fozanseyfi.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Web Sitesi"
-            title="fozanseyfi.com"
-            className="text-muted-foreground hover:bg-muted hover:text-foreground flex size-9 items-center justify-center rounded-md transition-colors"
-          >
-            <Globe className="size-4" />
-          </a>
-          <a
-            href="mailto:fozanseyfi@gmail.com"
-            aria-label="E-posta"
-            title="fozanseyfi@gmail.com"
-            className="text-muted-foreground hover:bg-muted hover:text-foreground flex size-9 items-center justify-center rounded-md transition-colors"
-          >
-            <Mail className="size-4" />
-          </a>
+        <div className="flex items-center gap-1">
+          <div className="hidden items-center gap-1 sm:flex">
+            <a
+              href="https://www.linkedin.com/in/fozanseyfi/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              title="LinkedIn"
+              className="text-slate-500 hover:bg-yellow-50 hover:text-yellow-700 flex size-9 items-center justify-center rounded-md transition-colors"
+            >
+              <LinkedinIcon className="size-4" />
+            </a>
+            <a
+              href="https://fozanseyfi.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Web Sitesi"
+              title="fozanseyfi.com"
+              className="text-slate-500 hover:bg-yellow-50 hover:text-yellow-700 flex size-9 items-center justify-center rounded-md transition-colors"
+            >
+              <Globe className="size-4" />
+            </a>
+            <a
+              href="mailto:fozanseyfi@gmail.com"
+              aria-label="E-posta"
+              title="fozanseyfi@gmail.com"
+              className="text-slate-500 hover:bg-yellow-50 hover:text-yellow-700 flex size-9 items-center justify-center rounded-md transition-colors"
+            >
+              <Mail className="size-4" />
+            </a>
+          </div>
+          {showSignupCta && (
+            <Link
+              href="/signup"
+              className="ml-1 inline-flex h-9 items-center rounded-md bg-yellow-500 px-3.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-yellow-600 active:scale-[.98]"
+            >
+              Kayıt
+            </Link>
+          )}
         </div>
       </div>
     </header>

@@ -34,7 +34,7 @@ const PLATFORMS: Platform[] = [
     description: "Solar EPC fiyatlandırma & cash flow",
     icon: Sparkles,
     tone: "emerald",
-    href: "https://solarteklif.fozanseyfi.com",
+    href: "https://teklif.fozanseyfi.com",
   },
   {
     key: "proje-yonetim",

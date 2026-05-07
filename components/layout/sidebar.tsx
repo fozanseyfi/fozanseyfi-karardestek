@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Trophy,
   MessageCircle,
+  BookOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/domain";
@@ -38,6 +39,7 @@ const NAV: NavItem[] = [
   { href: "/templates", label: "Şablonlar", icon: FileStack, group: "Kaynaklar" },
   { href: "/notifications", label: "Bildirimler", icon: Bell, group: "Kaynaklar" },
   { href: "/admin/users", label: "Kullanıcılar", icon: Users, adminOnly: true, group: "Yönetim" },
+  { href: "/how-it-works", label: "Nasıl Çalışır", icon: BookOpen, group: "Destek" },
   { href: "/contact", label: "İletişime Geç", icon: MessageCircle, group: "Destek" },
 ];
 

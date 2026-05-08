@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Sparkles,
   FolderKanban,
   LineChart,
   Wrench,
@@ -11,7 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Tone = "emerald" | "violet" | "blue" | "rose";
+type Tone = "violet" | "blue" | "rose";
 
 type Platform = {
   key: string;
@@ -24,16 +23,6 @@ type Platform = {
 };
 
 const PLATFORMS: Platform[] = [
-  {
-    key: "solar-teklif",
-    title: "Solar Teklif Platformu",
-    tagline: "EPC fiyatlandırma & cash flow",
-    description:
-      "Solar EPC projeleri için fiyatlandırma, akıllı marj hesabı ve nakit akışı yönetimi. Hazır şablonlar, PDF & Excel çıktıları ile teklif analizlerinizi doğru bir biçimde yapıp doğru teklifin hazırlanmasını sağlayabilirsiniz.",
-    icon: Sparkles,
-    tone: "emerald",
-    href: "https://teklif.fozanseyfi.com",
-  },
   {
     key: "proje-yonetim",
     title: "Proje Yönetim Platformu",
@@ -70,13 +59,6 @@ const TONE_STYLES: Record<
   Tone,
   { iconBg: string; iconText: string; ring: string; hoverBorder: string; gradient: string }
 > = {
-  emerald: {
-    iconBg: "bg-emerald-100",
-    iconText: "text-emerald-700",
-    ring: "ring-emerald-200/60",
-    hoverBorder: "hover:border-emerald-300",
-    gradient: "from-emerald-50/60 via-white to-white",
-  },
   violet: {
     iconBg: "bg-violet-100",
     iconText: "text-violet-700",
@@ -117,8 +99,7 @@ export default function PlatformsPage() {
           </h1>
           <p className="mt-3 text-base leading-relaxed text-slate-600 md:text-lg">
             Hepsi tamamen ücretsiz, <strong>bağımsız bir inisiyatifle</strong> sektör paydaşlarına
-            sunuluyor. Buraya yaptığınız tek kayıt ile tüm platformlara aynı şifreyle
-            giriş yaparsınız.
+            sunuluyor. Yakında olan platformlara erişim için bildirim almak istersen iletişime geç.
           </p>
         </div>
       </div>

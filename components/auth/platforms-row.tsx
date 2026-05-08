@@ -28,15 +28,6 @@ const PLATFORMS: Platform[] = [
     current: true,
   },
   {
-    key: "solar-teklif",
-    title: "Solar Teklif Platformu",
-    short: "Solar Teklif Pla...",
-    description: "Solar EPC fiyatlandırma & cash flow",
-    icon: Sparkles,
-    tone: "emerald",
-    href: "https://teklif.fozanseyfi.com",
-  },
-  {
     key: "proje-yonetim",
     title: "Proje Yönetim Platformu",
     short: "Proje Yönetim Platformu",
@@ -111,12 +102,11 @@ export function PlatformsRow() {
         Geliştirdiğim diğer platformlara da göz atın
       </h2>
       <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">
-        Hepsi tamamen ücretsiz, <strong>bağımsız bir inisiyatifle</strong> sektör paydaşlarına sunuluyor. Buraya
-        yaptığınız tek kayıt ile <strong>tüm platformlarıma aynı şifreyle giriş yapabilirsiniz</strong> — diğer
-        platformlarıma ulaşmak için kart üzerine tıklamanız yeterli.
+        Hepsi tamamen ücretsiz, <strong>bağımsız bir inisiyatifle</strong> sektör paydaşlarına sunuluyor.
+        Diğer platformlara ulaşmak için kart üzerine tıklamanız yeterli.
       </p>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {PLATFORMS.map((p) => (
           <PlatformCard key={p.key} platform={p} />
         ))}

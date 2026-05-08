@@ -29,7 +29,7 @@ const PLATFORMS: Platform[] = [
     title: "Solar Teklif Platformu",
     tagline: "EPC fiyatlandırma & cash flow",
     description:
-      "Solar EPC projeleri için fiyatlandırma, akıllı marj hesabı ve nakit akışı yönetimi. Hazır şablonlar, PDF & Excel çıktıları ile teklif sürecini saatler yerine dakikalar içinde tamamlarsın.",
+      "Solar EPC projeleri için fiyatlandırma, akıllı marj hesabı ve nakit akışı yönetimi. Hazır şablonlar, PDF & Excel çıktıları ile teklif analizlerinizi doğru bir biçimde yapıp doğru teklifin hazırlanmasını sağlayabilirsiniz.",
     icon: Sparkles,
     tone: "emerald",
     href: "https://teklif.fozanseyfi.com",

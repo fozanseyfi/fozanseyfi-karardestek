@@ -1,9 +1,11 @@
 -- Solar Teklif ayri bir Supabase projesine geciyor.
 -- handle_new_user trigger'inda solar-teklif platform satiri kaldirildi.
 -- Sadece karar-destek uyeligi olusturulacak.
+-- Mevcut orphan solar-teklif satirlari da temizlenir.
 --
 -- Composite PK: (user_id, organization_id, platform) -> ON CONFLICT'i da guncelliyoruz.
 
+-- 1. Trigger function: sadece karar-destek INSERT'i
 create or replace function handle_new_user()
 returns trigger
 language plpgsql
@@ -53,3 +55,8 @@ begin
   return new;
 end;
 $$;
+
+-- 2. Mevcut orphan solar-teklif satirlarini temizle
+-- Solar Teklif kendi Supabase'ine gectigi icin bu satirlar artik isimize yaramiyor
+delete from public.organization_members
+where platform = 'solar-teklif';

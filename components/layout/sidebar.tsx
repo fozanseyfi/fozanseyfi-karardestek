@@ -16,6 +16,7 @@ import {
   Trophy,
   MessageCircle,
   BookOpen,
+  Boxes,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/domain";
@@ -41,6 +42,7 @@ const NAV: NavItem[] = [
   { href: "/admin/users", label: "Kullanıcılar", icon: Users, adminOnly: true, group: "Yönetim" },
   { href: "/how-it-works", label: "Nasıl Çalışır", icon: BookOpen, group: "Destek" },
   { href: "/contact", label: "İletişime Geç", icon: MessageCircle, group: "Destek" },
+  { href: "/platforms", label: "Diğer Platformlar", icon: Boxes, group: "Diğer Platformlar" },
 ];
 
 const STORAGE_KEY = "sidebar-collapsed";

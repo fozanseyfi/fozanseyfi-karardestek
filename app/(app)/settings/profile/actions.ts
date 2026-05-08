@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { PLATFORM_KEY } from "@/lib/platform";
 
 export async function updateOrganizationName(name: string) {
   const supabase = await createClient();
@@ -87,10 +88,15 @@ export async function convertToOwnOrganization() {
     }
     if (!newOrg) throw new Error("Yeni panel oluşturuldu ama satır geri dönmedi.");
 
-    // 2. Yeni org'a admin olarak ekle (eski membership korunur)
+    // 2. Yeni org'a (BU platform için) admin olarak ekle (eski membership korunur)
     const { error: e2 } = await adminSb
       .from("organization_members")
-      .insert({ user_id: user.id, organization_id: newOrg.id, role: "admin" });
+      .insert({
+        user_id: user.id,
+        organization_id: newOrg.id,
+        role: "admin",
+        platform: PLATFORM_KEY,
+      });
     if (e2) {
       console.error("[convert] org_members insert failed:", e2);
       throw new Error(`Üyelik kaydı eklenemedi: ${e2.message}`);
@@ -140,7 +146,8 @@ export async function listMyMemberships() {
   const { data, error } = await supabase
     .from("organization_members")
     .select("organization_id, role, organizations(id, name)")
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .eq("platform", PLATFORM_KEY);
   if (error) {
     console.error("[listMyMemberships]", error);
     return [];

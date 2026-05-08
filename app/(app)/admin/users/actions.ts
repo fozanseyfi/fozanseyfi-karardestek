@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import type { UserRole } from "@/lib/constants";
+import { PLATFORM_KEY } from "@/lib/platform";
 
 async function requireAdmin() {
   const supabase = await createClient();
@@ -49,13 +50,14 @@ export async function inviteUser(email: string, role: UserRole, fullName: string
       .from("organization_members")
       .select("user_id", { head: true })
       .eq("user_id", existing.id)
-      .eq("organization_id", orgId);
+      .eq("organization_id", orgId)
+      .eq("platform", PLATFORM_KEY);
     if (alreadyMemberCheck) {
       // ignore — sadece insert dene
     }
     const { error: insertErr } = await adminSb
       .from("organization_members")
-      .insert({ user_id: existing.id, organization_id: orgId, role });
+      .insert({ user_id: existing.id, organization_id: orgId, role, platform: PLATFORM_KEY });
     if (insertErr) {
       // 23505 = unique_violation — zaten üye
       if ("code" in insertErr && insertErr.code === "23505") {
@@ -104,7 +106,8 @@ export async function updateUserRole(userId: string, role: UserRole) {
     .from("organization_members")
     .update({ role })
     .eq("user_id", userId)
-    .eq("organization_id", orgId);
+    .eq("organization_id", orgId)
+    .eq("platform", PLATFORM_KEY);
   if (omErr) throw new Error(omErr.message);
 
   // Eğer kullanıcının ŞU AN aktif org'u bu org ise profile.role'ünü de senkronize et
@@ -139,12 +142,14 @@ export async function deleteUser(userId: string) {
 
     const adminSb = await createServiceClient();
 
-    // 1. Kullanıcıyı bu org'dan çıkar (auth user'ı silmez — başka panellerde olabilir)
+    // 1. Kullanıcıyı bu org'dan (sadece BU platformdan) çıkar
+    //    Diger platformlardaki üyeligi etkilenmez
     const { error: omErr, count: deletedCount } = await adminSb
       .from("organization_members")
       .delete({ count: "exact" })
       .eq("user_id", userId)
-      .eq("organization_id", orgId);
+      .eq("organization_id", orgId)
+      .eq("platform", PLATFORM_KEY);
     if (omErr) {
       console.error("[deleteUser] om delete failed:", omErr);
       throw new Error(`Üyelik silinemedi: ${omErr.message}`);
@@ -164,11 +169,12 @@ export async function deleteUser(userId: string) {
     }
 
     if (targetProfile?.organization_id === orgId) {
-      // Diğer üyeliklerden birini bul
+      // Diğer üyeliklerden birini bul (yine sadece BU platformda)
       const { data: others } = await adminSb
         .from("organization_members")
         .select("organization_id, role")
         .eq("user_id", userId)
+        .eq("platform", PLATFORM_KEY)
         .limit(1);
       const otherMembership = others?.[0];
 
@@ -195,7 +201,12 @@ export async function deleteUser(userId: string) {
         } else if (newOrg) {
           await adminSb
             .from("organization_members")
-            .insert({ user_id: userId, organization_id: newOrg.id, role: "admin" });
+            .insert({
+              user_id: userId,
+              organization_id: newOrg.id,
+              role: "admin",
+              platform: PLATFORM_KEY,
+            });
           await adminSb
             .from("profiles")
             .update({ organization_id: newOrg.id, role: "admin" })

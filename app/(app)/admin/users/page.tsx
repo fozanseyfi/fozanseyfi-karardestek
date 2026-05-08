@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/supabase/get-profile";
 import { isAdmin } from "@/lib/permissions";
 import { UsersTable } from "@/components/admin/users-table";
 import type { UserRole } from "@/lib/constants";
+import { PLATFORM_KEY } from "@/lib/platform";
 
 export default async function AdminUsersPage() {
   const me = await getCurrentProfile();
@@ -14,11 +15,12 @@ export default async function AdminUsersPage() {
   let list: Row[] = [];
 
   try {
-    // 1) Admin'in org'undaki tüm üyelikler
+    // 1) Admin'in org'undaki BU PLATFORMA ait üyelikler
     const { data: members, error: mErr } = await supabase
       .from("organization_members")
       .select("user_id, role")
-      .eq("organization_id", me!.organization_id);
+      .eq("organization_id", me!.organization_id)
+      .eq("platform", PLATFORM_KEY);
     if (mErr) {
       console.error("[admin/users] memberships query error:", mErr);
     } else if (members && members.length > 0) {

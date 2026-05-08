@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { getCurrentProfile } from "@/lib/supabase/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { OnboardingDialog } from "@/components/onboarding/onboarding-dialog";
+import { PLATFORM_KEY } from "@/lib/platform";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const profile = await getCurrentProfile();
@@ -49,7 +50,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     const { data: membersRaw, error: mErr } = await supabase
       .from("organization_members")
       .select("organization_id, role, organizations(id, name)")
-      .eq("user_id", profile.id);
+      .eq("user_id", profile.id)
+      .eq("platform", PLATFORM_KEY);
     if (mErr) {
       console.error("[layout] memberships query error:", mErr);
     } else {

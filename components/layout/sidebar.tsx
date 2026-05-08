@@ -93,7 +93,7 @@ export function Sidebar({
       className={cn(
         "bg-sidebar border-sidebar-border flex flex-col border-r transition-[width] duration-200 ease-out",
         mobile ? "w-full" : isCollapsed ? "w-16" : "w-64",
-        !mobile && "hidden md:flex"
+        !mobile && "hidden md:sticky md:top-0 md:flex md:h-screen md:self-start"
       )}
       style={!mounted && !mobile ? { width: 256 } : undefined}
     >

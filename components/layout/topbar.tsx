@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { Menu, LogOut, User as UserIcon, Bell, Building2, Check, ChevronDown } from "lucide-react";
+import { Menu, LogOut, Bell, Building2, Check, ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -178,11 +178,6 @@ export function Topbar({
         <DropdownMenuContent align="end" className="w-56">
           <DropdownMenuLabel>Hesap</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <a href="/settings/profile" className="flex items-center gap-2">
-              <UserIcon className="size-4" /> Profil
-            </a>
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={logout} className="flex items-center gap-2">
             <LogOut className="size-4" /> Çıkış Yap
           </DropdownMenuItem>

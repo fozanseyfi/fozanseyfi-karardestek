@@ -17,6 +17,7 @@ import {
   MessageCircle,
   BookOpen,
   Boxes,
+  User as UserIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/domain";
@@ -38,8 +39,9 @@ const NAV: NavItem[] = [
   { href: "/comparisons", label: "Karşılaştırmalar", icon: GitCompareArrows, group: "Çalışma" },
   { href: "/firms", label: "Firmalar", icon: Building2, group: "Çalışma" },
   { href: "/templates", label: "Şablonlar", icon: FileStack, group: "Kaynaklar" },
-  { href: "/notifications", label: "Bildirimler", icon: Bell, group: "Kaynaklar" },
   { href: "/admin/users", label: "Kullanıcılar", icon: Users, adminOnly: true, group: "Yönetim" },
+  { href: "/settings/profile", label: "Profilim", icon: UserIcon, group: "Yönetim" },
+  { href: "/notifications", label: "Bildirimler", icon: Bell, group: "Yönetim" },
   { href: "/how-it-works", label: "Nasıl Çalışır", icon: BookOpen, group: "Destek" },
   { href: "/contact", label: "İletişime Geç", icon: MessageCircle, group: "Destek" },
   { href: "/platforms", label: "Diğer Platformlar", icon: Boxes, group: "Diğer Platformlar" },

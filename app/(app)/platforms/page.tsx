@@ -4,13 +4,14 @@ import {
   FolderKanban,
   LineChart,
   Wrench,
+  FileSpreadsheet,
   ExternalLink,
   Boxes,
   ArrowRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Tone = "violet" | "blue" | "rose";
+type Tone = "violet" | "blue" | "rose" | "emerald";
 
 type Platform = {
   key: string;
@@ -23,6 +24,16 @@ type Platform = {
 };
 
 const PLATFORMS: Platform[] = [
+  {
+    key: "teklif-platformu",
+    title: "Teklif Platformu",
+    tagline: "Teklif yönetimi & takibi",
+    description:
+      "Tüm teklifleri tek panelden topla, durum ve revizyonlarını izle. Müşteri, kalem ve fiyat geçmişi tek yerde — kim ne teklif vermiş, hangi aşamada, anında gör.",
+    icon: FileSpreadsheet,
+    tone: "emerald",
+    href: "https://teklif.fozanseyfi.com",
+  },
   {
     key: "proje-yonetim",
     title: "Proje Yönetim Platformu",
@@ -79,6 +90,13 @@ const TONE_STYLES: Record<
     ring: "ring-rose-200/60",
     hoverBorder: "hover:border-rose-300",
     gradient: "from-rose-50/60 via-white to-white",
+  },
+  emerald: {
+    iconBg: "bg-emerald-100",
+    iconText: "text-emerald-700",
+    ring: "ring-emerald-200/60",
+    hoverBorder: "hover:border-emerald-300",
+    gradient: "from-emerald-50/60 via-white to-white",
   },
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, FolderKanban, Trophy, LineChart, Wrench, ExternalLink } from "lucide-react";
+import { Sparkles, FolderKanban, Trophy, LineChart, Wrench, FileSpreadsheet, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Tone = "emerald" | "violet" | "amber" | "blue" | "rose";
@@ -26,6 +26,15 @@ const PLATFORMS: Platform[] = [
     tone: "amber",
     href: "/login",
     current: true,
+  },
+  {
+    key: "teklif-platformu",
+    title: "Teklif Platformu",
+    short: "Teklif Platformu",
+    description: "Tekliflerinizi tek panelden yönetin",
+    icon: FileSpreadsheet,
+    tone: "emerald",
+    href: "https://teklif.fozanseyfi.com",
   },
   {
     key: "proje-yonetim",
@@ -106,7 +115,7 @@ export function PlatformsRow() {
         Diğer platformlara ulaşmak için kart üzerine tıklamanız yeterli.
       </p>
 
-      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {PLATFORMS.map((p) => (
           <PlatformCard key={p.key} platform={p} />
         ))}

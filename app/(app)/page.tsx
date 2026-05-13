@@ -99,7 +99,7 @@ export default async function DashboardPage() {
               EPC Karar Destek Platformu
             </span>
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          <h1 className="shimmer-welcome text-3xl font-semibold tracking-tight md:text-4xl">
             {firstName ? `Hoş geldin, ${firstName}` : "Hoş geldin"}
           </h1>
           <p className="mt-2 max-w-xl text-base opacity-90">

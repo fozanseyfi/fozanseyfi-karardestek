@@ -131,11 +131,12 @@
   background-image: linear-gradient(
     100deg,
     #ffffff 0%,
-    #ffffff 28%,
-    #fef3c7 42%,
-    #ffffff 50%,
-    #cffafe 58%,
-    #ffffff 72%,
+    #ffffff 10%,
+    #22d3ee 25%,
+    #a78bfa 40%,
+    #f472b6 55%,
+    #fbbf24 70%,
+    #ffffff 90%,
     #ffffff 100%
   );
   background-size: 200% auto;
@@ -143,7 +144,7 @@
   -webkit-background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-  animation: shimmer-flow 4s linear infinite;
+  animation: shimmer-flow 3s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

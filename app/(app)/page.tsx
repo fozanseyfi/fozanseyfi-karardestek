@@ -90,7 +90,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {/* HERO */}
-      <div className="from-primary via-primary/95 to-primary/80 relative overflow-hidden rounded-2xl bg-gradient-to-br p-8 text-white shadow-xl">
+      <div className="hero-flow relative overflow-hidden rounded-2xl p-8 text-white shadow-xl">
         <div className="bg-grid-white/[0.05] absolute inset-0 [mask-image:radial-gradient(ellipse_at_top_left,white,transparent_70%)]" />
         <div className="relative">
           <div className="mb-2 flex items-center gap-2">
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
               EPC Karar Destek Platformu
             </span>
           </div>
-          <h1 className="shimmer-welcome text-3xl font-semibold tracking-tight md:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
             {firstName ? `Hoş geldin, ${firstName}` : "Hoş geldin"}
           </h1>
           <p className="mt-2 max-w-xl text-base opacity-90">

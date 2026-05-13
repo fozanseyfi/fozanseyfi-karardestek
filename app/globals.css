@@ -122,31 +122,25 @@
   }
 }
 
-@keyframes shimmer-flow {
-  0%   { background-position: 200% 50%; }
-  100% { background-position: -200% 50%; }
+@keyframes hero-flow {
+  0%,
+  100% { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
 }
 
-.shimmer-welcome {
+.hero-flow {
   background-image: linear-gradient(
-    100deg,
-    #ffffff 0%,
-    #ffffff 10%,
-    #22d3ee 25%,
-    #a78bfa 40%,
-    #f472b6 55%,
-    #fbbf24 70%,
-    #ffffff 90%,
-    #ffffff 100%
+    125deg,
+    #0e7490 0%,
+    #0d9488 22%,
+    #4338ca 50%,
+    #0369a1 78%,
+    #0e7490 100%
   );
-  background-size: 200% auto;
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer-flow 3s linear infinite;
+  background-size: 300% 300%;
+  animation: hero-flow 18s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shimmer-welcome { animation: none; }
+  .hero-flow { animation: none; }
 }

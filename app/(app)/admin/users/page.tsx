@@ -11,7 +11,13 @@ export default async function AdminUsersPage() {
   if (!isAdmin(me)) redirect("/");
 
   const supabase = await createClient();
-  type Row = { id: string; email: string; full_name: string | null; role: UserRole; created_at: string };
+  type Row = {
+    id: string;
+    email: string;
+    full_name: string | null;
+    role: UserRole;
+    created_at: string;
+  };
   let list: Row[] = [];
 
   try {
@@ -26,7 +32,7 @@ export default async function AdminUsersPage() {
     } else if (members && members.length > 0) {
       const ids = members.map((m) => m.user_id as string);
       const roleByUser = new Map<string, UserRole>(
-        members.map((m) => [m.user_id as string, m.role as UserRole])
+        members.map((m) => [m.user_id as string, m.role as UserRole]),
       );
       // 2) Bu üyelerin profil bilgileri (ortak org paylaştıkları için RLS izin verir)
       const { data: profiles, error: pErr } = await supabase
@@ -51,16 +57,5 @@ export default async function AdminUsersPage() {
     console.error("[admin/users] uncaught:", err);
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Kullanıcılar</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Yeni kullanıcı davet et, rolleri yönet, eski kullanıcıları sil.
-        </p>
-      </div>
-
-      <UsersTable users={list} currentUserId={me!.id} />
-    </div>
-  );
+  return <UsersTable users={list} currentUserId={me!.id} />;
 }

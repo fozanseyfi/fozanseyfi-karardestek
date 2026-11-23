@@ -14,14 +14,16 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value),
+          );
           response = NextResponse.next({ request });
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, withSharedDomain(options))
+            response.cookies.set(name, value, withSharedDomain(options)),
           );
         },
       },
-    }
+    },
   );
 
   const {
@@ -42,7 +44,10 @@ export async function updateSession(request: NextRequest) {
     path === "/favicon.ico" ||
     path.includes(".");
 
-  if (!user && !isAuthPath && !isPublicAsset) {
+  // Herkese açık sayfalar (giriş gerektirmez, girişliyken de açılır)
+  const isPublicPage = path === "/tanitim" || path.startsWith("/tanitim/");
+
+  if (!user && !isAuthPath && !isPublicAsset && !isPublicPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     url.searchParams.set("redirect", path);

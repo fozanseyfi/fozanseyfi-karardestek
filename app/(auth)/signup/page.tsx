@@ -7,50 +7,51 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
-import { AuthHeader } from "@/components/auth/auth-landing";
-import { AuthMissionCard } from "@/components/auth/auth-mission-card";
-import { FeaturesShowcase } from "@/components/auth/features-showcase";
-import { SiteFooter } from "@/components/layout/site-footer";
+import {
+  AuthChrome,
+  AuthHeading,
+  AuthSingleColumn,
+} from "@/components/auth/auth-chrome";
+import { PlatformNoteCard } from "@/components/auth/login-info";
 
 export default function SignupPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 via-white to-white">
-      <AuthHeader />
+    <AuthChrome cta="login">
+      <AuthSingleColumn>
+        <AuthHeading
+          title="Hesap Oluştur"
+          subtitle="E-posta ve şifrenle kayıt ol; doğrulama maili gelecek."
+        />
 
-      <section className="mx-auto w-full max-w-6xl px-4 pt-12 pb-6 md:px-6 md:pt-20">
-        <div className="mx-auto max-w-md text-center">
-          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-            Ücretsiz Başlangıç
-          </div>
-          <h1 className="text-3xl leading-tight font-semibold tracking-tight md:text-4xl">
-            Hesap Oluştur
-          </h1>
-          <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
-            E-posta ve şifrenle kayıt ol; doğrulama maili gelecek.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-8 w-full max-w-md">
+        <div className="mt-6 sm:mt-7">
           <Suspense fallback={null}>
             <SignupForm />
           </Suspense>
 
           <p className="text-muted-foreground mt-4 text-center text-sm">
             Zaten hesabın var mı?{" "}
-            <Link href="/login" className="text-primary font-medium hover:underline">
+            <Link
+              href="/login"
+              className="text-primary font-medium hover:underline"
+            >
               Giriş yap
             </Link>
           </p>
 
-          <AuthMissionCard />
+          <div className="mt-5 sm:mt-6">
+            <PlatformNoteCard />
+          </div>
         </div>
-      </section>
-
-      <FeaturesShowcase />
-      <SiteFooter />
-    </div>
+      </AuthSingleColumn>
+    </AuthChrome>
   );
 }
 
@@ -110,10 +111,12 @@ function SignupForm() {
           <div className="bg-emerald-600 mx-auto mb-3 flex size-14 items-center justify-center rounded-full text-white shadow-sm">
             <CheckCircle2 className="size-7" />
           </div>
-          <CardTitle className="text-center">Doğrulama maili gönderildi</CardTitle>
+          <CardTitle className="text-center">
+            Doğrulama maili gönderildi
+          </CardTitle>
           <CardDescription className="text-center">
-            <strong className="text-foreground">{email}</strong> adresine gönderdiğimiz bağlantıya tıklayarak hesabını
-            aktifleştir.
+            <strong className="text-foreground">{email}</strong> adresine
+            gönderdiğimiz bağlantıya tıklayarak hesabını aktifleştir.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">

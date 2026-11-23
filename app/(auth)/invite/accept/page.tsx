@@ -3,15 +3,24 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Lock, User, Loader2, CheckCircle2 } from "lucide-react";
+import { Lock, User, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
-import { AuthHeader } from "@/components/auth/auth-landing";
-import { SiteFooter } from "@/components/layout/site-footer";
+import {
+  AuthChrome,
+  AuthHeading,
+  AuthSingleColumn,
+} from "@/components/auth/auth-chrome";
 
 type SessionState = "checking" | "ok" | "missing";
 
@@ -32,7 +41,8 @@ export default function InviteAcceptPage() {
         return;
       }
       setEmail(user.email ?? "");
-      const meta = (user.user_metadata as { full_name?: string } | undefined) ?? {};
+      const meta =
+        (user.user_metadata as { full_name?: string } | undefined) ?? {};
       if (meta.full_name) setName(meta.full_name);
       setSessionState("ok");
     });
@@ -73,24 +83,14 @@ export default function InviteAcceptPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-b from-slate-50 via-white to-white">
-      <AuthHeader />
+    <AuthChrome cta="login">
+      <AuthSingleColumn>
+        <AuthHeading
+          title="Hesabınızı Tamamlayın"
+          subtitle="Davet bağlantısını onayladınız. Şifrenizi belirleyerek hesabınızı aktifleştirin."
+        />
 
-      <section className="mx-auto w-full max-w-6xl flex-1 px-4 pt-12 pb-12 md:px-6 md:pt-20">
-        <div className="mx-auto max-w-md text-center">
-          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-            <CheckCircle2 className="size-3" />
-            Davetiniz Onaylandı
-          </div>
-          <h1 className="text-3xl leading-tight font-semibold tracking-tight md:text-4xl">
-            Hesabınızı Tamamlayın
-          </h1>
-          <p className="text-muted-foreground mx-auto mt-2 max-w-sm text-sm">
-            Davet bağlantısını onayladınız. Şifrenizi belirleyerek hesabınızı aktifleştirin.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-8 w-full max-w-md">
+        <div className="mt-6 sm:mt-7">
           {sessionState === "checking" && (
             <Card className="border-border/60 shadow-lg">
               <CardContent className="flex items-center justify-center gap-2 p-8 text-sm text-slate-600">
@@ -105,8 +105,9 @@ export default function InviteAcceptPage() {
               <CardHeader>
                 <CardTitle>Davet bağlantısı geçersiz</CardTitle>
                 <CardDescription>
-                  Oturum açılamadı. Davet bağlantısının süresi dolmuş veya bağlantı zaten kullanılmış olabilir.
-                  Lütfen sizi davet eden yöneticiden yeni bir davet talep edin.
+                  Oturum açılamadı. Davet bağlantısının süresi dolmuş veya
+                  bağlantı zaten kullanılmış olabilir. Lütfen sizi davet eden
+                  yöneticiden yeni bir davet talep edin.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -175,7 +176,11 @@ export default function InviteAcceptPage() {
                       />
                     </div>
                   </div>
-                  <Button type="submit" className="h-11 w-full" disabled={loading}>
+                  <Button
+                    type="submit"
+                    className="h-11 w-full"
+                    disabled={loading}
+                  >
                     {loading ? "Kaydediliyor..." : "Hesabı Aktifleştir"}
                   </Button>
                 </form>
@@ -183,9 +188,7 @@ export default function InviteAcceptPage() {
             </Card>
           )}
         </div>
-      </section>
-
-      <SiteFooter />
-    </div>
+      </AuthSingleColumn>
+    </AuthChrome>
   );
 }

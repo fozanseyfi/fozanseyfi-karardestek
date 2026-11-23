@@ -32,67 +32,83 @@ import {
   convertToOwnOrganization,
 } from "@/app/(app)/settings/profile/actions";
 
-type Tone = "blue" | "emerald" | "rose" | "yellow";
-
-const TONE_STYLES: Record<Tone, { iconBg: string; iconText: string }> = {
-  blue: { iconBg: "bg-blue-100", iconText: "text-blue-700" },
-  emerald: { iconBg: "bg-emerald-100", iconText: "text-emerald-700" },
-  rose: { iconBg: "bg-rose-100", iconText: "text-rose-700" },
-  yellow: { iconBg: "bg-yellow-100", iconText: "text-yellow-700" },
-};
-
-function SectionCard({
+function Panel({
   icon: Icon,
-  tone,
   title,
-  description,
+  desc,
   children,
   className,
 }: {
   icon: React.ComponentType<{ className?: string }>;
-  tone: Tone;
   title: string;
-  description?: React.ReactNode;
+  desc: React.ReactNode;
   children: React.ReactNode;
   className?: string;
 }) {
-  const t = TONE_STYLES[tone];
   return (
-    <section
-      className={cn(
-        "rounded-2xl border border-slate-200 bg-white p-6 shadow-sm md:p-7",
-        className
-      )}
-    >
-      <div className="flex items-start gap-4">
-        <div className={cn("flex size-11 shrink-0 items-center justify-center rounded-xl", t.iconBg, t.iconText)}>
-          <Icon className="size-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-base font-semibold tracking-tight text-slate-900 md:text-lg">
-            {title}
-          </h2>
-          {description && <p className="mt-0.5 text-sm text-slate-600">{description}</p>}
-          <div className="mt-4">{children}</div>
+    <section className={cn("rounded-xl border bg-card", className)}>
+      <div className="flex items-start gap-3 border-b px-5 py-3.5">
+        <Icon className="mt-0.5 size-4 text-muted-foreground" />
+        <div>
+          <h2 className="text-sm font-semibold text-foreground">{title}</h2>
+          <p className="text-xs text-muted-foreground">{desc}</p>
         </div>
       </div>
+      <div className="px-5 py-4">{children}</div>
     </section>
   );
 }
 
-function PrimaryButton({
+function FieldGroup({
+  label,
+  htmlFor,
   children,
-  disabled,
-  ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+}: {
+  label: string;
+  htmlFor?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <Button
-      {...props}
-      disabled={disabled}
-      className="h-10 bg-yellow-600 px-4 font-semibold text-white shadow-sm transition-colors hover:bg-yellow-700"
-    >
+    <div className="space-y-1.5">
+      <Label
+        htmlFor={htmlFor}
+        className="text-[10.5px] font-semibold tracking-wider text-slate-500 uppercase"
+      >
+        {label}
+      </Label>
       {children}
-    </Button>
+    </div>
+  );
+}
+
+function PasswordField({
+  id,
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+}: {
+  id: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  autoComplete: string;
+}) {
+  return (
+    <div className="relative">
+      <Lock className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-slate-400" />
+      <Input
+        id={id}
+        type="password"
+        required
+        minLength={autoComplete === "new-password" ? 8 : undefined}
+        autoComplete={autoComplete}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="pl-9"
+      />
+    </div>
   );
 }
 
@@ -142,7 +158,9 @@ export function ProfileForm({
         toast.error("Mevcut şifre yanlış.");
         return;
       }
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
       if (error) throw error;
       toast.success("Şifreniz güncellendi.");
       setCurrentPassword("");
@@ -159,7 +177,9 @@ export function ProfileForm({
     startTransition(async () => {
       try {
         const r = await convertToOwnOrganization();
-        toast.success(`Kendi paneliniz açıldı: ${r.newOrgName}. Yönetici oldunuz.`);
+        toast.success(
+          `Kendi paneliniz açıldı: ${r.newOrgName}. Yönetici oldunuz.`,
+        );
         setConvertOpen(false);
         window.location.href = "/";
       } catch (err) {
@@ -196,224 +216,177 @@ export function ProfileForm({
 
   return (
     <div className="space-y-5">
-      {/* PROFIL BİLGİLERİ */}
-      <SectionCard
-        icon={User}
-        tone="blue"
-        title="Profil bilgileri"
-        description="Görünen adınızı güncelleyin — ekip arkadaşlarınız sizi bu isimle görür."
-      >
-        <form onSubmit={saveName} className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold tracking-wide uppercase text-slate-700">
-                Ad Soyad
-              </Label>
+      <div className="grid items-start gap-5 lg:grid-cols-2">
+        {/* Profil + şirket adı */}
+        <Panel
+          icon={User}
+          title="Profil"
+          desc="Görünen adınız ve sidebar'da görünen şirket adı."
+        >
+          <form onSubmit={saveName} className="space-y-3.5">
+            <FieldGroup label="Ad Soyad">
               <Input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                placeholder="Örn. Furkan Ozan Seyfi"
-                className="h-11 border-slate-200 bg-white focus-visible:border-yellow-400 focus-visible:ring-yellow-200"
+                placeholder="Ad Soyad"
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs font-semibold tracking-wide uppercase text-slate-700">
-                E-posta
-              </Label>
+            </FieldGroup>
+            <FieldGroup label="E-posta">
               <div className="relative">
-                <Mail className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+                <Mail className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={email}
                   readOnly
-                  className="h-11 border-slate-200 bg-slate-50 pl-10 text-slate-600"
+                  className="bg-muted/50 pl-9 text-muted-foreground"
                 />
               </div>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-[11px] text-muted-foreground">
                 E-posta değişimi için iletişime geçin.
               </p>
+            </FieldGroup>
+            <div className="flex justify-end">
+              <Button type="submit" size="sm" disabled={pending}>
+                <Save className="size-3.5" />
+                {pending ? "Kaydediliyor..." : "Kaydet"}
+              </Button>
             </div>
-          </div>
-          <div>
-            <PrimaryButton type="submit" disabled={pending}>
-              <Save className="mr-1.5 size-4" />
-              {pending ? "Kaydediliyor..." : "Kaydet"}
-            </PrimaryButton>
-          </div>
-        </form>
-      </SectionCard>
-
-      {/* ŞİRKET / PANEL */}
-      <SectionCard
-        icon={Building2}
-        tone="emerald"
-        title="Şirket / panel adı"
-        description={
-          <>
-            Sidebar başlığında ve topbar&apos;da görünen şirket adı.
-            {!isAdmin && (
-              <>
-                {" "}
-                <span className="font-medium text-rose-600">Sadece yönetici değiştirebilir.</span>
-              </>
-            )}
-          </>
-        }
-      >
-        <form onSubmit={saveOrg} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold tracking-wide uppercase text-slate-700">
-              Şirket adı
-            </Label>
-            <Input
-              value={orgName}
-              onChange={(e) => setOrgName(e.target.value)}
-              placeholder="Örn. Kontrolmatik Mühendislik"
-              className="h-11 border-slate-200 bg-white focus-visible:border-yellow-400 focus-visible:ring-yellow-200"
-              disabled={!isAdmin}
-            />
-          </div>
-          <div>
-            <PrimaryButton type="submit" disabled={pending || !isAdmin}>
-              <Save className="mr-1.5 size-4" />
-              {pending ? "Kaydediliyor..." : "Kaydet"}
-            </PrimaryButton>
-          </div>
-        </form>
-      </SectionCard>
-
-      {/* ŞİFRE GÜVENLİĞİ */}
-      <SectionCard
-        icon={KeyRound}
-        tone="rose"
-        title="Şifre güvenliği"
-        description={
-          <>
-            Mevcut şifrenizi onaylayarak yeni bir şifre belirleyin. Şifrenizi unuttuysanız çıkış
-            yapıp <strong>&quot;Şifremi unuttum&quot;</strong> bağlantısını kullanın.
-          </>
-        }
-      >
-        <form onSubmit={changePassword} className="space-y-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="current-pwd" className="text-xs font-semibold tracking-wide uppercase text-slate-700">
-              Mevcut şifre
-            </Label>
-            <div className="relative">
-              <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
+          </form>
+          <form onSubmit={saveOrg} className="mt-4 space-y-3.5 border-t pt-4">
+            <FieldGroup label="Şirket / panel adı">
               <Input
-                id="current-pwd"
-                type="password"
-                required
-                autoComplete="current-password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="••••••••"
-                className="h-11 border-slate-200 bg-white pl-10 focus-visible:border-yellow-400 focus-visible:ring-yellow-200"
+                value={orgName}
+                onChange={(e) => setOrgName(e.target.value)}
+                placeholder="Örn. Kontrolmatik Mühendislik"
+                disabled={!isAdmin}
               />
+              {!isAdmin && (
+                <p className="text-[11px] text-rose-600">
+                  Sadece yönetici değiştirebilir.
+                </p>
+              )}
+            </FieldGroup>
+            <div className="flex justify-end">
+              <Button type="submit" size="sm" disabled={pending || !isAdmin}>
+                <Building2 className="size-3.5" />
+                Şirket adını kaydet
+              </Button>
             </div>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="new-pwd" className="text-xs font-semibold tracking-wide uppercase text-slate-700">
-                Yeni şifre
-              </Label>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
-                <Input
+          </form>
+        </Panel>
+
+        {/* Şifre */}
+        <Panel
+          icon={KeyRound}
+          title="Şifre"
+          desc={
+            <>
+              Mevcut şifrenizi onaylayarak yeni şifre belirleyin. Unuttuysanız
+              çıkış yapıp <strong>&quot;Şifremi unuttum&quot;</strong>{" "}
+              bağlantısını kullanın.
+            </>
+          }
+        >
+          <form onSubmit={changePassword} className="space-y-3.5">
+            <FieldGroup label="Mevcut şifre" htmlFor="current-pwd">
+              <PasswordField
+                id="current-pwd"
+                value={currentPassword}
+                onChange={setCurrentPassword}
+                placeholder="••••••••"
+                autoComplete="current-password"
+              />
+            </FieldGroup>
+            <div className="grid gap-3.5 sm:grid-cols-2">
+              <FieldGroup label="Yeni şifre" htmlFor="new-pwd">
+                <PasswordField
                   id="new-pwd"
-                  type="password"
-                  required
-                  minLength={8}
-                  autoComplete="new-password"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={setNewPassword}
                   placeholder="En az 8 karakter"
-                  className="h-11 border-slate-200 bg-white pl-10 focus-visible:border-yellow-400 focus-visible:ring-yellow-200"
-                />
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="new-pwd2" className="text-xs font-semibold tracking-wide uppercase text-slate-700">
-                Yeni şifre (tekrar)
-              </Label>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
-                <Input
-                  id="new-pwd2"
-                  type="password"
-                  required
-                  minLength={8}
                   autoComplete="new-password"
-                  value={newPassword2}
-                  onChange={(e) => setNewPassword2(e.target.value)}
-                  placeholder="En az 8 karakter"
-                  className="h-11 border-slate-200 bg-white pl-10 focus-visible:border-yellow-400 focus-visible:ring-yellow-200"
                 />
-              </div>
+              </FieldGroup>
+              <FieldGroup label="Yeni şifre (tekrar)" htmlFor="new-pwd2">
+                <PasswordField
+                  id="new-pwd2"
+                  value={newPassword2}
+                  onChange={setNewPassword2}
+                  placeholder="Tekrar yazın"
+                  autoComplete="new-password"
+                />
+              </FieldGroup>
             </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <PrimaryButton type="submit" disabled={pwdSaving}>
-              <ShieldCheck className="mr-1.5 size-4" />
-              {pwdSaving ? "Güncelleniyor..." : "Şifreyi Güncelle"}
-            </PrimaryButton>
-            <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
-              <AlertTriangle className="size-3" />
-              Şifre değişiminden sonra mevcut oturumlar bozulmaz.
-            </span>
-          </div>
-        </form>
-      </SectionCard>
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                <AlertTriangle className="size-3" />
+                Mevcut oturumlar bozulmaz.
+              </span>
+              <Button type="submit" size="sm" disabled={pwdSaving}>
+                <ShieldCheck className="size-3.5" />
+                {pwdSaving ? "Güncelleniyor..." : "Şifreyi güncelle"}
+              </Button>
+            </div>
+          </form>
+        </Panel>
+      </div>
 
       {/* KENDİ PANELİMİ AÇ — sadece admin olmayanlara */}
       {!isAdmin && (
-        <SectionCard
+        <Panel
           icon={Sparkles}
-          tone="yellow"
           title="Kendi panelimi aç"
-          description="Kendi şirketinizi açarak kendi panelinizin yöneticisi olabilirsiniz. Mevcut paneldeki üyeliğiniz korunur."
-          className="border-yellow-200/70 bg-gradient-to-br from-yellow-50/40 via-white to-white"
+          desc="Kendi şirketinizi açarak kendi panelinizin yöneticisi olabilirsiniz. Mevcut paneldeki üyeliğiniz korunur."
         >
-          <Button
-            onClick={() => setConvertOpen(true)}
-            disabled={pending}
-            className="h-10 bg-yellow-600 px-4 font-semibold text-white shadow-sm hover:bg-yellow-700"
-          >
-            <Sparkles className="mr-1.5 size-4" />
-            Kendi Panelimi Aç
-          </Button>
-        </SectionCard>
+          <div className="flex justify-end">
+            <Button
+              size="sm"
+              onClick={() => setConvertOpen(true)}
+              disabled={pending}
+            >
+              <Sparkles className="size-3.5" />
+              Kendi Panelimi Aç
+            </Button>
+          </div>
+        </Panel>
       )}
 
       <Dialog open={convertOpen} onOpenChange={setConvertOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="size-5 text-yellow-600" /> Kendi Panelinizi Açmak Üzeresiniz
+              <Sparkles className="size-5 text-primary" /> Kendi Panelinizi
+              Açmak Üzeresiniz
             </DialogTitle>
             <DialogDescription>
-              Sıfırdan boş bir panel oluşturulacak ve siz onun <strong>yöneticisi</strong>{" "}
-              olacaksınız.
+              Sıfırdan boş bir panel oluşturulacak ve siz onun{" "}
+              <strong>yöneticisi</strong> olacaksınız.
             </DialogDescription>
           </DialogHeader>
           <ul className="space-y-2 text-sm">
-            <li>✅ Yeni boş bir panel açılır, siz <strong>yöneticisi</strong> olursunuz</li>
+            <li>
+              ✅ Yeni boş bir panel açılır, siz <strong>yöneticisi</strong>{" "}
+              olursunuz
+            </li>
             <li>✅ Sıfırdan karşılaştırma, proje, firma yaratabilirsiniz</li>
             <li>✅ Kendi ekibinizi davet edebilirsiniz</li>
             <li>
-              ✅ <strong>Mevcut paneldeki üyeliğiniz korunur</strong> — topbar&apos;daki panel
-              seçici ile aralarında geçiş yapabilirsiniz
+              ✅ <strong>Mevcut paneldeki üyeliğiniz korunur</strong> —
+              topbar&apos;daki panel seçici ile aralarında geçiş yapabilirsiniz
             </li>
             <li>ℹ️ Önceki panelden veri kopyalanmaz; her panel bağımsızdır</li>
           </ul>
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setConvertOpen(false)} disabled={pending}>
+            <Button
+              variant="outline"
+              onClick={() => setConvertOpen(false)}
+              disabled={pending}
+            >
               İptal
             </Button>
             <Button
               onClick={doConvert}
               disabled={pending}
-              className="bg-yellow-600 font-semibold text-white hover:bg-yellow-700"
+              className="font-semibold"
             >
               <Sparkles className="mr-1.5 size-4" />
               {pending ? "Açılıyor..." : "Onaylıyorum, Kendi Panelimi Aç"}

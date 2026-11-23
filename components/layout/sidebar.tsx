@@ -17,12 +17,18 @@ import {
   MessageCircle,
   BookOpen,
   Boxes,
+  PlayCircle,
   User as UserIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/types/domain";
 import { isAdmin } from "@/lib/permissions";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { TOUR_READY } from "@/lib/tanitim/ready";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 
 type NavItem = {
@@ -35,16 +41,72 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { href: "/", label: "Pano", icon: LayoutDashboard, group: "Genel" },
-  { href: "/projects", label: "Projeler", icon: FolderKanban, group: "Çalışma" },
-  { href: "/comparisons", label: "Karşılaştırmalar", icon: GitCompareArrows, group: "Çalışma" },
+  {
+    href: "/projects",
+    label: "Projeler",
+    icon: FolderKanban,
+    group: "Çalışma",
+  },
+  {
+    href: "/comparisons",
+    label: "Karşılaştırmalar",
+    icon: GitCompareArrows,
+    group: "Çalışma",
+  },
   { href: "/firms", label: "Firmalar", icon: Building2, group: "Çalışma" },
-  { href: "/templates", label: "Şablonlar", icon: FileStack, group: "Kaynaklar" },
-  { href: "/admin/users", label: "Kullanıcılar", icon: Users, adminOnly: true, group: "Yönetim" },
-  { href: "/settings/profile", label: "Profilim", icon: UserIcon, group: "Yönetim" },
-  { href: "/notifications", label: "Bildirimler", icon: Bell, group: "Yönetim" },
-  { href: "/how-it-works", label: "Nasıl Çalışır", icon: BookOpen, group: "Destek" },
-  { href: "/contact", label: "İletişime Geç", icon: MessageCircle, group: "Destek" },
-  { href: "/platforms", label: "Diğer Platformlar", icon: Boxes, group: "Diğer Platformlar" },
+  {
+    href: "/templates",
+    label: "Şablonlar",
+    icon: FileStack,
+    group: "Kaynaklar",
+  },
+  {
+    href: "/admin/users",
+    label: "Kullanıcılar",
+    icon: Users,
+    adminOnly: true,
+    group: "Yönetim",
+  },
+  {
+    href: "/settings/profile",
+    label: "Profilim",
+    icon: UserIcon,
+    group: "Yönetim",
+  },
+  {
+    href: "/notifications",
+    label: "Bildirimler",
+    icon: Bell,
+    group: "Yönetim",
+  },
+  {
+    href: "/how-it-works",
+    label: "Nasıl Çalışır",
+    icon: BookOpen,
+    group: "Destek",
+  },
+  {
+    href: "/contact",
+    label: "İletişime Geç",
+    icon: MessageCircle,
+    group: "Destek",
+  },
+  ...(TOUR_READY
+    ? [
+        {
+          href: "/platform-tanitimi",
+          label: "Platform Tanıtımı",
+          icon: PlayCircle,
+          group: "Platformlarım",
+        },
+      ]
+    : []),
+  {
+    href: "/platforms",
+    label: "Platformlarım",
+    icon: Boxes,
+    group: "Platformlarım",
+  },
 ];
 
 const STORAGE_KEY = "sidebar-collapsed";
@@ -62,7 +124,9 @@ export function Sidebar({
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
 
+  // localStorage yalnız istemcide okunabilir; hidrasyondan sonra bir kez senkronlanır.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     if (mobile) return;
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -97,7 +161,8 @@ export function Sidebar({
       className={cn(
         "bg-sidebar border-sidebar-border flex flex-col border-r transition-[width] duration-200 ease-out",
         mobile ? "w-full" : isCollapsed ? "w-16" : "w-64",
-        !mobile && "hidden md:sticky md:top-0 md:flex md:h-screen md:self-start"
+        !mobile &&
+          "hidden md:sticky md:top-0 md:flex md:h-screen md:self-start",
       )}
       style={!mounted && !mobile ? { width: 256 } : undefined}
     >
@@ -105,14 +170,14 @@ export function Sidebar({
       <div
         className={cn(
           "border-sidebar-border flex h-14 items-center border-b px-3",
-          isCollapsed ? "justify-center" : "justify-between"
+          isCollapsed ? "justify-center" : "justify-between",
         )}
       >
         <Link
           href="/"
           className={cn(
             "text-sidebar-foreground flex min-w-0 items-center gap-2 overflow-hidden",
-            isCollapsed && "justify-center"
+            isCollapsed && "justify-center",
           )}
         >
           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-700 shadow-sm">
@@ -158,7 +223,10 @@ export function Sidebar({
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto px-2 py-3">
         {groups.map((g) => (
-          <div key={g.name} className={cn("mb-4 last:mb-0", isCollapsed && "mb-3")}>
+          <div
+            key={g.name}
+            className={cn("mb-4 last:mb-0", isCollapsed && "mb-3")}
+          >
             {!isCollapsed && (
               <div className="text-sidebar-foreground/50 mb-1.5 px-2 text-[10px] font-semibold tracking-wider uppercase">
                 {g.name}
@@ -168,7 +236,8 @@ export function Sidebar({
               {g.items.map((item) => {
                 const Icon = item.icon;
                 const active =
-                  pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+                  pathname === item.href ||
+                  (item.href !== "/" && pathname.startsWith(item.href));
                 const linkContent = (
                   <Link
                     href={item.href}
@@ -177,17 +246,19 @@ export function Sidebar({
                       isCollapsed ? "justify-center p-2.5" : "px-3 py-2",
                       "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                       active &&
-                        "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm font-semibold"
+                        "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm font-semibold",
                     )}
                   >
                     <Icon
                       className={cn(
                         "size-4 shrink-0 transition-transform",
                         "group-hover:scale-110",
-                        active && "text-primary"
+                        active && "text-primary",
                       )}
                     />
-                    {!isCollapsed && <span className="truncate">{item.label}</span>}
+                    {!isCollapsed && (
+                      <span className="truncate">{item.label}</span>
+                    )}
                   </Link>
                 );
                 return (
@@ -209,7 +280,6 @@ export function Sidebar({
           </div>
         ))}
       </nav>
-
     </aside>
   );
 }

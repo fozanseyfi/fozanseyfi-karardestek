@@ -2,112 +2,74 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Eye, EyeOff, Sparkles, Shield, Check } from "lucide-react";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AuthHeader } from "@/components/auth/auth-landing";
-import { AuthMissionCard } from "@/components/auth/auth-mission-card";
+import { AuthChrome, AuthHeading } from "@/components/auth/auth-chrome";
+import { PlatformNoteCard, PrivacyCard } from "@/components/auth/login-info";
+import { TourLink } from "@/components/auth/tour-promo";
+import { TOUR_READY } from "@/lib/tanitim/ready";
 import { HeroPreviewCard } from "@/components/auth/hero-preview-card";
-import { FeaturesShowcase } from "@/components/auth/features-showcase";
-import { PlatformsRow } from "@/components/auth/platforms-row";
-import { SiteFooter } from "@/components/layout/site-footer";
 
+/**
+ * Giriş ekranı — Teklif / Fizibilite / Solar BOM platformlarıyla aynı şablon:
+ * üst başlık, iki sütun (form + örnek önizleme), tanıtım şeridi, diğer platformlar, geliştirici footer'ı.
+ */
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-white">
-      <AuthHeader />
+    <AuthChrome>
+      <main className="mx-auto grid max-w-[1400px] grid-cols-1 gap-6 px-4 pb-8 pt-6 sm:gap-8 sm:px-6 sm:pt-8 lg:grid-cols-[minmax(380px,5fr)_7fr] lg:gap-12 lg:px-10 lg:pt-12">
+        {/* SOL — Form */}
+        <section className="flex flex-col">
+          <div className="mx-auto w-full max-w-md animate-in-up">
+            <AuthHeading
+              title="Hoş Geldiniz"
+              subtitle="Hesabınıza giriş yapın ve karşılaştırma yönetimine kaldığınız yerden devam edin."
+            />
 
-      {/* HERO: 2-column login + preview */}
-      <section className="mx-auto w-full max-w-7xl px-4 pt-8 pb-12 md:px-8 md:pt-12">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,440px)_minmax(0,1fr)] lg:gap-12">
-          {/* LEFT — login form & welcome */}
-          <div className="flex flex-col">
-            <div className="mb-5 inline-flex w-fit items-center gap-1.5 rounded-full border border-yellow-200/70 bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-800">
-              <Sparkles className="size-3" />
-              BAĞIMSIZ BİR İNİSİYATİF
-            </div>
-            <h1 className="text-3xl font-semibold leading-tight tracking-tight text-slate-900 md:text-4xl">
-              Hoş Geldiniz
-            </h1>
-            <p className="mt-2 max-w-md text-sm text-slate-600">
-              Hesabınıza giriş yapın ve karşılaştırma yönetimine kaldığınız yerden devam edin.
-            </p>
+            <Suspense
+              fallback={
+                <div className="mt-7 text-sm text-muted-foreground">
+                  Yükleniyor...
+                </div>
+              }
+            >
+              <LoginForm />
+            </Suspense>
 
-            <div className="mt-6">
-              <Suspense fallback={<LoginSkeleton />}>
-                <LoginForm />
-              </Suspense>
-            </div>
-
-            <p className="mt-4 text-center text-sm text-slate-600">
+            <p className="mt-4 text-center text-[13px] text-muted-foreground sm:mt-5 sm:text-sm">
               Hesabın yok mu?{" "}
-              <Link href="/signup" className="font-semibold text-yellow-700 hover:underline">
+              <Link
+                href="/signup"
+                className="font-semibold text-primary hover:underline"
+              >
                 Hemen kayıt ol
               </Link>
             </p>
 
-            <AuthMissionCard />
-          </div>
-
-          {/* RIGHT — eye-catching preview hero */}
-          <div className="lg:pl-2">
-            <HeroPreviewCard />
-          </div>
-        </div>
-      </section>
-
-      {/* HOW IT WORKS — full width, centered */}
-      <FeaturesShowcase showPrivacy={false} maxWidthClass="max-w-7xl" />
-
-      {/* PRIVACY (amber, full width) */}
-      <section className="mx-auto w-full max-w-7xl px-4 pb-12 md:px-8">
-        <div className="rounded-2xl border border-yellow-200/70 bg-gradient-to-br from-yellow-50 via-white to-white p-6 md:p-8">
-          <div className="grid gap-6 md:grid-cols-[auto_1fr] md:items-center">
-            <div className="flex size-14 items-center justify-center rounded-2xl bg-yellow-500 text-white shadow-md">
-              <Shield className="size-7" />
-            </div>
-            <div>
-              <div className="text-xs font-semibold tracking-[0.14em] text-yellow-900 uppercase">
-                Veri Gizliliği
+            {TOUR_READY && (
+              <div className="mt-4">
+                <TourLink />
               </div>
-              <h3 className="mt-1 text-lg font-semibold tracking-tight">
-                Verileriniz size aittir. Geliştirici dahil hiç kimse görüntüleyemez.
-              </h3>
-              <ul className="mt-3 grid gap-1.5 text-sm text-slate-700 md:grid-cols-2">
-                {[
-                  "Satır seviyesinde güvenlik (RLS) ile şifrelenir",
-                  "Hesaplar arası tam izolasyon",
-                  "Üçüncü taraf izleme veya analitik yok",
-                  "Yalnızca sizin davet ettikleriniz erişebilir",
-                ].map((p) => (
-                  <li key={p} className="flex items-start gap-2">
-                    <Check className="mt-0.5 size-4 shrink-0 text-yellow-600" />
-                    <span>{p}</span>
-                  </li>
-                ))}
-              </ul>
+            )}
+
+            <div className="mt-5 sm:mt-6">
+              <PlatformNoteCard />
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* OTHER PLATFORMS */}
-      <PlatformsRow />
-
-      <SiteFooter />
-    </div>
-  );
-}
-
-function LoginSkeleton() {
-  return (
-    <div className="rounded-2xl border border-yellow-100 bg-white p-6 shadow-sm">
-      <div className="text-sm text-muted-foreground">Yükleniyor...</div>
-    </div>
+        {/* SAĞ — Örnek önizleme + Veri Gizliliği (lg+) */}
+        <section className="hidden flex-col gap-4 lg:flex lg:self-start">
+          <HeroPreviewCard />
+          <PrivacyCard />
+        </section>
+      </main>
+    </AuthChrome>
   );
 }
 
@@ -124,7 +86,10 @@ function LoginForm() {
     setLoading(true);
     try {
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       if (error) throw error;
       window.location.href = redirect;
     } catch (err) {
@@ -135,30 +100,27 @@ function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} className="mt-5 space-y-3.5 sm:mt-7 sm:space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="email" className="text-xs font-semibold text-slate-700">
-          E-posta
-        </Label>
+        <Label htmlFor="email">E-posta</Label>
         <Input
           id="email"
+          name="email"
           type="email"
           required
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="ornek@firma.com"
-          className="h-11 border-slate-200 bg-white focus-visible:border-yellow-400 focus-visible:ring-yellow-200"
+          className="h-10 bg-background"
         />
       </div>
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password" className="text-xs font-semibold text-slate-700">
-            Şifre
-          </Label>
+          <Label htmlFor="password">Şifre</Label>
           <Link
             href="/forgot-password"
-            className="text-xs font-medium text-yellow-700 hover:underline"
+            className="text-xs font-medium text-primary hover:underline"
           >
             Şifremi unuttum
           </Link>
@@ -166,29 +128,34 @@ function LoginForm() {
         <div className="relative">
           <Input
             id="password"
+            name="password"
             type={showPw ? "text" : "password"}
             required
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="h-11 border-slate-200 bg-white pr-10 focus-visible:border-yellow-400 focus-visible:ring-yellow-200"
+            className="h-10 bg-background pr-10"
           />
           <button
             type="button"
             onClick={() => setShowPw((v) => !v)}
             tabIndex={-1}
             aria-label={showPw ? "Şifreyi gizle" : "Şifreyi göster"}
-            className="absolute right-2.5 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-md text-slate-500 hover:bg-yellow-50 hover:text-yellow-700"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
           >
-            {showPw ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {showPw ? (
+              <EyeOff className="size-4" />
+            ) : (
+              <Eye className="size-4" />
+            )}
           </button>
         </div>
       </div>
       <Button
         type="submit"
         disabled={loading}
-        className="h-11 w-full bg-yellow-500 font-semibold text-white shadow-sm hover:bg-yellow-600"
+        className="h-10 w-full text-sm font-semibold"
       >
         {loading ? "Giriş yapılıyor..." : "Giriş Yap"}
       </Button>

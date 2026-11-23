@@ -1,4 +1,4 @@
-import { Building2, Calendar, ShieldCheck, UserCircle } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { getCurrentProfile } from "@/lib/supabase/get-profile";
 import { createClient } from "@/lib/supabase/server";
 import { ROLE_LABELS, isAdmin } from "@/lib/permissions";
@@ -31,80 +31,60 @@ export default async function ProfileSettingsPage() {
     .eq("id", profile?.organization_id ?? "")
     .single();
 
-  const initials = profile ? getInitials(profile.full_name, profile.email) : "??";
+  const initials = profile
+    ? getInitials(profile.full_name, profile.email)
+    : "??";
   const roleLabel = profile ? ROLE_LABELS[profile.role] : "—";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      {/* HERO PROFILE CARD */}
-      <div className="relative overflow-hidden rounded-2xl border border-yellow-200/60 bg-gradient-to-br from-yellow-50/80 via-white to-white p-6 md:p-8">
-        <div className="pointer-events-none absolute -top-24 -right-20 size-56 rounded-full bg-yellow-100/60 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-32 -left-16 size-72 rounded-full bg-yellow-50 blur-3xl" />
-
-        <div className="relative flex flex-col gap-5 md:flex-row md:items-center">
-          {/* Avatar */}
-          <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-yellow-500 to-yellow-700 text-2xl font-bold text-white shadow-md md:size-24 md:text-3xl">
+    <div className="mx-auto w-full max-w-5xl space-y-5">
+      {/* Kimlik şeridi */}
+      <section className="flex flex-wrap items-center gap-x-6 gap-y-4 rounded-xl border bg-gradient-to-b from-card to-muted/40 px-6 py-5">
+        <div className="flex min-w-0 basis-full items-center gap-4 sm:basis-0 sm:flex-1">
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-lg font-bold text-white">
             {initials}
           </div>
-
-          {/* Identity */}
-          <div className="min-w-0 flex-1">
-            <div className="inline-flex items-center gap-1.5 rounded-full border border-yellow-200/70 bg-yellow-50 px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-yellow-700 uppercase">
-              <UserCircle className="size-3" />
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold tracking-[0.12em] text-muted-foreground uppercase">
               Profilim
-            </div>
-            <h1 className="mt-2 text-2xl font-semibold tracking-tight md:text-3xl">
-              {profile?.full_name?.trim() || profile?.email || "Kullanıcı"}
-            </h1>
-            <div className="mt-1.5 flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1 rounded-full bg-yellow-600 px-2.5 py-1 text-[10px] font-bold tracking-wider text-white">
-                <ShieldCheck className="size-3" />
-                {roleLabel}
+            </p>
+            <h1 className="flex flex-wrap items-center gap-2 text-xl font-bold tracking-tight text-foreground">
+              <span className="truncate">
+                {profile?.full_name?.trim() || profile?.email || "Kullanıcı"}
               </span>
-              <span className="text-sm text-slate-600">{profile?.email}</span>
-            </div>
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary-soft-foreground">
+                <ShieldCheck className="size-3" /> {roleLabel}
+              </span>
+            </h1>
+            {profile?.email && (
+              <p className="truncate text-[13px] text-muted-foreground">
+                {profile.email}
+              </p>
+            )}
           </div>
         </div>
+        <dl className="flex gap-6 text-xs">
+          <div>
+            <dt className="text-muted-foreground">Şirket</dt>
+            <dd className="font-semibold text-foreground">
+              {org?.name ?? "—"}
+            </dd>
+          </div>
+          <div>
+            <dt className="text-muted-foreground">Üyelik</dt>
+            <dd className="font-semibold text-foreground">
+              {formatDate(profile?.created_at)}
+            </dd>
+          </div>
+        </dl>
+      </section>
 
-        {/* Stats strip */}
-        <div className="relative mt-6 grid gap-3 sm:grid-cols-3">
-          <StatCard icon={Building2} label="Şirket" value={org?.name ?? "—"} />
-          <StatCard icon={ShieldCheck} label="Rol" value={roleLabel} />
-          <StatCard icon={Calendar} label="Üyelik tarihi" value={formatDate(profile?.created_at)} />
-        </div>
-      </div>
-
-      {/* FORM SECTIONS */}
       <ProfileForm
         initialFullName={profile?.full_name ?? ""}
         initialOrgName={org?.name ?? ""}
         isAdmin={isAdmin(profile)}
         email={profile?.email ?? ""}
       />
-    </div>
-  );
-}
-
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-yellow-50 text-yellow-700">
-        <Icon className="size-4" />
-      </div>
-      <div className="min-w-0">
-        <div className="text-[10px] font-semibold tracking-[0.14em] text-slate-500 uppercase">
-          {label}
-        </div>
-        <div className="truncate text-sm font-semibold text-slate-900">{value}</div>
-      </div>
     </div>
   );
 }

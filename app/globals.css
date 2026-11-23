@@ -37,8 +37,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  --color-success: oklch(0.6 0.18 145);
-  --color-warning: oklch(0.75 0.15 75);
   --color-danger: oklch(0.577 0.245 27.325);
 }
 
@@ -110,6 +108,31 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --font-sans: var(--font-inter);
+
+  /* Diğer platformlarla (Teklif / Fizibilite / PM / BOM) ortak yardımcı renk adları */
+  --color-primary-soft: color-mix(
+    in oklch,
+    var(--primary) 14%,
+    var(--background)
+  );
+  --color-primary-soft-foreground: color-mix(
+    in oklch,
+    var(--primary) 70%,
+    black
+  );
+  --color-success: oklch(0.6 0.15 155);
+  --color-success-soft: oklch(0.96 0.04 155);
+  --color-success-soft-foreground: oklch(0.42 0.1 155);
+  --color-warning: oklch(0.75 0.15 75);
+  --color-warning-soft: oklch(0.97 0.05 85);
+  --color-warning-soft-foreground: oklch(0.48 0.11 70);
+  --color-info: oklch(0.62 0.14 240);
+  --color-info-soft: oklch(0.96 0.03 240);
+  --color-info-soft-foreground: oklch(0.45 0.12 245);
+  --color-destructive-soft: oklch(0.97 0.02 25);
+  --color-destructive-soft-foreground: oklch(0.5 0.19 27);
+  --shadow-large:
+    0 10px 30px -12px rgb(15 23 42 / 0.18), 0 4px 10px -6px rgb(15 23 42 / 0.08);
 }
 
 @layer base {
@@ -118,14 +141,20 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 }
 
 @keyframes hero-flow {
   0%,
-  100% { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .hero-flow {
@@ -142,5 +171,71 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero-flow { animation: none; }
+  .hero-flow {
+    animation: none;
+  }
+}
+
+/* ================================================================
+   Giriş ekranı — Teklif / Fizibilite / Solar BOM login şablonuyla ortak
+================================================================ */
+.bg-soft-gradient {
+  background:
+    radial-gradient(
+      1200px 500px at 0% -10%,
+      color-mix(in oklch, var(--primary) 9%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      900px 500px at 100% 0%,
+      rgb(26 74 148 / 0.06),
+      transparent 60%
+    ),
+    var(--background);
+}
+@keyframes auth-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-in-up {
+  animation: auth-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-in-up {
+    animation: none;
+  }
+}
+
+/* Ortak İletişim sayfası başlığındaki soluk akan bant */
+@keyframes common-flow {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: -200% 50%;
+  }
+}
+.common-flow {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgb(234 179 8 / 0.1) 20%,
+    rgb(59 130 246 / 0.1) 40%,
+    transparent 60%,
+    rgb(234 179 8 / 0.08) 80%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: common-flow 14s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .common-flow {
+    animation: none;
+  }
 }

@@ -35,7 +35,7 @@ export default function TanitimPage() {
           <nav className="flex items-center gap-2">
             <span className="flex items-center gap-1">
               <a
-                href="https://www.linkedin.com/in/furkan-ozan-seyfi"
+                href="https://www.linkedin.com/in/fozanseyfi/"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="LinkedIn"
@@ -72,7 +72,7 @@ export default function TanitimPage() {
                 </svg>
               </a>
               <a
-                href="mailto:ozan.seyfi@kontrolmatik.com"
+                href="mailto:fozanseyfi@gmail.com"
                 title="E-posta"
                 aria-label="E-posta"
                 className="flex size-7 items-center justify-center rounded-md border border-border text-muted-foreground hover:text-foreground"

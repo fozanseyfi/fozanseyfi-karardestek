@@ -25,7 +25,7 @@ export function PlatformNoteCard() {
         İşinize yararsa ne mutlu bana. Eksik gördüğünüz ya da canınızı sıkan bir
         şey olursa{" "}
         <a
-          href="mailto:ozan.seyfi@kontrolmatik.com"
+          href="mailto:fozanseyfi@gmail.com"
           className="font-semibold text-primary hover:underline"
         >
           yazın

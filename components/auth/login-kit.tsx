@@ -579,8 +579,8 @@ function PlatformList({ current }: { current: PlatformId }) {
               Diğer platformlarım
             </h2>
             <p className="mt-1 max-w-[60ch] text-[13.5px] text-[var(--lk-muted)]">
-              GES projelerinin farklı aşamaları için yazdığım araçlar. Tek
-              hesapla hepsine girebilirsiniz.
+              GES projelerinin farklı aşamaları için yazdığım araçlar. Her
+              birine kendi hesabınızla ayrıca giriş yapılır.
             </p>
           </div>
           <a
@@ -594,95 +594,97 @@ function PlatformList({ current }: { current: PlatformId }) {
         </div>
 
         <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {PLATFORMS.map((x) => {
-            const isCurrent = x.id === current;
-            const live = !!x.href && !isCurrent;
-            const domain = x.href?.replace("https://", "");
-            const body = (
-              <>
-                <PlatformLogo
-                  id={x.logo}
-                  size={48}
-                  className="shrink-0 rounded-[11px] shadow-sm"
-                />
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="flex items-start justify-between gap-2">
-                    <span className="min-w-0">
-                      <span className="block text-[14.5px] font-bold leading-tight">
-                        {x.name}
+          {[...PLATFORMS]
+            .sort((a, b) => Number(b.id === current) - Number(a.id === current))
+            .map((x) => {
+              const isCurrent = x.id === current;
+              const live = !!x.href && !isCurrent;
+              const domain = x.href?.replace("https://", "");
+              const body = (
+                <>
+                  <PlatformLogo
+                    id={x.logo}
+                    size={48}
+                    className="shrink-0 rounded-[11px] shadow-sm"
+                  />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="flex items-start justify-between gap-2">
+                      <span className="min-w-0">
+                        <span className="block text-[14.5px] font-bold leading-tight">
+                          {x.name}
+                        </span>
+                        <span className="mt-0.5 block truncate text-[12px] text-[var(--lk-muted)]">
+                          {domain ?? "Hazırlanıyor"}
+                        </span>
                       </span>
-                      <span className="mt-0.5 block truncate text-[12px] text-[var(--lk-muted)]">
-                        {domain ?? "Hazırlanıyor"}
-                      </span>
+                      {isCurrent && (
+                        <span
+                          className="shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-semibold text-white"
+                          style={{ background: x.color }}
+                        >
+                          Buradasınız
+                        </span>
+                      )}
+                      {!x.href && (
+                        <span className="shrink-0 rounded-full border border-[var(--lk-line)] px-2 py-0.5 text-[10.5px] font-semibold text-[var(--lk-muted)]">
+                          Yakında
+                        </span>
+                      )}
                     </span>
-                    {isCurrent && (
+                    <span className="mt-2 block flex-1 text-[13px] leading-snug text-[var(--lk-muted)]">
+                      {x.text}
+                    </span>
+                    {live && (
                       <span
-                        className="shrink-0 rounded-full px-2 py-0.5 text-[10.5px] font-semibold text-white"
-                        style={{ background: x.color }}
+                        className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold"
+                        style={{ color: x.color }}
                       >
-                        Buradasınız
-                      </span>
-                    )}
-                    {!x.href && (
-                      <span className="shrink-0 rounded-full border border-[var(--lk-line)] px-2 py-0.5 text-[10.5px] font-semibold text-[var(--lk-muted)]">
-                        Yakında
+                        Platforma git
+                        <span
+                          aria-hidden="true"
+                          className="transition-transform duration-150 group-hover:translate-x-0.5"
+                        >
+                          →
+                        </span>
                       </span>
                     )}
                   </span>
-                  <span className="mt-2 block flex-1 text-[13px] leading-snug text-[var(--lk-muted)]">
-                    {x.text}
-                  </span>
-                  {live && (
-                    <span
-                      className="mt-3 inline-flex items-center gap-1 text-[12.5px] font-semibold"
-                      style={{ color: x.color }}
+                </>
+              );
+              const cls =
+                "group flex h-full gap-4 rounded-md border p-4 transition-[border-color,box-shadow] duration-150";
+              const vars = { "--pc": x.color } as React.CSSProperties;
+              return (
+                <li key={x.id} className="min-w-0">
+                  {live ? (
+                    <a
+                      href={x.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={vars}
+                      className={`${cls} border-[var(--lk-line)] bg-[var(--lk-panel)] hover:border-[var(--pc)] hover:shadow-[0_8px_24px_-14px_rgba(0,0,0,.35)]`}
                     >
-                      Platforma git
-                      <span
-                        aria-hidden="true"
-                        className="transition-transform duration-150 group-hover:translate-x-0.5"
-                      >
-                        →
-                      </span>
-                    </span>
+                      {body}
+                    </a>
+                  ) : (
+                    <div
+                      style={
+                        isCurrent
+                          ? {
+                              ...vars,
+                              borderColor: x.color,
+                              background: `color-mix(in srgb, ${x.color} 6%, var(--lk-panel))`,
+                            }
+                          : vars
+                      }
+                      className={`${cls} ${isCurrent ? "" : "border-dashed border-[var(--lk-line)] bg-[var(--lk-soft)]"}`}
+                    >
+                      {body}
+                    </div>
                   )}
-                </span>
-              </>
-            );
-            const cls =
-              "group flex h-full gap-4 rounded-md border p-4 transition-[border-color,box-shadow] duration-150";
-            const vars = { "--pc": x.color } as React.CSSProperties;
-            return (
-              <li key={x.id} className="min-w-0">
-                {live ? (
-                  <a
-                    href={x.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={vars}
-                    className={`${cls} border-[var(--lk-line)] bg-[var(--lk-panel)] hover:border-[var(--pc)] hover:shadow-[0_8px_24px_-14px_rgba(0,0,0,.35)]`}
-                  >
-                    {body}
-                  </a>
-                ) : (
-                  <div
-                    style={
-                      isCurrent
-                        ? {
-                            ...vars,
-                            borderColor: x.color,
-                            background: `color-mix(in srgb, ${x.color} 6%, var(--lk-panel))`,
-                          }
-                        : vars
-                    }
-                    className={`${cls} ${isCurrent ? "" : "border-dashed border-[var(--lk-line)] bg-[var(--lk-soft)]"}`}
-                  >
-                    {body}
-                  </div>
-                )}
-              </li>
-            );
-          })}
+                </li>
+              );
+            })}
         </ul>
       </div>
     </section>

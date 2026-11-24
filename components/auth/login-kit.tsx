@@ -130,6 +130,7 @@ const PLATFORMS: {
     logo: "bom",
     name: "Konstrüksiyon BoM",
     color: "#1a4a94",
+    href: "https://konstruksiyon.fozanseyfi.com",
     text: "Sehpa parça listesi, tonaj ve konstrüksiyon maliyeti hesabı.",
   },
   {

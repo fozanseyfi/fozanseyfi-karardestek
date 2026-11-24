@@ -13,7 +13,6 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
-  Trophy,
   MessageCircle,
   BookOpen,
   Boxes,
@@ -21,6 +20,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PlatformLogo } from "@/components/common/platform-logos";
 import type { Profile } from "@/types/domain";
 import { isAdmin } from "@/lib/permissions";
 import { TOUR_READY } from "@/lib/tanitim/ready";
@@ -180,9 +180,11 @@ export function Sidebar({
             isCollapsed && "justify-center",
           )}
         >
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-yellow-500 to-yellow-700 shadow-sm">
-            <Trophy className="size-4 text-white" />
-          </div>
+          <PlatformLogo
+            id="karardestek"
+            size={32}
+            className="shrink-0 rounded-lg shadow-sm"
+          />
           {!isCollapsed && (
             <div className="min-w-0">
               <div className="truncate text-sm leading-tight font-semibold">

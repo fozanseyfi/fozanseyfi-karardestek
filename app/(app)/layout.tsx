@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
-import { Sidebar } from "@/components/layout/sidebar";
-import { Topbar } from "@/components/layout/topbar";
+import { AppChrome } from "@/components/layout/app-chrome";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,7 +8,11 @@ import { createClient } from "@/lib/supabase/server";
 import { OnboardingDialog } from "@/components/onboarding/onboarding-dialog";
 import { PLATFORM_KEY } from "@/lib/platform";
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
@@ -71,17 +74,17 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <TooltipProvider>
-      <div className="flex min-h-screen">
-        <Sidebar profile={profile} organizationName={organizationName} />
-        <div className="flex flex-1 flex-col">
-          <Topbar
-            profile={profile}
-            unreadCount={unreadCount ?? 0}
-            organizationName={organizationName}
-            memberships={memberships}
-            activeOrgId={profile.organization_id}
-          />
-          <main className="flex-1 px-4 py-6 md:px-8">{children}</main>
+      <div className="bg-background min-h-screen">
+        <AppChrome
+          profile={profile}
+          unreadCount={unreadCount ?? 0}
+          organizationName={organizationName}
+          memberships={memberships}
+          activeOrgId={profile.organization_id}
+        />
+        {/* Diğer platformlarla aynı: üst bar sabit (h-14), içerik menü genişliği kadar sağda */}
+        <div className="sidebar-aware flex min-h-screen flex-col pt-14">
+          <main className="w-full flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
           <SiteFooter />
         </div>
       </div>

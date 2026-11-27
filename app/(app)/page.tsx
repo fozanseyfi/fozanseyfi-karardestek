@@ -5,14 +5,19 @@ import {
   Building2,
   FolderKanban,
   FileStack,
-  Sparkles,
   ArrowRight,
   TrendingUp,
   Trophy,
   Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/supabase/get-profile";
@@ -31,16 +36,32 @@ export default async function DashboardPage() {
   let projectsCount = 0;
   let firmsCount = 0;
   let decidedCount = 0;
-  let recent: Array<{ id: string; name: string; type: string; status: string; currency: string; created_at: string; project_id: string | null }> = [];
+  let recent: Array<{
+    id: string;
+    name: string;
+    type: string;
+    status: string;
+    currency: string;
+    created_at: string;
+    project_id: string | null;
+  }> = [];
   let byStatus: Array<{ status: string }> = [];
-  let latestDecided: Array<{ id: string; name: string; decided_firm_id: string | null; decision_date: string | null }> = [];
+  let latestDecided: Array<{
+    id: string;
+    name: string;
+    decided_firm_id: string | null;
+    decision_date: string | null;
+  }> = [];
   const firmNames = new Map<string, string>();
 
   try {
     const results = await Promise.all([
       supabase.from("comparisons").select("*", { count: "exact", head: true }),
       supabase.from("projects").select("*", { count: "exact", head: true }),
-      supabase.from("firms").select("*", { count: "exact", head: true }).eq("is_sample", false),
+      supabase
+        .from("firms")
+        .select("*", { count: "exact", head: true })
+        .eq("is_sample", false),
       supabase
         .from("comparisons")
         .select("*", { count: "exact", head: true })
@@ -69,66 +90,63 @@ export default async function DashboardPage() {
     console.error("[dashboard] queries failed:", err);
   }
 
-  const statusCounts: Record<string, number> = { draft: 0, in_review: 0, decided: 0, archived: 0 };
+  const statusCounts: Record<string, number> = {
+    draft: 0,
+    in_review: 0,
+    decided: 0,
+    archived: 0,
+  };
   for (const c of byStatus) {
     statusCounts[c.status] = (statusCounts[c.status] ?? 0) + 1;
   }
-  const statusData = Object.entries(statusCounts).map(([status, count]) => ({ status, count }));
+  const statusData = Object.entries(statusCounts).map(([status, count]) => ({
+    status,
+    count,
+  }));
 
   try {
-    const decidedFirmIds = latestDecided.map((d) => d.decided_firm_id).filter((x): x is string => !!x);
+    const decidedFirmIds = latestDecided
+      .map((d) => d.decided_firm_id)
+      .filter((x): x is string => !!x);
     if (decidedFirmIds.length > 0) {
-      const { data: fs } = await supabase.from("firms").select("id, name").in("id", decidedFirmIds);
+      const { data: fs } = await supabase
+        .from("firms")
+        .select("id, name")
+        .in("id", decidedFirmIds);
       for (const f of fs ?? []) firmNames.set(f.id as string, f.name as string);
     }
   } catch (err) {
     console.error("[dashboard] firm names fetch failed:", err);
   }
 
-  const firstName = profile?.full_name?.split(" ")[0] ?? profile?.email?.split("@")[0] ?? "";
+  const firstName =
+    profile?.full_name?.split(" ")[0] ?? profile?.email?.split("@")[0] ?? "";
 
   return (
-    <div className="space-y-8">
-      {/* HERO */}
-      <div className="hero-flow relative overflow-hidden rounded-2xl p-8 text-white shadow-xl">
-        <div className="bg-grid-white/[0.05] absolute inset-0 [mask-image:radial-gradient(ellipse_at_top_left,white,transparent_70%)]" />
-        <div className="relative">
-          <div className="mb-2 flex items-center gap-2">
-            <Sparkles className="size-4 opacity-80" />
-            <span className="text-xs font-medium tracking-wide uppercase opacity-90">
-              EPC Karar Destek Platformu
-            </span>
-          </div>
-          <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-            {firstName ? `Hoş geldin, ${firstName}` : "Hoş geldin"}
-          </h1>
-          <p className="mt-2 max-w-xl text-base opacity-90">
-            GES &amp; RES projelerinde taşeron, malzeme ve hizmet tekliflerini akıllı skor algoritmasıyla
-            değerlendir.
+    <div className="space-y-6">
+      {/* Başlık — diğer platformlardaki Dashboard düzeni */}
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
+          <p className="text-muted-foreground text-sm">
+            {firstName ? `Hoş geldin, ${firstName}. ` : ""}
+            {comparisonsCount ?? 0} karşılaştırma · {projectsCount ?? 0} proje ·{" "}
+            {firmsCount ?? 0} firma
           </p>
-          <div className="mt-5 flex flex-wrap gap-2">
-            {profile?.role !== "viewer" && (
-              <Button asChild size="lg" variant="secondary" className="font-semibold">
-                <Link href="/comparisons/new">
-                  <Plus className="mr-1 size-4" /> Yeni Karşılaştırma
-                </Link>
-              </Button>
-            )}
-            <Button
-              asChild
-              size="lg"
-              variant={profile?.role === "viewer" ? "secondary" : "outline"}
-              className={
-                profile?.role === "viewer"
-                  ? "font-semibold"
-                  : "border-white/30 bg-white/10 text-white backdrop-blur hover:bg-white/20 hover:text-white"
-              }
-            >
-              <Link href="/templates">
-                <Sparkles className="mr-1 size-4" /> Şablonları Gör
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" size="sm">
+            <Link href="/templates">
+              <FileStack className="mr-1 size-4" /> Şablonlar
+            </Link>
+          </Button>
+          {profile?.role !== "viewer" && (
+            <Button asChild size="sm">
+              <Link href="/comparisons/new">
+                <Plus className="mr-1 size-4" /> Yeni Karşılaştırma
               </Link>
             </Button>
-          </div>
+          )}
         </div>
       </div>
 
@@ -158,8 +176,20 @@ export default async function DashboardPage() {
           tone="emerald"
           href="/comparisons"
         />
-        <KpiTile icon={FolderKanban} label="Proje" value={projectsCount ?? 0} tone="violet" href="/projects" />
-        <KpiTile icon={Building2} label="Firma" value={firmsCount ?? 0} tone="amber" href="/firms" />
+        <KpiTile
+          icon={FolderKanban}
+          label="Proje"
+          value={projectsCount ?? 0}
+          tone="violet"
+          href="/projects"
+        />
+        <KpiTile
+          icon={Building2}
+          label="Firma"
+          value={firmsCount ?? 0}
+          tone="amber"
+          href="/firms"
+        />
       </div>
 
       {/* MIDDLE GRID: status chart + quick actions */}
@@ -167,9 +197,12 @@ export default async function DashboardPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="size-4 text-blue-600" /> Karşılaştırma Durumu
+              <TrendingUp className="size-4 text-blue-600" /> Karşılaştırma
+              Durumu
             </CardTitle>
-            <CardDescription>Tüm karşılaştırmaların aşamalara göre dağılımı</CardDescription>
+            <CardDescription>
+              Tüm karşılaştırmaların aşamalara göre dağılımı
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <StatusChart data={statusData} />
@@ -178,25 +211,69 @@ export default async function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{profile?.role === "viewer" ? "Hızlı Erişim" : "Hızlı İşlemler"}</CardTitle>
+            <CardTitle>
+              {profile?.role === "viewer" ? "Hızlı Erişim" : "Hızlı İşlemler"}
+            </CardTitle>
             <CardDescription>
-              {profile?.role === "viewer" ? "Sık baktığın sayfalar" : "En sık kullanılan aksiyonlar"}
+              {profile?.role === "viewer"
+                ? "Sık baktığın sayfalar"
+                : "En sık kullanılan aksiyonlar"}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             {profile?.role !== "viewer" ? (
               <>
-                <QuickAction icon={Plus} label="Yeni Karşılaştırma" href="/comparisons/new" tone="blue" />
-                <QuickAction icon={Sparkles} label="Şablondan Başla" href="/templates" tone="amber" />
-                <QuickAction icon={Building2} label="Yeni Firma" href="/firms/new" tone="emerald" />
-                <QuickAction icon={FolderKanban} label="Yeni Proje" href="/projects/new" tone="violet" />
+                <QuickAction
+                  icon={Plus}
+                  label="Yeni Karşılaştırma"
+                  href="/comparisons/new"
+                  tone="blue"
+                />
+                <QuickAction
+                  icon={FileStack}
+                  label="Şablondan Başla"
+                  href="/templates"
+                  tone="amber"
+                />
+                <QuickAction
+                  icon={Building2}
+                  label="Yeni Firma"
+                  href="/firms/new"
+                  tone="emerald"
+                />
+                <QuickAction
+                  icon={FolderKanban}
+                  label="Yeni Proje"
+                  href="/projects/new"
+                  tone="violet"
+                />
               </>
             ) : (
               <>
-                <QuickAction icon={GitCompareArrows} label="Karşılaştırmalar" href="/comparisons" tone="blue" />
-                <QuickAction icon={Sparkles} label="Şablonlar" href="/templates" tone="amber" />
-                <QuickAction icon={Building2} label="Firmalar" href="/firms" tone="emerald" />
-                <QuickAction icon={FolderKanban} label="Projeler" href="/projects" tone="violet" />
+                <QuickAction
+                  icon={GitCompareArrows}
+                  label="Karşılaştırmalar"
+                  href="/comparisons"
+                  tone="blue"
+                />
+                <QuickAction
+                  icon={FileStack}
+                  label="Şablonlar"
+                  href="/templates"
+                  tone="amber"
+                />
+                <QuickAction
+                  icon={Building2}
+                  label="Firmalar"
+                  href="/firms"
+                  tone="emerald"
+                />
+                <QuickAction
+                  icon={FolderKanban}
+                  label="Projeler"
+                  href="/projects"
+                  tone="violet"
+                />
               </>
             )}
           </CardContent>
@@ -223,29 +300,47 @@ export default async function DashboardPage() {
             {recent && recent.length > 0 ? (
               <ul className="divide-y">
                 {recent.map((c) => (
-                  <li key={c.id} className="flex items-center justify-between gap-3 py-3">
+                  <li
+                    key={c.id}
+                    className="flex items-center justify-between gap-3 py-3"
+                  >
                     <div className="min-w-0 flex-1">
-                      <Link href={`/comparisons/${c.id}`} className="line-clamp-1 font-medium hover:underline">
+                      <Link
+                        href={`/comparisons/${c.id}`}
+                        className="line-clamp-1 font-medium hover:underline"
+                      >
                         {c.name}
                       </Link>
                       <div className="text-muted-foreground mt-0.5 flex items-center gap-2 text-xs">
                         <Badge variant="outline" className="text-[10px]">
                           {c.type}
                         </Badge>
-                        <span>{new Date(c.created_at).toLocaleDateString("tr-TR")}</span>
+                        <span>
+                          {new Date(c.created_at).toLocaleDateString("tr-TR")}
+                        </span>
                       </div>
                     </div>
-                    <StatusBadge status={c.status as "draft" | "in_review" | "decided" | "archived"} />
+                    <StatusBadge
+                      status={
+                        c.status as
+                          | "draft"
+                          | "in_review"
+                          | "decided"
+                          | "archived"
+                      }
+                    />
                   </li>
                 ))}
               </ul>
             ) : (
               <div className="py-12 text-center">
                 <FileStack className="text-muted-foreground mx-auto size-10" />
-                <p className="text-muted-foreground mt-2 text-sm">Henüz karşılaştırma yok.</p>
+                <p className="text-muted-foreground mt-2 text-sm">
+                  Henüz karşılaştırma yok.
+                </p>
                 <Button asChild className="mt-4" variant="outline">
                   <Link href="/templates">
-                    <Sparkles className="mr-1 size-4" /> Şablondan başlat
+                    <FileStack className="mr-1 size-4" /> Şablondan başlat
                   </Link>
                 </Button>
               </div>
@@ -265,13 +360,18 @@ export default async function DashboardPage() {
               <ul className="space-y-3">
                 {latestDecided.map((d) => (
                   <li key={d.id} className="border-l-2 border-emerald-500 pl-3">
-                    <Link href={`/comparisons/${d.id}`} className="line-clamp-1 text-sm font-medium hover:underline">
+                    <Link
+                      href={`/comparisons/${d.id}`}
+                      className="line-clamp-1 text-sm font-medium hover:underline"
+                    >
                       {d.name}
                     </Link>
                     {d.decided_firm_id && firmNames.get(d.decided_firm_id) && (
                       <div className="mt-0.5 flex items-center gap-1 text-xs">
                         <Trophy className="size-3 text-emerald-600" />
-                        <span className="text-emerald-700">{firmNames.get(d.decided_firm_id)}</span>
+                        <span className="text-emerald-700">
+                          {firmNames.get(d.decided_firm_id)}
+                        </span>
                       </div>
                     )}
                     {d.decision_date && (
@@ -283,7 +383,9 @@ export default async function DashboardPage() {
                 ))}
               </ul>
             ) : (
-              <p className="text-muted-foreground py-6 text-center text-sm">Henüz karar verilmemiş.</p>
+              <p className="text-muted-foreground py-6 text-center text-sm">
+                Henüz karar verilmemiş.
+              </p>
             )}
           </CardContent>
         </Card>
@@ -293,10 +395,30 @@ export default async function DashboardPage() {
 }
 
 const TONES = {
-  blue: { bg: "bg-blue-50", text: "text-blue-700", iconBg: "bg-blue-600", iconText: "text-white" },
-  emerald: { bg: "bg-emerald-50", text: "text-emerald-700", iconBg: "bg-emerald-600", iconText: "text-white" },
-  violet: { bg: "bg-violet-50", text: "text-violet-700", iconBg: "bg-violet-600", iconText: "text-white" },
-  amber: { bg: "bg-yellow-50", text: "text-yellow-700", iconBg: "bg-yellow-500", iconText: "text-white" },
+  blue: {
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    iconBg: "bg-blue-600",
+    iconText: "text-white",
+  },
+  emerald: {
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    iconBg: "bg-emerald-600",
+    iconText: "text-white",
+  },
+  violet: {
+    bg: "bg-violet-50",
+    text: "text-violet-700",
+    iconBg: "bg-violet-600",
+    iconText: "text-white",
+  },
+  amber: {
+    bg: "bg-yellow-50",
+    text: "text-yellow-700",
+    iconBg: "bg-yellow-500",
+    iconText: "text-white",
+  },
 };
 
 function KpiTile({
@@ -319,21 +441,24 @@ function KpiTile({
   const t = TONES[tone];
   return (
     <Link href={href}>
-      <Card className={`${t.bg} group cursor-pointer overflow-hidden border-transparent transition-all hover:shadow-lg`}>
-        <CardContent className="relative p-5">
-          <div className={`mb-3 flex size-12 items-center justify-center rounded-xl ${t.iconBg} ${t.iconText} shadow-sm`}>
-            <Icon className="size-6" />
+      <Card
+        data-kpi
+        className="group hover:border-primary/40 cursor-pointer gap-0 py-0 transition-colors"
+      >
+        <CardContent className="relative p-4">
+          <div className="text-muted-foreground flex items-center gap-1.5 text-[12px] font-medium">
+            <Icon className={`size-3.5 ${t.text}`} />
+            {label}
           </div>
-          <div className={`text-xs font-medium tracking-wide uppercase ${t.text} opacity-80`}>{label}</div>
-          <div className="mt-1 text-3xl font-bold tabular-nums">{value}</div>
+          <div className={`mt-1 text-2xl font-semibold tabular-nums ${t.text}`}>
+            {value}
+          </div>
           {budget !== undefined && currency && (
-            <div className={`text-xs ${t.text} opacity-70`}>
+            <div className="text-muted-foreground text-xs">
               {formatCompactCurrency(budget, currency)}
             </div>
           )}
-          <ArrowRight
-            className={`absolute right-4 bottom-4 size-4 ${t.text} opacity-0 transition-opacity group-hover:opacity-70`}
-          />
+          <ArrowRight className="text-muted-foreground absolute top-4 right-4 size-4 opacity-0 transition-opacity group-hover:opacity-70" />
         </CardContent>
       </Card>
     </Link>
@@ -357,11 +482,15 @@ function QuickAction({
       href={href}
       className={`group flex items-center gap-3 rounded-lg border ${t.bg} border-transparent p-3 transition-all hover:shadow-md`}
     >
-      <div className={`flex size-9 shrink-0 items-center justify-center rounded ${t.iconBg} ${t.iconText}`}>
+      <div
+        className={`flex size-9 shrink-0 items-center justify-center rounded ${t.iconBg} ${t.iconText}`}
+      >
         <Icon className="size-4" />
       </div>
       <span className={`flex-1 text-sm font-medium ${t.text}`}>{label}</span>
-      <ArrowRight className={`size-4 ${t.text} opacity-50 transition-transform group-hover:translate-x-0.5`} />
+      <ArrowRight
+        className={`size-4 ${t.text} opacity-50 transition-transform group-hover:translate-x-0.5`}
+      />
     </Link>
   );
 }

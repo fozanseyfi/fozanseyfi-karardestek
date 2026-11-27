@@ -29,14 +29,16 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Koyu sol menü — Teklif / Fizibilite / Proje Yönetim / Solar BOM ile BİREBİR aynı */
+  --sidebar: #0f172a;
+  --sidebar-foreground: #cbd5e1;
+  --sidebar-muted: #94a3b8;
+  --sidebar-primary: #047857;
+  --sidebar-primary-foreground: #ecfdf5;
+  --sidebar-accent: #047857;
+  --sidebar-accent-foreground: #ecfdf5;
+  --sidebar-border: #1e293b;
+  --sidebar-ring: #047857;
   --color-danger: oklch(0.577 0.245 27.325);
 }
 
@@ -60,14 +62,6 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
 }
 
 @theme inline {
@@ -97,6 +91,7 @@
   --color-chart-5: var(--chart-5);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
   --color-sidebar-accent: var(--sidebar-accent);
@@ -144,6 +139,19 @@
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
+  }
+}
+
+/* Sabit sol menü genişliği kadar sol boşluk (lg+). Mobilde menü çekmece olduğu için 0. */
+@media (min-width: 1024px) {
+  .sidebar-aware {
+    padding-left: var(--sidebar-w, 14rem);
+    transition: padding-left 200ms;
+  }
+}
+@media print {
+  .sidebar-aware {
+    padding: 0 !important;
   }
 }
 

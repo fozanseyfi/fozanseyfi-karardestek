@@ -1,37 +1,20 @@
 import Link from "next/link";
-import {
-  Plus,
-  GitCompareArrows,
-  Building2,
-  FolderKanban,
-  FileStack,
-  ArrowRight,
-  TrendingUp,
-  Trophy,
-  Clock,
-} from "lucide-react";
+import { Plus, FileStack } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/supabase/get-profile";
-import { formatCompactCurrency } from "@/lib/currency";
-import type { Currency } from "@/lib/constants";
-import { StatusChart } from "@/components/dashboard/status-chart";
 import { StatusBadge } from "@/components/comparison/status-button";
 import { GettingStartedChecklist } from "@/components/onboarding/getting-started-checklist";
 
+type Status = "draft" | "in_review" | "decided" | "archived";
+
+/** Dashboard — sade: başlık, dört sayı, son karşılaştırmalar tablosu. */
 export default async function DashboardPage() {
   const profile = await getCurrentProfile();
   const supabase = await createClient();
 
-  // Defensive: her sorguyu izole et, biri patlasa bile diğerleri çıksın
+  // Her sorgu izole: biri patlasa bile sayfa açılsın
   let comparisonsCount = 0;
   let projectsCount = 0;
   let firmsCount = 0;
@@ -41,18 +24,8 @@ export default async function DashboardPage() {
     name: string;
     type: string;
     status: string;
-    currency: string;
     created_at: string;
-    project_id: string | null;
   }> = [];
-  let byStatus: Array<{ status: string }> = [];
-  let latestDecided: Array<{
-    id: string;
-    name: string;
-    decided_firm_id: string | null;
-    decision_date: string | null;
-  }> = [];
-  const firmNames = new Map<string, string>();
 
   try {
     const results = await Promise.all([
@@ -68,429 +41,135 @@ export default async function DashboardPage() {
         .eq("status", "decided"),
       supabase
         .from("comparisons")
-        .select("id, name, type, status, currency, created_at, project_id")
+        .select("id, name, type, status, created_at")
         .order("created_at", { ascending: false })
-        .limit(6),
-      supabase.from("comparisons").select("status"),
-      supabase
-        .from("comparisons")
-        .select("id, name, decided_firm_id, decision_date")
-        .eq("status", "decided")
-        .order("decision_date", { ascending: false })
-        .limit(3),
+        .limit(8),
     ]);
     comparisonsCount = results[0].count ?? 0;
     projectsCount = results[1].count ?? 0;
     firmsCount = results[2].count ?? 0;
     decidedCount = results[3].count ?? 0;
     recent = (results[4].data as typeof recent) ?? [];
-    byStatus = (results[5].data as typeof byStatus) ?? [];
-    latestDecided = (results[6].data as typeof latestDecided) ?? [];
   } catch (err) {
     console.error("[dashboard] queries failed:", err);
   }
 
-  const statusCounts: Record<string, number> = {
-    draft: 0,
-    in_review: 0,
-    decided: 0,
-    archived: 0,
-  };
-  for (const c of byStatus) {
-    statusCounts[c.status] = (statusCounts[c.status] ?? 0) + 1;
-  }
-  const statusData = Object.entries(statusCounts).map(([status, count]) => ({
-    status,
-    count,
-  }));
-
-  try {
-    const decidedFirmIds = latestDecided
-      .map((d) => d.decided_firm_id)
-      .filter((x): x is string => !!x);
-    if (decidedFirmIds.length > 0) {
-      const { data: fs } = await supabase
-        .from("firms")
-        .select("id, name")
-        .in("id", decidedFirmIds);
-      for (const f of fs ?? []) firmNames.set(f.id as string, f.name as string);
-    }
-  } catch (err) {
-    console.error("[dashboard] firm names fetch failed:", err);
-  }
-
-  const firstName =
-    profile?.full_name?.split(" ")[0] ?? profile?.email?.split("@")[0] ?? "";
+  const canEdit = profile?.role !== "viewer";
+  const kpis = [
+    { label: "Karşılaştırma", value: comparisonsCount, href: "/comparisons" },
+    { label: "Karar verilen", value: decidedCount, href: "/comparisons" },
+    { label: "Proje", value: projectsCount, href: "/projects" },
+    { label: "Firma", value: firmsCount, href: "/firms" },
+  ];
 
   return (
     <div className="space-y-6">
-      {/* Başlık — diğer platformlardaki Dashboard düzeni */}
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground text-sm">
-            {firstName ? `Hoş geldin, ${firstName}. ` : ""}
-            {comparisonsCount ?? 0} karşılaştırma · {projectsCount ?? 0} proje ·{" "}
-            {firmsCount ?? 0} firma
+            {comparisonsCount} karşılaştırma kaydı
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link href="/templates">
-              <FileStack className="mr-1 size-4" /> Şablonlar
+        {canEdit && (
+          <Button asChild size="sm">
+            <Link href="/comparisons/new">
+              <Plus className="mr-1 size-4" /> Yeni Karşılaştırma
             </Link>
           </Button>
-          {profile?.role !== "viewer" && (
-            <Button asChild size="sm">
-              <Link href="/comparisons/new">
-                <Plus className="mr-1 size-4" /> Yeni Karşılaştırma
-              </Link>
-            </Button>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Onboarding checklist — sadece onboarding tamamlanmadıysa görünür */}
       {!profile?.onboarding_completed && (
         <GettingStartedChecklist
-          hasProject={(projectsCount ?? 0) > 0}
-          hasFirm={(firmsCount ?? 0) > 0}
-          hasComparison={(comparisonsCount ?? 0) > 0}
-          hasDecision={(decidedCount ?? 0) > 0}
+          hasProject={projectsCount > 0}
+          hasFirm={firmsCount > 0}
+          hasComparison={comparisonsCount > 0}
+          hasDecision={decidedCount > 0}
         />
       )}
 
-      {/* KPI GRID */}
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <KpiTile
-          icon={GitCompareArrows}
-          label="Karşılaştırma"
-          value={comparisonsCount ?? 0}
-          tone="blue"
-          href="/comparisons"
-        />
-        <KpiTile
-          icon={Trophy}
-          label="Karar Verildi"
-          value={decidedCount ?? 0}
-          tone="emerald"
-          href="/comparisons"
-        />
-        <KpiTile
-          icon={FolderKanban}
-          label="Proje"
-          value={projectsCount ?? 0}
-          tone="violet"
-          href="/projects"
-        />
-        <KpiTile
-          icon={Building2}
-          label="Firma"
-          value={firmsCount ?? 0}
-          tone="amber"
-          href="/firms"
-        />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        {kpis.map((k) => (
+          <Link key={k.label} href={k.href}>
+            <Card
+              data-kpi
+              className="hover:border-primary/40 gap-0 py-0 transition-colors"
+            >
+              <CardContent className="p-4">
+                <div className="text-muted-foreground text-[12px] font-medium">
+                  {k.label}
+                </div>
+                <div className="mt-1 text-2xl font-semibold tabular-nums">
+                  {k.value}
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
       </div>
 
-      {/* MIDDLE GRID: status chart + quick actions */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="size-4 text-blue-600" /> Karşılaştırma
-              Durumu
-            </CardTitle>
-            <CardDescription>
-              Tüm karşılaştırmaların aşamalara göre dağılımı
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <StatusChart data={statusData} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {profile?.role === "viewer" ? "Hızlı Erişim" : "Hızlı İşlemler"}
-            </CardTitle>
-            <CardDescription>
-              {profile?.role === "viewer"
-                ? "Sık baktığın sayfalar"
-                : "En sık kullanılan aksiyonlar"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {profile?.role !== "viewer" ? (
-              <>
-                <QuickAction
-                  icon={Plus}
-                  label="Yeni Karşılaştırma"
-                  href="/comparisons/new"
-                  tone="blue"
-                />
-                <QuickAction
-                  icon={FileStack}
-                  label="Şablondan Başla"
-                  href="/templates"
-                  tone="amber"
-                />
-                <QuickAction
-                  icon={Building2}
-                  label="Yeni Firma"
-                  href="/firms/new"
-                  tone="emerald"
-                />
-                <QuickAction
-                  icon={FolderKanban}
-                  label="Yeni Proje"
-                  href="/projects/new"
-                  tone="violet"
-                />
-              </>
-            ) : (
-              <>
-                <QuickAction
-                  icon={GitCompareArrows}
-                  label="Karşılaştırmalar"
-                  href="/comparisons"
-                  tone="blue"
-                />
-                <QuickAction
-                  icon={FileStack}
-                  label="Şablonlar"
-                  href="/templates"
-                  tone="amber"
-                />
-                <QuickAction
-                  icon={Building2}
-                  label="Firmalar"
-                  href="/firms"
-                  tone="emerald"
-                />
-                <QuickAction
-                  icon={FolderKanban}
-                  label="Projeler"
-                  href="/projects"
-                  tone="violet"
-                />
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* BOTTOM: Recent + Decided */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader className="flex flex-row items-center justify-between gap-3">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="size-4 text-blue-600" /> Son Karşılaştırmalar
-              </CardTitle>
-              <CardDescription>En son eklenen 6 karşılaştırma</CardDescription>
-            </div>
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/comparisons">
-                Tümü <ArrowRight className="ml-1 size-3" />
-              </Link>
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {recent && recent.length > 0 ? (
-              <ul className="divide-y">
+      <Card className="gap-0 py-0">
+        <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
+          <h2 className="text-sm font-semibold">Son Karşılaştırmalar</h2>
+          <Link
+            href="/comparisons"
+            className="text-primary text-xs font-medium hover:underline"
+          >
+            Tümünü gör →
+          </Link>
+        </div>
+        {recent.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left">
+                  <th className="px-4 py-2 font-medium">Karşılaştırma</th>
+                  <th className="px-4 py-2 font-medium">Tür</th>
+                  <th className="px-4 py-2 font-medium">Tarih</th>
+                  <th className="px-4 py-2 font-medium">Durum</th>
+                </tr>
+              </thead>
+              <tbody>
                 {recent.map((c) => (
-                  <li
-                    key={c.id}
-                    className="flex items-center justify-between gap-3 py-3"
-                  >
-                    <div className="min-w-0 flex-1">
+                  <tr key={c.id} className="border-t">
+                    <td className="px-4 py-2">
                       <Link
                         href={`/comparisons/${c.id}`}
-                        className="line-clamp-1 font-medium hover:underline"
+                        className="font-medium hover:underline"
                       >
                         {c.name}
                       </Link>
-                      <div className="text-muted-foreground mt-0.5 flex items-center gap-2 text-xs">
-                        <Badge variant="outline" className="text-[10px]">
-                          {c.type}
-                        </Badge>
-                        <span>
-                          {new Date(c.created_at).toLocaleDateString("tr-TR")}
-                        </span>
-                      </div>
-                    </div>
-                    <StatusBadge
-                      status={
-                        c.status as
-                          | "draft"
-                          | "in_review"
-                          | "decided"
-                          | "archived"
-                      }
-                    />
-                  </li>
+                    </td>
+                    <td className="text-muted-foreground px-4 py-2">
+                      {c.type}
+                    </td>
+                    <td className="text-muted-foreground px-4 py-2 tabular-nums">
+                      {new Date(c.created_at).toLocaleDateString("tr-TR")}
+                    </td>
+                    <td className="px-4 py-2">
+                      <StatusBadge status={c.status as Status} />
+                    </td>
+                  </tr>
                 ))}
-              </ul>
-            ) : (
-              <div className="py-12 text-center">
-                <FileStack className="text-muted-foreground mx-auto size-10" />
-                <p className="text-muted-foreground mt-2 text-sm">
-                  Henüz karşılaştırma yok.
-                </p>
-                <Button asChild className="mt-4" variant="outline">
-                  <Link href="/templates">
-                    <FileStack className="mr-1 size-4" /> Şablondan başlat
-                  </Link>
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Trophy className="size-4 text-emerald-600" /> Son Kararlar
-            </CardTitle>
-            <CardDescription>En son verilen 3 karar</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {latestDecided && latestDecided.length > 0 ? (
-              <ul className="space-y-3">
-                {latestDecided.map((d) => (
-                  <li key={d.id} className="border-l-2 border-emerald-500 pl-3">
-                    <Link
-                      href={`/comparisons/${d.id}`}
-                      className="line-clamp-1 text-sm font-medium hover:underline"
-                    >
-                      {d.name}
-                    </Link>
-                    {d.decided_firm_id && firmNames.get(d.decided_firm_id) && (
-                      <div className="mt-0.5 flex items-center gap-1 text-xs">
-                        <Trophy className="size-3 text-emerald-600" />
-                        <span className="text-emerald-700">
-                          {firmNames.get(d.decided_firm_id)}
-                        </span>
-                      </div>
-                    )}
-                    {d.decision_date && (
-                      <div className="text-muted-foreground mt-0.5 text-[11px]">
-                        {new Date(d.decision_date).toLocaleDateString("tr-TR")}
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-muted-foreground py-6 text-center text-sm">
-                Henüz karar verilmemiş.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-const TONES = {
-  blue: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    iconBg: "bg-blue-600",
-    iconText: "text-white",
-  },
-  emerald: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    iconBg: "bg-emerald-600",
-    iconText: "text-white",
-  },
-  violet: {
-    bg: "bg-violet-50",
-    text: "text-violet-700",
-    iconBg: "bg-violet-600",
-    iconText: "text-white",
-  },
-  amber: {
-    bg: "bg-yellow-50",
-    text: "text-yellow-700",
-    iconBg: "bg-yellow-500",
-    iconText: "text-white",
-  },
-};
-
-function KpiTile({
-  icon: Icon,
-  label,
-  value,
-  tone,
-  href,
-  budget,
-  currency,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: number;
-  tone: keyof typeof TONES;
-  href: string;
-  budget?: number;
-  currency?: Currency;
-}) {
-  const t = TONES[tone];
-  return (
-    <Link href={href}>
-      <Card
-        data-kpi
-        className="group hover:border-primary/40 cursor-pointer gap-0 py-0 transition-colors"
-      >
-        <CardContent className="relative p-4">
-          <div className="text-muted-foreground flex items-center gap-1.5 text-[12px] font-medium">
-            <Icon className={`size-3.5 ${t.text}`} />
-            {label}
+              </tbody>
+            </table>
           </div>
-          <div className={`mt-1 text-2xl font-semibold tabular-nums ${t.text}`}>
-            {value}
+        ) : (
+          <div className="px-4 py-10 text-center">
+            <p className="text-muted-foreground text-sm">
+              Henüz karşılaştırma yok.
+            </p>
+            {canEdit && (
+              <Button asChild className="mt-3" variant="outline" size="sm">
+                <Link href="/templates">
+                  <FileStack className="mr-1 size-4" /> Şablondan başlat
+                </Link>
+              </Button>
+            )}
           </div>
-          {budget !== undefined && currency && (
-            <div className="text-muted-foreground text-xs">
-              {formatCompactCurrency(budget, currency)}
-            </div>
-          )}
-          <ArrowRight className="text-muted-foreground absolute top-4 right-4 size-4 opacity-0 transition-opacity group-hover:opacity-70" />
-        </CardContent>
+        )}
       </Card>
-    </Link>
-  );
-}
-
-function QuickAction({
-  icon: Icon,
-  label,
-  href,
-  tone,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  href: string;
-  tone: keyof typeof TONES;
-}) {
-  const t = TONES[tone];
-  return (
-    <Link
-      href={href}
-      className={`group flex items-center gap-3 rounded-lg border ${t.bg} border-transparent p-3 transition-all hover:shadow-md`}
-    >
-      <div
-        className={`flex size-9 shrink-0 items-center justify-center rounded ${t.iconBg} ${t.iconText}`}
-      >
-        <Icon className="size-4" />
-      </div>
-      <span className={`flex-1 text-sm font-medium ${t.text}`}>{label}</span>
-      <ArrowRight
-        className={`size-4 ${t.text} opacity-50 transition-transform group-hover:translate-x-0.5`}
-      />
-    </Link>
+    </div>
   );
 }
